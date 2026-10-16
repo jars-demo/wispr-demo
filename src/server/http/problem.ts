@@ -35,21 +35,22 @@ export class HttpError extends Error {
   }
 }
 
-const MAX_BODY_BYTES = 64 * 1024
+const DEFAULT_MAX_BODY_BYTES = 64 * 1024
 
 /** Reads and validates a JSON body. Throws HttpError with a ready-made problem response. */
 export async function readJson<Schema extends z.ZodType>(
   request: Request,
   schema: Schema,
+  maxBytes: number = DEFAULT_MAX_BODY_BYTES,
 ): Promise<z.infer<Schema>> {
   if (!request.headers.get('content-type')?.includes('application/json')) {
     throw new HttpError(problem(415, 'Send JSON with Content-Type: application/json.'))
   }
   const declared = Number(request.headers.get('content-length') ?? 0)
-  if (declared > MAX_BODY_BYTES) throw new HttpError(problem(413, 'That request is too large.'))
+  if (declared > maxBytes) throw new HttpError(problem(413, 'That request is too large.'))
 
   const text = await request.text()
-  if (new TextEncoder().encode(text).length > MAX_BODY_BYTES) {
+  if (new TextEncoder().encode(text).length > maxBytes) {
     throw new HttpError(problem(413, 'That request is too large.'))
   }
   let json: unknown

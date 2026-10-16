@@ -65,3 +65,9 @@ export function updateSpec(
 export function deleteSpec(id: string): Promise<void> {
   return send(`/api/specs/${id}`, { method: 'DELETE' })
 }
+
+export type CheckRequest = { diff: string; link: string; summary: string; testOutput: string }
+
+export function createCheck(specId: string, body: CheckRequest): Promise<{ id: string }> {
+  return send(`/api/specs/${specId}/checks`, { method: 'POST', body: JSON.stringify(body) })
+}

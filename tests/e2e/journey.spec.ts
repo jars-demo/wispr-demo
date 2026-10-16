@@ -24,7 +24,9 @@ test('landing page shows one clear action and fits the screen', async ({ page })
   await expectNoSidewaysScroll(page)
 })
 
-test('speaking or typing on the landing page becomes a saved checklist', async ({ page }) => {
+test('talking (via Wispr Flow) or typing on the landing page becomes a saved checklist', async ({
+  page,
+}) => {
   await page.goto('/')
   await page.getByLabel('What do you want your agent to build?').fill(REQUEST)
   await page.getByRole('button', { name: 'Make my checklist' }).click()
@@ -57,4 +59,26 @@ test('nothing to act on gives a clear message instead of an empty checklist', as
   await expect(
     page.getByRole('main').getByRole('alert').filter({ hasText: 'Nothing to act on was found' }),
   ).toBeVisible()
+})
+
+test('the sample journey ends with a check that catches the missing tests', async ({ page }) => {
+  await page.goto('/new')
+  await page.getByRole('button', { name: 'Fill in an example' }).click()
+  await page.getByRole('button', { name: 'Turn into a checklist' }).click()
+  await page.getByRole('button', { name: 'Save checklist' }).click()
+  await expect(page).toHaveURL(/\/specs\/[0-9a-f-]{36}$/)
+
+  await page.getByRole('link', { name: 'Check the work' }).click()
+  await page.getByRole('button', { name: 'Fill in a sample agent result' }).click()
+  await page.getByRole('button', { name: 'Check the work' }).click()
+
+  await expect(page).toHaveURL(/\/checks\/[0-9a-f-]{36}$/)
+  await expect(page.getByRole('heading', { level: 1 })).toContainText('1 of 2')
+  const main = page.getByRole('main')
+  await expect(main.getByText('None of the changed files are tests.').first()).toBeVisible()
+  await expect(
+    main.getByRole('listitem').filter({ hasText: 'Added tests for the limiter.' }),
+  ).toContainText('Not true')
+  await expect(page.getByRole('button', { name: 'Copy a fix-up prompt' })).toBeVisible()
+  await expectNoSidewaysScroll(page)
 })

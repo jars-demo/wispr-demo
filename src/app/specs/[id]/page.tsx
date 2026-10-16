@@ -3,7 +3,12 @@ import { notFound } from 'next/navigation'
 import { Suspense } from 'react'
 import { z } from 'zod'
 
+import Link from 'next/link'
+
 import { LoadingBlock, PageShell } from '@/components/PageShell'
+import { buttonStyles } from '@/components/ui/button-styles'
+import { describeCheck } from '@/domain/check/report'
+import { listChecks } from '@/server/checks/repository'
 import { toAgentPrompt, toMarkdown } from '@/domain/spec-export'
 import { SpecActions } from '@/features/spec/SpecActions'
 import { SpecView } from '@/features/spec/SpecView'
@@ -23,8 +28,10 @@ async function SpecDetail({ params }: { params: PageProps<'/specs/[id]'>['params
   const { id } = await params
   const ownerId = await currentOwner()
   if (!ownerId || !z.uuid().safeParse(id).success) notFound()
-  const spec = await getSpec(await getDb(), ownerId, id)
+  const db = await getDb()
+  const spec = await getSpec(db, ownerId, id)
   if (!spec) notFound()
+  const checks = await listChecks(db, ownerId, spec.id)
 
   return (
     <>
@@ -50,15 +57,38 @@ async function SpecDetail({ params }: { params: PageProps<'/specs/[id]'>['params
 
       <section
         aria-labelledby="next-heading"
-        className="glass mt-12 flex flex-col gap-2 rounded-panel p-6"
+        className="glass mt-12 flex flex-col gap-4 rounded-panel p-6"
       >
-        <h2 id="next-heading" className="text-[15px] font-semibold tracking-tight">
-          Next · Check the work
-        </h2>
-        <p className="text-[15px] text-muted">
-          Checking your agent&rsquo;s changes against this list arrives in the next build milestone.
-          Until then, copy the prompt above into your agent.
-        </p>
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div className="flex flex-col gap-1">
+            <h2 id="next-heading" className="font-display text-3xl tracking-[-0.02em]">
+              Agent done? <em className="italic">Check it.</em>
+            </h2>
+            <p className="text-[15px] text-muted">
+              Paste the diff or a GitHub link, plus what your agent said.
+            </p>
+          </div>
+          <Link href={`/specs/${spec.id}/check`} className={buttonStyles('primary', 'lg')}>
+            Check the work
+          </Link>
+        </div>
+        {checks.length > 0 ? (
+          <ul className="flex flex-col gap-1.5">
+            {checks.map((c) => (
+              <li key={c.id}>
+                <Link
+                  href={`/specs/${spec.id}/checks/${c.id}`}
+                  className="flex items-center justify-between gap-3 rounded-card bg-surface/70 px-4 py-3 text-sm transition-colors hover:bg-surface"
+                >
+                  <span className="min-w-0 truncate">{describeCheck(c.result)}</span>
+                  <span className="shrink-0 text-[12px] text-muted">
+                    {dateFormat.format(c.createdAt)}
+                  </span>
+                </Link>
+              </li>
+            ))}
+          </ul>
+        ) : null}
       </section>
 
       <details className="mt-6 rounded-card px-1">

@@ -49,4 +49,20 @@ export const MIGRATIONS: readonly Migration[] = [
       );
     `,
   },
+  {
+    version: '0002_checks',
+    sql: `
+      create table checks (
+        id uuid primary key,
+        spec_id uuid not null references specs (id) on delete cascade,
+        owner_id text not null,
+        spec_version integer not null,
+        sources text[] not null,
+        source_label text,
+        result jsonb not null,
+        created_at timestamptz not null default now()
+      );
+      create index checks_spec_created_idx on checks (spec_id, created_at desc);
+    `,
+  },
 ]
