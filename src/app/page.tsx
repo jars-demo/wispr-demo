@@ -25,7 +25,7 @@ const STEPS = [
   },
 ]
 
-const AGENTS = ['Claude Code', 'Codex', 'Cursor', 'Copilot', 'Any agent']
+const AGENTS = ['Claude Code', 'Codex', 'Cursor', 'Copilot', 'Windsurf', 'Any agent']
 
 export default function HomePage() {
   return (
@@ -68,14 +68,22 @@ export default function HomePage() {
         </section>
 
         <section aria-label="Works with" className="pb-24">
-          <ul className="mx-auto flex max-w-3xl flex-wrap items-center justify-center gap-x-8 gap-y-3 px-4 text-[15px]">
-            <li className="text-[12px] tracking-[0.18em] text-muted uppercase">Works with</li>
-            {AGENTS.map((agent) => (
-              <li key={agent} className="font-medium text-ink-2">
-                {agent}
-              </li>
-            ))}
-          </ul>
+          <p className="mb-5 text-center text-[12px] tracking-[0.18em] text-muted uppercase">
+            Works with your agent
+          </p>
+          <div className="marquee mx-auto max-w-4xl">
+            <ul className="marquee-track">
+              {[...AGENTS, ...AGENTS].map((agent, index) => (
+                <li
+                  key={`${agent}-${index}`}
+                  aria-hidden={index >= AGENTS.length}
+                  className="glass shrink-0 rounded-full px-5 py-2.5 font-display text-[1.35rem] tracking-[-0.01em] text-ink-2 italic"
+                >
+                  {agent}
+                </li>
+              ))}
+            </ul>
+          </div>
         </section>
 
         <section
@@ -91,7 +99,10 @@ export default function HomePage() {
           </h2>
           <ol className="grid gap-4 md:grid-cols-3">
             {STEPS.map((step, index) => (
-              <li key={step.title} className="reveal glass flex flex-col gap-3 rounded-panel p-7">
+              <li
+                key={step.title}
+                className="reveal glass lift flex flex-col gap-3 rounded-panel p-7"
+              >
                 <span className="font-mono text-[13px] text-accent-text">0{index + 1}</span>
                 <h3 className="font-display text-[2rem] leading-tight tracking-[-0.02em]">
                   {step.title} <em className="italic">{step.em}</em>
