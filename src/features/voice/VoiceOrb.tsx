@@ -35,11 +35,11 @@ export function VoiceOrb({
   listening: boolean
   onToggle: () => void
   disabled?: boolean
-  size?: 'lg' | 'md'
+  size?: 'lg' | 'md' | 'sm'
   label?: string
 }) {
-  const box = size === 'lg' ? 'size-24' : 'size-14'
-  const glyph = size === 'lg' ? 34 : 22
+  const box = { lg: 'size-24', md: 'size-14', sm: 'size-11' }[size]
+  const glyph = { lg: 34, md: 22, sm: 18 }[size]
   return (
     <button
       type="button"

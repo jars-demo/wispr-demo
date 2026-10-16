@@ -320,23 +320,26 @@ body::before {
   }
 }
 
-/* ---------- Words orbiting the orb. One slow turn a minute. ---------- */
+/* ---------- A soft pulse on the "hold the key" hint. ---------- */
 
-.word-orbit {
-  transform-origin: center;
-  animation: orbit 60s linear infinite;
+.key-pulse {
+  animation: key-pulse 2.4s var(--ease-out) infinite;
 }
 
-@keyframes orbit {
-  to {
-    transform: rotate(360deg);
+@keyframes key-pulse {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 rgb(255 90 31 / 0.45);
+  }
+  60% {
+    box-shadow: 0 0 0 6px rgb(255 90 31 / 0);
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
   .rise,
   .reveal,
-  .word-orbit {
+  .key-pulse {
     animation: none;
   }
 

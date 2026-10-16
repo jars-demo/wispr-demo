@@ -10,7 +10,7 @@ const STEPS = [
   {
     title: 'Say',
     em: 'it.',
-    body: 'Talk through the change like you would to a teammate. Receipts turns it into a short checklist. Anything vague becomes a question for you, never a guess.',
+    body: 'Hold your Wispr Flow key and talk it through like you would to a teammate. Receipts turns it into a short checklist. Anything vague becomes a question, never a guess.',
   },
   {
     title: 'Hand it',
@@ -36,7 +36,7 @@ export default function HomePage() {
           className="mx-auto flex max-w-4xl scroll-mt-24 flex-col items-center px-4 pt-10 pb-20 text-center sm:pt-14"
         >
           <span className="rise text-[12px] font-medium tracking-[0.18em] text-muted uppercase">
-            Voice-first, for coding agents
+            Voice-first, made for Wispr Flow
           </span>
           <h1
             className="rise mt-5 font-display text-[3.4rem] leading-[0.95] tracking-[-0.03em] text-balance sm:text-[5.5rem]"
@@ -50,11 +50,11 @@ export default function HomePage() {
             className="rise mt-5 max-w-md text-[17px] leading-relaxed text-pretty text-ink-2"
             style={{ '--delay': '160ms' } as React.CSSProperties}
           >
-            Talk to Receipts. It writes the checklist for your coding agent, then checks the work
-            against what you said.
+            Talk it through with Wispr Flow. Receipts writes the checklist for your coding agent,
+            then checks the work against what you said.
           </p>
           <div
-            className="rise mt-4 flex w-full justify-center"
+            className="rise mt-9 flex w-full justify-center"
             style={{ '--delay': '240ms' } as React.CSSProperties}
           >
             <VoiceStart />
