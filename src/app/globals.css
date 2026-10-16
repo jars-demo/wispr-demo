@@ -6,17 +6,18 @@
   Rule: orange is a fill, accent or focus colour. Orange text uses --accent-text.
 */
 :root {
-  --canvas: #fafaf9;
+  /* Warm paper rather than clinical white: calm, editorial, easy on the eyes. */
+  --canvas: #fbf8f1;
   --surface: #ffffff;
-  --surface-2: #f4f4f2;
-  --ink: #0a0a0a;
-  --ink-2: #2e2e2e;
-  --muted: #6b6b6b;
-  --hairline: rgb(10 10 10 / 0.06);
-  --hairline-strong: rgb(10 10 10 / 0.11);
+  --surface-2: #f3efe6;
+  --ink: #141412;
+  --ink-2: #34322d;
+  --muted: #6b675f;
+  --hairline: rgb(20 20 18 / 0.07);
+  --hairline-strong: rgb(20 20 18 / 0.12);
 
   --accent: #ff5a1f;
-  --accent-on: #0a0a0a;
+  --accent-on: #141412;
   --accent-text: #c2410c;
   --accent-wash: #fff1ea;
 
@@ -43,10 +44,10 @@
 
   /* Soft ambient light behind the glass, so the material has something to blur. */
   --ambient:
-    radial-gradient(42% 52% at 10% 6%, rgb(255 200 170 / 0.6) 0%, transparent 70%),
-    radial-gradient(40% 48% at 92% 2%, rgb(208 218 234 / 0.75) 0%, transparent 70%),
-    radial-gradient(36% 40% at 78% 62%, rgb(255 214 192 / 0.4) 0%, transparent 70%),
-    radial-gradient(34% 38% at 18% 88%, rgb(216 224 236 / 0.5) 0%, transparent 70%);
+    radial-gradient(44% 50% at 12% 4%, rgb(255 205 175 / 0.55) 0%, transparent 70%),
+    radial-gradient(40% 46% at 90% 0%, rgb(240 226 200 / 0.8) 0%, transparent 70%),
+    radial-gradient(36% 40% at 80% 64%, rgb(255 218 196 / 0.35) 0%, transparent 70%),
+    radial-gradient(34% 38% at 16% 90%, rgb(236 228 210 / 0.6) 0%, transparent 70%);
 
   --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
 
@@ -120,6 +121,7 @@
 
   --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
   --font-mono: var(--font-geist-mono), ui-monospace, 'SFMono-Regular', monospace;
+  --font-display: var(--font-instrument-serif), ui-serif, Georgia, serif;
 
   --shadow-soft: var(--shadow-soft);
   --shadow-lift: var(--shadow-lift);
@@ -274,9 +276,67 @@ body::before {
   }
 }
 
+/* ---------- Voice orb. A soft halo at rest; rings breathe outward while listening. ---------- */
+
+.orb {
+  box-shadow:
+    0 0 0 8px rgb(255 90 31 / 0.08),
+    0 18px 40px rgb(10 10 10 / 0.18);
+}
+
+.orb-ring {
+  position: absolute;
+  inset: 0;
+  border-radius: 9999px;
+  border: 2px solid var(--accent);
+  opacity: 0;
+  pointer-events: none;
+}
+
+.orb[data-listening] .orb-ring {
+  animation: orb-breathe 1.8s var(--ease-out) infinite;
+}
+
+.orb[data-listening] .orb-ring-late {
+  animation-delay: 0.9s;
+}
+
+@keyframes orb-breathe {
+  from {
+    transform: scale(1);
+    opacity: 0.55;
+  }
+  to {
+    transform: scale(1.6);
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .orb[data-listening] .orb-ring {
+    animation: none;
+    opacity: 0.5;
+    transform: scale(1.15);
+  }
+}
+
+/* ---------- Words orbiting the orb. One slow turn a minute. ---------- */
+
+.word-orbit {
+  transform-origin: center;
+  animation: orbit 60s linear infinite;
+}
+
+@keyframes orbit {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .rise,
-  .reveal {
+  .reveal,
+  .word-orbit {
     animation: none;
   }
 

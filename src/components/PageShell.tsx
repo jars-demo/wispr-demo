@@ -22,17 +22,30 @@ export function PageShell({
 export function PageHeader({
   eyebrow,
   title,
+  em,
   children,
 }: {
   eyebrow?: string
   title: string
+  /** Optional ending set in italics, in the editorial style of the landing page. */
+  em?: string
   children?: React.ReactNode
 }) {
   return (
     <header className="rise mb-10 flex flex-col gap-3">
-      {eyebrow ? <span className="text-[13px] font-medium text-accent-text">{eyebrow}</span> : null}
-      <h1 className="text-4xl font-semibold tracking-[-0.04em] text-balance sm:text-5xl">
+      {eyebrow ? (
+        <span className="text-[12px] font-medium tracking-[0.16em] text-muted uppercase">
+          {eyebrow}
+        </span>
+      ) : null}
+      <h1 className="font-display text-5xl leading-[1] tracking-[-0.03em] text-balance sm:text-6xl">
         {title}
+        {em ? (
+          <>
+            {' '}
+            <em className="italic">{em}</em>
+          </>
+        ) : null}
       </h1>
       {children}
     </header>

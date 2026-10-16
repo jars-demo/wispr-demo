@@ -33,7 +33,7 @@ async function EditLoader({ params }: { params: PageProps<'/specs/[id]/edit'>['p
 export default function EditSpecPage(props: PageProps<'/specs/[id]/edit'>) {
   return (
     <PageShell>
-      <PageHeader title="Edit checklist">
+      <PageHeader title="Edit" em="checklist">
         <p className="text-[15px] text-muted">Saving creates a new version. The old one is kept.</p>
       </PageHeader>
       <Suspense fallback={<LoadingBlock label="Loading checklist" />}>

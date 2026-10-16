@@ -29,10 +29,10 @@ async function SpecDetail({ params }: { params: PageProps<'/specs/[id]'>['params
   return (
     <>
       <header className="rise mb-8 flex flex-col gap-3">
-        <span className="text-[13px] font-medium text-accent-text">
+        <span className="text-[12px] font-medium tracking-[0.16em] text-muted uppercase">
           Step 3 of 3 · Hand it to your agent
         </span>
-        <h1 className="text-4xl font-semibold tracking-[-0.04em] text-balance sm:text-5xl">
+        <h1 className="font-display text-5xl leading-[1] tracking-[-0.03em] text-balance sm:text-6xl">
           {spec.title}
         </h1>
         <p className="text-[13px] text-muted">

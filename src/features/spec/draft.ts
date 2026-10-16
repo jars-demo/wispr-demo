@@ -9,6 +9,9 @@ import {
 
 // Client-side draft state. Keys keep React rows stable while items are edited or moved.
 
+/** sessionStorage key the landing page uses to hand what was said to /new. */
+export const PENDING_TRANSCRIPT_KEY = 'receipts:pending-transcript'
+
 export type DraftItem = SpecItemInput & { key: string }
 
 export type Draft = { title: string; items: DraftItem[] }

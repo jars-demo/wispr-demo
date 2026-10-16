@@ -60,7 +60,7 @@ async function SpecList() {
 export default function SpecsPage() {
   return (
     <PageShell>
-      <PageHeader title="Your checklists">
+      <PageHeader title="My" em="checklists">
         <p className="text-[15px] text-muted">
           Saved in this browser. Anyone else using this browser can see them.
         </p>

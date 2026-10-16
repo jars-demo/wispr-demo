@@ -38,7 +38,8 @@ const ERROR_MESSAGES: Record<string, string> = {
   'service-not-allowed': 'Speech input is turned off in this browser. You can type instead.',
   'no-speech': 'No speech was heard. Try again a little closer to the microphone.',
   'audio-capture': 'No microphone was found. You can type instead.',
-  network: 'Browser speech needs an internet connection. You can type instead.',
+  network:
+    'This browser’s speech service is blocked here (Brave, VPNs and some networks block it). Click the box and talk with Wispr Flow, or type.',
   'language-not-supported': 'Your browser cannot transcribe this language. You can type instead.',
 }
 
