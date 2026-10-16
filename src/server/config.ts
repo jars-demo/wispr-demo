@@ -76,3 +76,18 @@ export function getConfig(): Config {
   cached ??= parseConfig(process.env)
   return cached
 }
+
+/**
+ * The validation message (variable names only, never values) when configuration is invalid,
+ * or null when it is fine. Lets static pages and the health probe keep working while the
+ * routes that need configuration fail clearly.
+ */
+export function configProblem(): string | null {
+  try {
+    getConfig()
+    return null
+  } catch (error) {
+    if (error instanceof ConfigError) return error.message
+    throw error
+  }
+}

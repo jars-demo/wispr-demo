@@ -1,6 +1,6 @@
 import 'server-only'
 
-import { getConfig } from '@/server/config'
+import { ConfigError, getConfig } from '@/server/config'
 import { devErrorMessage, errorKind, log } from '@/server/log'
 import { OWNER_COOKIE, verifyOwner } from '@/server/owner'
 
@@ -40,6 +40,12 @@ export function withOwner<Args extends unknown[]>(
     } catch (error) {
       if (error instanceof HttpError) {
         response = error.response
+      } else if (error instanceof ConfigError) {
+        // The message lists variable names only, never values.
+        log.error('config.invalid', { route, requestId, detail: error.message })
+        response = problem(503, 'This service is not set up yet. Please try again later.', {
+          requestId,
+        })
       } else {
         log.error('http.unhandled', {
           route,

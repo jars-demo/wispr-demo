@@ -1,6 +1,6 @@
 import { NextResponse, type NextRequest } from 'next/server'
 
-import { getConfig } from '@/server/config'
+import { configProblem, getConfig } from '@/server/config'
 import {
   newOwnerId,
   OWNER_COOKIE,
@@ -13,6 +13,9 @@ import {
 // request so the page being rendered already sees it. Handlers still verify it themselves.
 
 export async function proxy(request: NextRequest) {
+  // Without valid config no cookie can be signed. Let the request through so static pages still
+  // render; routes that need an owner answer 503 on their own.
+  if (configProblem()) return NextResponse.next()
   const { sessionSecret, environment } = getConfig()
   const current = request.cookies.get(OWNER_COOKIE)?.value
   if (await verifyOwner(current, sessionSecret)) return NextResponse.next()
