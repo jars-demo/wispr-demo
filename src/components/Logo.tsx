@@ -1,20 +1,22 @@
-// A receipt with a torn edge and a tick: "proof it was done".
+// A receipt with a torn edge and an orange tick: proof the work was done.
+// Same geometry as src/app/icon.svg, so the favicon and the in-app mark always match.
 
 export function LogoMark({ size = 28 }: { size?: number }) {
   return (
-    <svg width={size} height={size} viewBox="0 0 32 32" aria-hidden="true">
-      <rect width="32" height="32" rx="9" className="fill-ink" />
+    <svg width={size} height={size} viewBox="0 0 64 64" aria-hidden="true">
+      <rect width="64" height="64" rx="16" fill="#0A0A0A" />
       <path
-        d="M10 7.5h12a1 1 0 0 1 1 1V24l-2-1.4-2 1.4-2-1.4-2 1.4-2-1.4-2 1.4-2-1.4V8.5a1 1 0 0 1 1-1Z"
-        className="fill-canvas"
+        d="M19.5 11h25a3.5 3.5 0 0 1 3.5 3.5V52l-4-3-4 3-4-3-4 3-4-3-4 3-4-3-4 3V14.5a3.5 3.5 0 0 1 3.5-3.5Z"
+        fill="#FAFAF9"
       />
+      <rect x="23" y="18" width="18" height="3" rx="1.5" fill="#D6D6D3" />
       <path
-        d="m12.6 15.4 2.4 2.4 4.6-5"
+        d="m23.5 33.5 6 6 11.5-12.5"
         fill="none"
-        strokeWidth="2.2"
+        stroke="#FF5A1F"
+        strokeWidth="5"
         strokeLinecap="round"
         strokeLinejoin="round"
-        className="stroke-accent"
       />
     </svg>
   )
@@ -22,7 +24,7 @@ export function LogoMark({ size = 28 }: { size?: number }) {
 
 export function Logo() {
   return (
-    <span className="inline-flex items-center gap-2 text-[17px] font-semibold tracking-tight">
+    <span className="inline-flex items-center gap-2.5 text-[17px] font-semibold tracking-[-0.02em]">
       <LogoMark />
       Receipts
     </span>
