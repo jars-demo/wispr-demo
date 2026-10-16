@@ -5,8 +5,16 @@ All notable user-facing changes are recorded here, following
 
 ## [Unreleased]
 
+### Removed
+
+- Browser speech input and spoken read-back. Voice is Wispr Flow, which types into any text box.
+
 ### Added
 
+- Check the work: paste a diff or a public GitHub link, plus the agent's summary and test output,
+  and get Found, Partly, Missing or Can't tell per item with cited lines, leave-alone checks, claim
+  checks and a copyable fix-up prompt. Past checks are listed on each checklist.
+- Receipt logo as favicon and home-screen icon; warm editorial design with hand-drawn doodles.
 - Checklists: speak, dictate or type a request at `/new`, review the organised checklist
   (requirements, things to leave alone, open questions, each with the words it came from), then
   save. Edit creates a new version; delete asks once more. Copy as an agent prompt or Markdown.

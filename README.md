@@ -17,20 +17,25 @@ track.
 | --------- | ----------------------------------------------------------------- | ------- |
 | M1        | Foundation, config, CI, design system, design preview             | Done    |
 | M2        | Checklists: dictate, organise, review, save, edit, export, delete | Done    |
-| M3        | Check engine: evidence adapters, rule checks, cited mapping, eval | Next    |
-| M4        | Result UI, feedback, sharing, re-check, PWA                       | Planned |
+| M3        | Check the work: diff or GitHub link, cited answers, claim checks  | Done    |
+| M4        | Sharing, PWA, sign-in, agent hand-off links                       | Next    |
 | M5 to M8  | Beta, hardening, deploy, submission                               | Planned |
 
-What works today:
+What works today (live at https://wispr.jishanahmed.in):
 
-- `/new`: speak (browser speech), dictate with Wispr Flow or any dictation app, or type a request.
-  Receipts organises it into requirements, things to leave alone and open questions, each with the
-  words it came from. You review and edit before anything is saved.
-- `/specs` and `/specs/:id`: your saved checklists. Copy a ready-made prompt for your agent or
-  Markdown for an issue, edit (each save is a new version), or delete.
+- **Say it** (`/`, `/new`): click the box, hold your Wispr Flow key and talk (or type). Receipts
+  organises it into requirements, things to leave alone and open questions, each with the words it
+  came from. You review and edit before anything is saved.
+- **Hand it over** (`/specs/:id`): copy a ready prompt for your agent or Markdown for an issue.
+  Edit (each save is a new version) or delete.
+- **Check it** (`/specs/:id/check`): paste a `git diff` or a public GitHub pull request, compare or
+  commit link, plus the agent's summary and test output. Each requirement comes back Found (with
+  cited lines), Partly, Missing or Can't tell; things to leave alone and the agent's claims are
+  checked too. One click copies a fix-up prompt for whatever is missing.
 - No sign-up. Checklists belong to your browser through a signed, HttpOnly cookie.
 
-Checking the agent's work (M3) is not built yet, and the interface says so.
+Voice input is Wispr Flow: it types into whichever box has focus, so the app has no microphone
+code of its own.
 
 ## Requirements
 
@@ -65,6 +70,7 @@ To start over with an empty local database, stop the server and delete `.data/`.
 | `npm run typecheck`    | Generate route types, then `tsc --noEmit`                     |
 | `npm run format:check` | Prettier check (`npm run format` writes)                      |
 | `npm test`             | Unit tests and integration tests (real PostgreSQL via PGlite) |
+| `npm run test:e2e`     | Playwright journeys on desktop and two phone sizes            |
 | `npm run check`        | Lint, typecheck, format check and tests together              |
 
 ## Environment variables
