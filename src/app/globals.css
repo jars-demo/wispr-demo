@@ -1,0 +1,289 @@
+@import 'tailwindcss';
+
+/*
+  Receipts design tokens. Light is the brand default. Dark is an explicit opt-in via
+  data-theme="dark" on <html>. Every text/background pair is measured on /design (WCAG 2.x).
+  Rule: orange is a fill, accent or focus colour. Orange text uses --accent-text.
+*/
+:root {
+  --canvas: #fafaf9;
+  --surface: #ffffff;
+  --surface-2: #f4f4f2;
+  --ink: #0a0a0a;
+  --ink-2: #2e2e2e;
+  --muted: #6b6b6b;
+  --hairline: rgb(10 10 10 / 0.06);
+  --hairline-strong: rgb(10 10 10 / 0.11);
+
+  --accent: #ff5a1f;
+  --accent-on: #0a0a0a;
+  --accent-text: #c2410c;
+  --accent-wash: #fff1ea;
+
+  --ok: #15803d;
+  --ok-wash: #ecfdf3;
+  --warn: #b45309;
+  --warn-wash: #fffbeb;
+  --bad: #b91c1c;
+  --bad-wash: #fef2f2;
+  --breach: #9a3412;
+  --breach-wash: #fff7ed;
+  --unknown: #52525b;
+  --unknown-wash: #f4f4f5;
+
+  /* Frosted material: translucent white, a bright inner edge and a faint outer line. */
+  --glass-fill: rgb(255 255 255 / 0.58);
+  --glass-fill-strong: rgb(255 255 255 / 0.86);
+  --glass-edge: rgb(255 255 255 / 0.85);
+  --glass-line: rgb(10 10 10 / 0.05);
+  --glass-blur: 24px;
+
+  --shadow-soft: 0 1px 1px rgb(10 10 10 / 0.02), 0 6px 20px rgb(10 10 10 / 0.04);
+  --shadow-lift: 0 1px 2px rgb(10 10 10 / 0.03), 0 24px 64px rgb(10 10 10 / 0.08);
+
+  /* Soft ambient light behind the glass, so the material has something to blur. */
+  --ambient:
+    radial-gradient(42% 52% at 10% 6%, rgb(255 200 170 / 0.6) 0%, transparent 70%),
+    radial-gradient(40% 48% at 92% 2%, rgb(208 218 234 / 0.75) 0%, transparent 70%),
+    radial-gradient(36% 40% at 78% 62%, rgb(255 214 192 / 0.4) 0%, transparent 70%),
+    radial-gradient(34% 38% at 18% 88%, rgb(216 224 236 / 0.5) 0%, transparent 70%);
+
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+
+  color-scheme: light;
+}
+
+:root[data-theme='dark'] {
+  --canvas: #0a0a0a;
+  --surface: #141414;
+  --surface-2: #1c1c1c;
+  --ink: #f5f5f4;
+  --ink-2: #d6d6d4;
+  --muted: #a1a1a1;
+  --hairline: rgb(255 255 255 / 0.08);
+  --hairline-strong: rgb(255 255 255 / 0.14);
+
+  --accent: #ff6a33;
+  --accent-on: #0a0a0a;
+  --accent-text: #ff8a5c;
+  --accent-wash: #221408;
+
+  --ok: #4ade80;
+  --ok-wash: #0f1f14;
+  --warn: #fbbf24;
+  --warn-wash: #1f1a0a;
+  --bad: #f87171;
+  --bad-wash: #220f0f;
+  --breach: #fb923c;
+  --breach-wash: #221408;
+  --unknown: #a1a1aa;
+  --unknown-wash: #1c1c1f;
+
+  --glass-fill: rgb(28 28 28 / 0.55);
+  --glass-fill-strong: rgb(28 28 28 / 0.78);
+  --glass-edge: rgb(255 255 255 / 0.08);
+  --glass-line: rgb(255 255 255 / 0.06);
+
+  --shadow-soft: 0 1px 1px rgb(0 0 0 / 0.3), 0 6px 20px rgb(0 0 0 / 0.3);
+  --shadow-lift: 0 1px 2px rgb(0 0 0 / 0.4), 0 24px 64px rgb(0 0 0 / 0.5);
+
+  --ambient:
+    radial-gradient(40% 50% at 12% 4%, rgb(120 52 20 / 0.35) 0%, transparent 70%),
+    radial-gradient(38% 46% at 92% 0%, rgb(40 48 64 / 0.5) 0%, transparent 70%);
+
+  color-scheme: dark;
+}
+
+@theme inline {
+  --color-canvas: var(--canvas);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-ink: var(--ink);
+  --color-ink-2: var(--ink-2);
+  --color-muted: var(--muted);
+  --color-hairline: var(--hairline);
+  --color-hairline-strong: var(--hairline-strong);
+  --color-accent: var(--accent);
+  --color-accent-on: var(--accent-on);
+  --color-accent-text: var(--accent-text);
+  --color-accent-wash: var(--accent-wash);
+  --color-ok: var(--ok);
+  --color-ok-wash: var(--ok-wash);
+  --color-warn: var(--warn);
+  --color-warn-wash: var(--warn-wash);
+  --color-bad: var(--bad);
+  --color-bad-wash: var(--bad-wash);
+  --color-breach: var(--breach);
+  --color-breach-wash: var(--breach-wash);
+  --color-unknown: var(--unknown);
+  --color-unknown-wash: var(--unknown-wash);
+
+  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, 'SFMono-Regular', monospace;
+
+  --shadow-soft: var(--shadow-soft);
+  --shadow-lift: var(--shadow-lift);
+
+  --radius-card: 1.25rem;
+  --radius-panel: 1.75rem;
+}
+
+body {
+  background: var(--canvas);
+  color: var(--ink);
+  font-family: var(--font-sans);
+  font-feature-settings: 'ss01', 'cv11';
+  letter-spacing: -0.006em;
+}
+
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  background: var(--ambient);
+  pointer-events: none;
+}
+
+::selection {
+  background: var(--accent);
+  color: var(--accent-on);
+}
+
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: 0.5rem;
+}
+
+/* ---------- Glass. Floating chrome and cards. Code always sits on a solid surface. ---------- */
+
+.glass,
+.glass-strong {
+  background: var(--glass-fill);
+  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(170%);
+  backdrop-filter: blur(var(--glass-blur)) saturate(170%);
+  box-shadow:
+    inset 0 1px 0 var(--glass-edge),
+    0 0 0 1px var(--glass-line),
+    var(--shadow-soft);
+}
+
+.glass-strong {
+  background: var(--glass-fill-strong);
+}
+
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .glass,
+  .glass-strong {
+    background: var(--surface);
+  }
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  .glass,
+  .glass-strong {
+    background: var(--surface);
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+}
+
+/* ---------- Motion. Small, quick, and off when the user asks for less. ---------- */
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+    filter: blur(4px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+    filter: none;
+  }
+}
+
+/* On load, staggered with --delay. */
+.rise {
+  animation: rise 700ms var(--ease-out) both;
+  animation-delay: var(--delay, 0ms);
+}
+
+/* On scroll, where the browser supports scroll-driven animations. Elsewhere: simply visible. */
+@supports (animation-timeline: view()) {
+  .reveal {
+    animation: rise linear both;
+    animation-timeline: view();
+    animation-range: entry 0% entry 35%;
+  }
+}
+
+/* ---------- Sheets. Native popovers that rise softly over a blurred backdrop. ---------- */
+
+.sheet {
+  margin: auto;
+  border: 0;
+  padding: 0;
+  max-width: min(26rem, calc(100vw - 2rem));
+  border-radius: var(--radius-panel);
+  color: var(--ink);
+  opacity: 0;
+  transform: translateY(10px) scale(0.98);
+  transition:
+    opacity 220ms var(--ease-out),
+    transform 220ms var(--ease-out),
+    overlay 220ms allow-discrete,
+    display 220ms allow-discrete;
+}
+
+.sheet:popover-open {
+  opacity: 1;
+  transform: none;
+}
+
+@starting-style {
+  .sheet:popover-open {
+    opacity: 0;
+    transform: translateY(10px) scale(0.98);
+  }
+}
+
+.sheet::backdrop {
+  background: rgb(250 250 249 / 0);
+  -webkit-backdrop-filter: blur(0);
+  backdrop-filter: blur(0);
+  transition:
+    background 220ms var(--ease-out),
+    backdrop-filter 220ms var(--ease-out),
+    overlay 220ms allow-discrete,
+    display 220ms allow-discrete;
+}
+
+.sheet:popover-open::backdrop {
+  background: rgb(250 250 249 / 0.45);
+  -webkit-backdrop-filter: blur(6px);
+  backdrop-filter: blur(6px);
+}
+
+@starting-style {
+  .sheet:popover-open::backdrop {
+    background: rgb(250 250 249 / 0);
+    -webkit-backdrop-filter: blur(0);
+    backdrop-filter: blur(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rise,
+  .reveal {
+    animation: none;
+  }
+
+  *,
+  *::before,
+  *::after {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+  }
+}
