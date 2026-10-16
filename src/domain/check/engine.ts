@@ -30,7 +30,9 @@ export type NonGoalResult = {
 export type ClaimResult = { text: string; status: ClaimStatus; evidence: string }
 
 export type CheckResult = {
-  engine: 'rules'
+  engine: 'rules' | 'model'
+  /** Shown to the user, e.g. when the AI was unavailable and the rules were used. */
+  notices?: string[]
   requirements: RequirementResult[]
   nonGoals: NonGoalResult[]
   claims: ClaimResult[]

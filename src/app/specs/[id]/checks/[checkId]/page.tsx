@@ -51,6 +51,11 @@ async function ResultLoader({
           {found} of {total} <em className="italic">{allFound ? 'found. Nice.' : 'found.'}</em>
         </h1>
         <p className="text-[15px] text-ink-2">{describeCheck(check.result)}</p>
+        {(check.result.notices ?? []).map((notice) => (
+          <p key={notice} className="rounded-xl bg-unknown-wash px-3 py-2 text-sm text-unknown">
+            {notice}
+          </p>
+        ))}
         <div className="flex flex-wrap items-center gap-1.5">
           {check.sources.map((s) => (
             <span key={s} className="rounded-full bg-surface-2 px-2.5 py-1 text-[12px] text-ink-2">
@@ -62,8 +67,11 @@ async function ResultLoader({
           ) : null}
         </div>
         <p className="text-[13px] text-muted">
-          {spec.title} · version {check.specVersion} · checked by built-in rules ·{' '}
-          {dateFormat.format(check.createdAt)} UTC
+          {spec.title} · version {check.specVersion} ·{' '}
+          {check.result.engine === 'model'
+            ? 'checked by AI, lines verified'
+            : 'checked by built-in rules'}{' '}
+          · {dateFormat.format(check.createdAt)} UTC
         </p>
       </header>
       <div className="mb-10">

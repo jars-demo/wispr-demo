@@ -1,6 +1,6 @@
 import { z } from 'zod'
 
-import { runCheck } from '@/domain/check/engine'
+import { runFullCheck } from '@/server/checks/run'
 import type { EvidenceSourceKind } from '@/domain/evidence-source'
 import { createCheck } from '@/server/checks/repository'
 import { getDb } from '@/server/db'
@@ -74,7 +74,7 @@ export const POST = withOwner('checks.create', async (request, { ownerId }, cont
   if (body.summary.trim()) sources.push('agent_summary')
   if (body.testOutput.trim()) sources.push('test_output')
 
-  const result = runCheck({
+  const result = await runFullCheck({
     items: spec.items,
     diff,
     summary: body.summary,

@@ -11,6 +11,8 @@ All notable user-facing changes are recorded here, following
 
 ### Added
 
+- Optional Groq AI (gpt-oss-20b to organise, gpt-oss-120b to check). Every AI verdict must quote
+  lines that exist in the diff, or it becomes Can't tell; test claims stay rule-based.
 - Check the work: paste a diff or a public GitHub link, plus the agent's summary and test output,
   and get Found, Partly, Missing or Can't tell per item with cited lines, leave-alone checks, claim
   checks and a copyable fix-up prompt. Past checks are listed on each checklist.

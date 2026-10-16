@@ -26,7 +26,7 @@ const outputSchema = z.object({
   ),
 })
 
-const SYSTEM = `You turn a developer's spoken request into a short checklist for a coding agent.
+export const STRUCTURE_SYSTEM = `You turn a developer's spoken request into a short checklist for a coding agent.
 
 Rules:
 - Use only what the speaker said. Never add requirements, details, numbers or tests they did not ask for.
@@ -51,7 +51,7 @@ export function createAnthropicStructurer(config: ModelConfig): ModelStructurer 
         betas: ['server-side-fallback-2026-07-01'],
         fallbacks: 'default',
         output_config: { effort: 'low', format: betaZodOutputFormat(outputSchema) },
-        system: SYSTEM,
+        system: STRUCTURE_SYSTEM,
         messages: [{ role: 'user', content: `<transcript>\n${transcript}\n</transcript>` }],
       })
     } catch (error) {

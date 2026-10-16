@@ -78,14 +78,17 @@ To start over with an empty local database, stop the server and delete `.data/`.
 All variables are read and validated in one place, `src/server/config.ts`. The server refuses to
 start when one is missing or invalid, and the error names the variable without echoing its value.
 
-| Variable            | Required               | Kind   | Purpose                                                     |
-| ------------------- | ---------------------- | ------ | ----------------------------------------------------------- |
-| `SESSION_SECRET`    | Yes                    | Secret | Signs the anonymous owner cookie (32+ characters)           |
-| `DATABASE_URL`      | In production          | Secret | Hosted Postgres. Empty locally to use PGlite                |
-| `PGLITE_DIR`        | No (`.data/pglite`)    | Config | Where the local database lives                              |
-| `ANTHROPIC_API_KEY` | No                     | Secret | Turns on organising with Claude. Without it, rules are used |
-| `ANTHROPIC_MODEL`   | No (`claude-opus-5-5`) | Config | Claude model for organising                                 |
-| `LOG_LEVEL`         | No (`info`)            | Config | `debug`, `info`, `warn` or `error`                          |
+| Variable               | Required                   | Kind   | Purpose                                                     |
+| ---------------------- | -------------------------- | ------ | ----------------------------------------------------------- |
+| `SESSION_SECRET`       | Yes                        | Secret | Signs the anonymous owner cookie (32+ characters)           |
+| `DATABASE_URL`         | In production              | Secret | Hosted Postgres. Empty locally to use PGlite                |
+| `PGLITE_DIR`           | No (`.data/pglite`)        | Config | Where the local database lives                              |
+| `ANTHROPIC_API_KEY`    | No                         | Secret | Turns on organising with Claude. Without it, rules are used |
+| `ANTHROPIC_MODEL`      | No (`claude-opus-5-5`)     | Config | Claude model for organising                                 |
+| `GROQ_API_KEY`         | No                         | Secret | Groq AI for organising and checking (preferred when set)    |
+| `GROQ_STRUCTURE_MODEL` | No (`openai/gpt-oss-20b`)  | Config | Groq model for organising                                   |
+| `GROQ_CHECK_MODEL`     | No (`openai/gpt-oss-120b`) | Config | Groq model for checking the work                            |
+| `LOG_LEVEL`            | No (`info`)                | Config | `debug`, `info`, `warn` or `error`                          |
 
 ## How organising works
 

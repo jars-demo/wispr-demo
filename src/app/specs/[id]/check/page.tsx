@@ -7,6 +7,7 @@ import { z } from 'zod'
 import { LoadingBlock, PageHeader, PageShell } from '@/components/PageShell'
 import { SAMPLE_REQUEST } from '@/domain/check/sample'
 import { CheckForm } from '@/features/check/CheckForm'
+import { getConfig } from '@/server/config'
 import { getDb } from '@/server/db'
 import { getSpec } from '@/server/specs/repository'
 import { currentOwner } from '@/server/session'
@@ -28,7 +29,11 @@ async function CheckLoader({ params }: { params: PageProps<'/specs/[id]/check'>[
         </Link>
         , version {spec.version}.
       </p>
-      <CheckForm specId={spec.id} showSample={spec.transcript.trim() === SAMPLE_REQUEST} />
+      <CheckForm
+        specId={spec.id}
+        showSample={spec.transcript.trim() === SAMPLE_REQUEST}
+        aiEnabled={getConfig().groq !== null}
+      />
     </>
   )
 }

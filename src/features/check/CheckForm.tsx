@@ -15,7 +15,15 @@ type Mode = 'paste' | 'link'
 const FIELD =
   'w-full rounded-card bg-surface/80 p-4 text-[15px] leading-relaxed outline-none placeholder:text-muted/80 focus-visible:outline-2 focus-visible:outline-accent'
 
-export function CheckForm({ specId, showSample }: { specId: string; showSample: boolean }) {
+export function CheckForm({
+  specId,
+  showSample,
+  aiEnabled,
+}: {
+  specId: string
+  showSample: boolean
+  aiEnabled: boolean
+}) {
   const router = useRouter()
   const [mode, setMode] = useState<Mode>('paste')
   const [diff, setDiff] = useState('')
@@ -153,6 +161,13 @@ export function CheckForm({ specId, showSample }: { specId: string; showSample: 
           />
         </details>
       </section>
+
+      {aiEnabled ? (
+        <p className="px-1 text-[13px] text-muted">
+          The changes are sent to Groq for the AI part of the check. Every AI answer must point to
+          real lines in your diff, or it is marked Can’t tell. Nothing you paste is stored.
+        </p>
+      ) : null}
 
       {error ? (
         <p role="alert" className="rounded-xl bg-bad-wash px-4 py-3 text-sm text-bad">

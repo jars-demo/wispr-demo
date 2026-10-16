@@ -18,6 +18,10 @@ const configSchema = z
     // Secret. Enables model-based structuring. Without it, the rules engine is used.
     ANTHROPIC_API_KEY: optional(z.string().min(1)),
     ANTHROPIC_MODEL: z.string().default('claude-opus-5-5'),
+    // Secret. Enables Groq models for organising and checking. Preferred over Anthropic when set.
+    GROQ_API_KEY: optional(z.string().min(1)),
+    GROQ_STRUCTURE_MODEL: z.string().default('openai/gpt-oss-20b'),
+    GROQ_CHECK_MODEL: z.string().default('openai/gpt-oss-120b'),
   })
   .superRefine((env, ctx) => {
     if (env.NODE_ENV === 'production' && !env.DATABASE_URL) {
@@ -35,12 +39,15 @@ export type DatabaseConfig = { kind: 'postgres'; url: string } | { kind: 'pglite
 
 export type ModelConfig = { provider: 'anthropic'; apiKey: string; model: string }
 
+export type GroqConfig = { apiKey: string; structureModel: string; checkModel: string }
+
 export type Config = Readonly<{
   environment: Env['NODE_ENV']
   logLevel: Env['LOG_LEVEL']
   sessionSecret: string
   database: DatabaseConfig
   model: ModelConfig | null
+  groq: GroqConfig | null
 }>
 
 export class ConfigError extends Error {
@@ -61,12 +68,20 @@ export function parseConfig(env: Record<string, string | undefined>): Config {
   const model: ModelConfig | null = data.ANTHROPIC_API_KEY
     ? { provider: 'anthropic', apiKey: data.ANTHROPIC_API_KEY, model: data.ANTHROPIC_MODEL }
     : null
+  const groq: GroqConfig | null = data.GROQ_API_KEY
+    ? {
+        apiKey: data.GROQ_API_KEY,
+        structureModel: data.GROQ_STRUCTURE_MODEL,
+        checkModel: data.GROQ_CHECK_MODEL,
+      }
+    : null
   return Object.freeze({
     environment: data.NODE_ENV,
     logLevel: data.LOG_LEVEL,
     sessionSecret: data.SESSION_SECRET,
     database,
     model,
+    groq,
   })
 }
 
