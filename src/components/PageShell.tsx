@@ -1,4 +1,5 @@
 import { SiteFooter } from '@/components/SiteFooter'
+import { Squiggle } from '@/features/home/Doodles'
 import { SiteNav } from '@/components/SiteNav'
 
 export function PageShell({
@@ -43,7 +44,10 @@ export function PageHeader({
         {em ? (
           <>
             {' '}
-            <em className="italic">{em}</em>
+            <span className="relative inline-block">
+              <em className="text-gradient italic">{em}</em>
+              <Squiggle className="absolute -bottom-1.5 left-0 h-3 w-full" />
+            </span>
           </>
         ) : null}
       </h1>

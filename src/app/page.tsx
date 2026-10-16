@@ -77,7 +77,7 @@ export default function HomePage() {
                 <li
                   key={`${agent}-${index}`}
                   aria-hidden={index >= AGENTS.length}
-                  className="glass shrink-0 rounded-full px-5 py-2.5 font-display text-[1.35rem] tracking-[-0.01em] text-ink-2 italic"
+                  className="glass shrink-0 rounded-full px-5 py-2.5 text-[15px] font-medium tracking-[-0.01em] text-ink-2"
                 >
                   {agent}
                 </li>
@@ -95,7 +95,7 @@ export default function HomePage() {
             id="how-heading"
             className="reveal mb-12 text-center font-display text-5xl tracking-[-0.025em] sm:text-6xl"
           >
-            Three steps, <em className="italic">no setup.</em>
+            Three steps, <em className="text-gradient italic">no setup.</em>
           </h2>
           <ol className="grid gap-4 md:grid-cols-3">
             {STEPS.map((step, index) => (
@@ -118,7 +118,7 @@ export default function HomePage() {
             id="example-heading"
             className="reveal mb-10 text-center font-display text-5xl tracking-[-0.025em] sm:text-6xl"
           >
-            Proof, <em className="italic">not promises.</em>
+            Proof, <em className="text-gradient italic">not promises.</em>
           </h2>
           <div className="reveal">
             <CheckMockup compact />
@@ -129,7 +129,9 @@ export default function HomePage() {
         </section>
 
         <section className="mx-auto max-w-5xl px-4 pb-24">
-          <div className="reveal flex flex-col items-center gap-7 rounded-panel bg-ink px-6 py-16 text-center text-canvas sm:py-20">
+          <div className="cta-glow reveal relative flex flex-col items-center gap-7 overflow-hidden rounded-panel bg-ink px-6 py-16 text-center text-canvas sm:py-20">
+            <Sparkle className="absolute top-8 left-[12%] size-6 opacity-80" />
+            <Sparkle className="absolute right-[14%] bottom-10 size-8" />
             <h2 className="font-display text-5xl leading-[1.02] tracking-[-0.025em] text-balance sm:text-6xl">
               You said it. <em className="text-accent italic">Now see it done.</em>
             </h2>

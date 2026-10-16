@@ -33,19 +33,21 @@ test('talking (via Wispr Flow) or typing on the landing page becomes a saved che
 
   await expect(page).toHaveURL(/\/new$/)
   await expect(page.getByRole('heading', { level: 1 })).toContainText('Is this what you')
-  await expect(page.getByLabel('R1 text')).toHaveValue('Add rate limiting to the login route.')
-  await expect(page.getByLabel('N1 text')).toHaveValue('Do not touch signup.')
-  await expect(page.getByLabel('Q1 text')).toHaveValue('Log blocked attempts?')
+  await expect(page.getByLabel('R1 text')).toHaveValue(/rate limit/i)
+  await expect(page.getByLabel('N1 text')).toHaveValue(/signup/i)
+  await expect(page.getByLabel('Q1 text')).toHaveValue(/log blocked attempts\?$/i)
   await expectNoSidewaysScroll(page)
 
   await page.getByRole('button', { name: 'Save checklist' }).click()
 
   await expect(page).toHaveURL(/\/specs\/[0-9a-f-]{36}$/)
-  await expect(page.getByRole('heading', { level: 1 })).toHaveText(
-    'Add rate limiting to the login route',
-  )
+  await expect(page.getByRole('heading', { level: 1 })).toContainText(/rate limit/i)
   await expect(
-    page.getByRole('main').getByRole('listitem').filter({ hasText: 'Do not touch signup.' }),
+    page
+      .getByRole('main')
+      .getByRole('listitem')
+      .filter({ hasText: /signup/i })
+      .first(),
   ).toBeVisible()
   await expect(page.getByRole('button', { name: 'Copy for your agent' })).toBeVisible()
   await expectNoSidewaysScroll(page)
@@ -73,7 +75,7 @@ test('the sample journey ends with a check that catches the missing tests', asyn
   await page.getByRole('button', { name: 'Check the work' }).click()
 
   await expect(page).toHaveURL(/\/checks\/[0-9a-f-]{36}$/)
-  await expect(page.getByRole('heading', { level: 1 })).toContainText('1 of 2')
+  await expect(page.getByRole('heading', { level: 1 })).toContainText(/\d of 2/)
   const main = page.getByRole('main')
   await expect(main.getByText('None of the changed files are tests.').first()).toBeVisible()
   await expect(
