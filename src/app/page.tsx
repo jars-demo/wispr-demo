@@ -2,6 +2,7 @@ import { SiteFooter } from '@/components/SiteFooter'
 import { SiteNav } from '@/components/SiteNav'
 import { CheckMockup } from '@/components/mockups/CheckMockup'
 import { VerdictSheets } from '@/components/ui/VerdictSheets'
+import { DoodleArrow, Sparkle, Squiggle } from '@/features/home/Doodles'
 import { VoiceStart } from '@/features/home/VoiceStart'
 
 // One action above the fold: tap the orb and talk. Everything below explains it in three beats.
@@ -33,7 +34,7 @@ export default function HomePage() {
       <main id="main" className="flex-1">
         <section
           id="start"
-          className="mx-auto flex max-w-4xl scroll-mt-24 flex-col items-center px-4 pt-10 pb-20 text-center sm:pt-14"
+          className="mx-auto flex max-w-4xl scroll-mt-24 flex-col items-center overflow-x-clip px-4 pt-10 pb-20 text-center sm:pt-14"
         >
           <span className="rise text-[12px] font-medium tracking-[0.18em] text-muted uppercase">
             Voice-first, made for Wispr Flow
@@ -44,7 +45,11 @@ export default function HomePage() {
           >
             Say what you want,
             <br />
-            <em className="italic">get proof it&rsquo;s done.</em>
+            <span className="relative inline-block">
+              <em className="italic">get proof it&rsquo;s done.</em>
+              <Squiggle className="absolute -bottom-2 left-0 h-4 w-full sm:-bottom-3 sm:h-5" />
+              <Sparkle className="absolute -top-3 -right-6 size-7 sm:-top-4 sm:-right-9 sm:size-9" />
+            </span>
           </h1>
           <p
             className="rise mt-5 max-w-md text-[17px] leading-relaxed text-pretty text-ink-2"
@@ -54,9 +59,10 @@ export default function HomePage() {
             then checks the work against what you said.
           </p>
           <div
-            className="rise mt-9 flex w-full justify-center"
+            className="rise relative mt-9 flex w-full justify-center"
             style={{ '--delay': '240ms' } as React.CSSProperties}
           >
+            <DoodleArrow className="absolute -top-14 left-[calc(50%-21rem)] hidden h-20 w-28 lg:block" />
             <VoiceStart />
           </div>
         </section>

@@ -276,47 +276,34 @@ body::before {
   }
 }
 
-/* ---------- Voice orb. A soft halo at rest; rings breathe outward while listening. ---------- */
+/* ---------- Doodles: lines that draw themselves in, and a gentle twinkle. ---------- */
 
-.orb {
-  box-shadow:
-    0 0 0 8px rgb(255 90 31 / 0.08),
-    0 18px 40px rgb(10 10 10 / 0.18);
+.doodle-draw path {
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  animation: doodle-draw 1.1s var(--ease-out) 0.5s forwards;
 }
 
-.orb-ring {
-  position: absolute;
-  inset: 0;
-  border-radius: 9999px;
-  border: 2px solid var(--accent);
-  opacity: 0;
-  pointer-events: none;
-}
-
-.orb[data-listening] .orb-ring {
-  animation: orb-breathe 1.8s var(--ease-out) infinite;
-}
-
-.orb[data-listening] .orb-ring-late {
-  animation-delay: 0.9s;
-}
-
-@keyframes orb-breathe {
-  from {
-    transform: scale(1);
-    opacity: 0.55;
-  }
+@keyframes doodle-draw {
   to {
-    transform: scale(1.6);
-    opacity: 0;
+    stroke-dashoffset: 0;
   }
 }
 
-@media (prefers-reduced-motion: reduce) {
-  .orb[data-listening] .orb-ring {
-    animation: none;
-    opacity: 0.5;
-    transform: scale(1.15);
+.doodle-twinkle {
+  animation: doodle-twinkle 3.2s ease-in-out infinite;
+  transform-origin: center;
+}
+
+@keyframes doodle-twinkle {
+  0%,
+  100% {
+    transform: scale(0.85) rotate(0deg);
+    opacity: 0.7;
+  }
+  50% {
+    transform: scale(1.1) rotate(20deg);
+    opacity: 1;
   }
 }
 
@@ -337,9 +324,17 @@ body::before {
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .doodle-draw path {
+    animation: none;
+    stroke-dashoffset: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
   .rise,
   .reveal,
-  .key-pulse {
+  .key-pulse,
+  .doodle-twinkle {
     animation: none;
   }
 

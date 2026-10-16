@@ -1,12 +1,12 @@
 'use client'
 
 import { useRouter } from 'next/navigation'
-import { useEffect, useRef, useState, useSyncExternalStore } from 'react'
+import { useEffect, useRef, useState } from 'react'
 
 import { PageHeader } from '@/components/PageShell'
 import { buttonStyles } from '@/components/ui/button-styles'
+import { SAMPLE_REQUEST } from '@/domain/check/sample'
 import type { StructuringEngine } from '@/domain/spec'
-import { isMuted, setMuted, speak, subscribeMuted, summarise } from '@/features/voice/speak'
 
 import { ApiError, createSpec, structure } from './api'
 import { ChecklistEditor } from './ChecklistEditor'
@@ -16,10 +16,7 @@ import { SaveBar } from './SaveBar'
 
 // Step 1: say it. Step 2: check the checklist. Step 3: save. Nothing is stored until Save.
 
-const EXAMPLE =
-  'Add rate limiting to the login route, five attempts per minute per IP, and return a 429 with ' +
-  'a Retry-After header. Do not touch the signup flow. Add tests for the limit and the reset. ' +
-  'And maybe log the blocked attempts?'
+const EXAMPLE = SAMPLE_REQUEST
 
 const ENGINE_LABEL: Record<StructuringEngine, string> = {
   rules: 'Organised by built-in rules',
@@ -36,38 +33,6 @@ function takePendingTranscript(): string | null {
   } catch {
     return null
   }
-}
-
-function VoiceToggle() {
-  const muted = useSyncExternalStore(subscribeMuted, isMuted, () => false)
-  return (
-    <button
-      type="button"
-      aria-pressed={!muted}
-      onClick={() => setMuted(!muted)}
-      className="inline-flex h-8 items-center gap-1.5 rounded-full bg-surface-2 px-3 text-[12px] text-ink-2 transition-colors hover:bg-surface"
-    >
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-        <path
-          d="M4 9v6h4l5 4V5L8 9H4Z"
-          stroke="currentColor"
-          strokeWidth="2"
-          strokeLinejoin="round"
-        />
-        {muted ? (
-          <path d="m17 9 5 6m0-6-5 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-        ) : (
-          <path
-            d="M17 8.5a5 5 0 0 1 0 7"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-          />
-        )}
-      </svg>
-      {muted ? 'Voice off' : 'Voice on'}
-    </button>
-  )
 }
 
 export function SpecComposer() {
@@ -94,13 +59,6 @@ export function SpecComposer() {
       setDraft({ title: result.title, items: toDraftItems(result.items, crypto.randomUUID()) })
       setPhase({ step: 'review', engine: result.engine, notices: result.notices })
       window.scrollTo({ top: 0 })
-      speak(
-        summarise({
-          todo: result.items.filter((item) => item.kind === 'requirement').length,
-          leaveAlone: result.items.filter((item) => item.kind === 'non_goal').length,
-          questions: result.items.filter((item) => item.kind === 'open_question').length,
-        }),
-      )
     } catch (caught) {
       setError(caught instanceof ApiError ? caught.message : 'Something went wrong. Try again.')
     } finally {
@@ -184,7 +142,6 @@ export function SpecComposer() {
             <span className="size-1.5 rounded-full bg-accent" aria-hidden="true" />
             {ENGINE_LABEL[phase.engine]}
           </span>
-          <VoiceToggle />
         </div>
         {phase.notices.map((notice) => (
           <p key={notice} className="rounded-xl bg-unknown-wash px-3 py-2 text-sm text-unknown">
