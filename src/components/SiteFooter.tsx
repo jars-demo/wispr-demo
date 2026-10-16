@@ -2,11 +2,13 @@ import Link from 'next/link'
 
 import { BackToTop } from '@/components/BackToTop'
 import { LogoMark } from '@/components/Logo'
+import { Mascot } from '@/components/mascot/Mascot'
 
 export function SiteFooter() {
   return (
     <footer className="border-t border-hairline">
       <BackToTop />
+      <Mascot />
       <div className="mx-auto flex max-w-5xl flex-col gap-3 px-4 py-8 text-sm text-muted sm:flex-row sm:items-center sm:justify-between">
         <span className="inline-flex items-center gap-2">
           <LogoMark size={20} />

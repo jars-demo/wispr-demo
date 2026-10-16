@@ -1,8 +1,10 @@
 import { SiteFooter } from '@/components/SiteFooter'
 import { SiteNav } from '@/components/SiteNav'
+import { TiltCard } from '@/components/TiltCard'
 import { CheckMockup } from '@/components/mockups/CheckMockup'
 import { VerdictSheets } from '@/components/ui/VerdictSheets'
 import { DoodleArrow, Sparkle, Squiggle } from '@/features/home/Doodles'
+import { AGENTS } from '@/features/home/agents'
 import { VoiceStart } from '@/features/home/VoiceStart'
 
 // One action above the fold: tap the orb and talk. Everything below explains it in three beats.
@@ -24,8 +26,6 @@ const STEPS = [
     body: 'Give Receipts the changes. Each item comes back Found, Partly, Missing or Can’t tell, with the exact lines as proof.',
   },
 ]
-
-const AGENTS = ['Claude Code', 'Codex', 'Cursor', 'Copilot', 'Windsurf', 'Any agent']
 
 export default function HomePage() {
   return (
@@ -75,11 +75,14 @@ export default function HomePage() {
             <ul className="marquee-track">
               {[...AGENTS, ...AGENTS].map((agent, index) => (
                 <li
-                  key={`${agent}-${index}`}
+                  key={`${agent.name}-${index}`}
                   aria-hidden={index >= AGENTS.length}
-                  className="glass shrink-0 rounded-full px-5 py-2.5 text-[15px] font-medium tracking-[-0.01em] text-ink-2"
+                  className="glass shrink-0 rounded-full px-5 py-2.5 text-[15px] font-medium tracking-[-0.01em] text-ink-2 inline-flex items-center gap-2.5"
                 >
-                  {agent}
+                  <svg viewBox="0 0 24 24" className="size-5 shrink-0" aria-hidden="true">
+                    <path d={agent.path} fill={agent.color} />
+                  </svg>
+                  {agent.name}
                 </li>
               ))}
             </ul>
@@ -129,9 +132,7 @@ export default function HomePage() {
         </section>
 
         <section className="mx-auto max-w-5xl px-4 pb-24">
-          <div className="cta-glow reveal relative flex flex-col items-center gap-7 overflow-hidden rounded-panel bg-ink px-6 py-16 text-center text-canvas sm:py-20">
-            <Sparkle className="absolute top-8 left-[12%] size-6 opacity-80" />
-            <Sparkle className="absolute right-[14%] bottom-10 size-8" />
+          <TiltCard className="cta-glow relative flex flex-col items-center gap-7 overflow-hidden rounded-panel bg-ink px-6 py-16 text-center text-canvas sm:py-20">
             <h2 className="font-display text-5xl leading-[1.02] tracking-[-0.025em] text-balance sm:text-6xl">
               You said it. <em className="text-accent italic">Now see it done.</em>
             </h2>
@@ -141,7 +142,7 @@ export default function HomePage() {
             >
               Start talking
             </a>
-          </div>
+          </TiltCard>
         </section>
       </main>
       <SiteFooter />

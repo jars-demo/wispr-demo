@@ -391,6 +391,96 @@ body::after {
   position: relative;
 }
 
+/* ---------- 3D tilt card: follows the pointer, with a soft moving shine. ---------- */
+
+.tilt-card {
+  transform: rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg));
+  transform-style: preserve-3d;
+  transition: transform 300ms var(--ease-out);
+  will-change: transform;
+}
+
+.tilt-card::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  background: radial-gradient(
+    40% 50% at var(--mx, 50%) var(--my, 50%),
+    rgb(255 255 255 / 0.14),
+    transparent 70%
+  );
+}
+
+/* ---------- Recei the mascot: peeks from the corner, blinks, waves. ---------- */
+
+.mascot-peek {
+  transform: translateY(46%) rotate(6deg);
+  transition: transform 500ms cubic-bezier(0.34, 1.56, 0.64, 1);
+  animation: mascot-peek 9s ease-in-out 2s infinite;
+}
+
+.mascot-peek:hover,
+.mascot-peek:focus-visible,
+.mascot-peek.is-open {
+  transform: translateY(8%) rotate(0deg);
+  animation: none;
+}
+
+@keyframes mascot-peek {
+  0%,
+  70%,
+  100% {
+    transform: translateY(46%) rotate(6deg);
+  }
+  78%,
+  90% {
+    transform: translateY(18%) rotate(-3deg);
+  }
+}
+
+.mascot-blink {
+  animation: mascot-blink 5s infinite;
+}
+
+@keyframes mascot-blink {
+  0%,
+  94%,
+  100% {
+    transform: scaleY(1);
+  }
+  97% {
+    transform: scaleY(0.1);
+  }
+}
+
+.mascot-wave {
+  animation: mascot-wave 0.9s ease-in-out 2;
+}
+
+@keyframes mascot-wave {
+  0%,
+  100% {
+    transform: rotate(0deg);
+  }
+  50% {
+    transform: rotate(-28deg);
+  }
+}
+
+.mascot-pop {
+  animation: mascot-pop 320ms cubic-bezier(0.34, 1.56, 0.64, 1);
+  transform-origin: bottom left;
+}
+
+@keyframes mascot-pop {
+  from {
+    opacity: 0;
+    transform: translateY(10px) scale(0.92);
+  }
+}
+
 /* ---------- A soft pulse on the "hold the key" hint. ---------- */
 
 .key-pulse {
@@ -417,6 +507,9 @@ body::after {
 @media (prefers-reduced-motion: reduce) {
   .rise,
   .reveal,
+  .mascot-peek,
+  .mascot-blink,
+  .mascot-wave,
   .marquee-track,
   body::after,
   .key-pulse,
