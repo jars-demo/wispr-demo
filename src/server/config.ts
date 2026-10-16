@@ -9,7 +9,6 @@ const optional = (schema: z.ZodString) =>
 const configSchema = z
   .object({
     NODE_ENV: z.enum(['development', 'test', 'production']).default('development'),
-    APP_BASE_URL: z.url({ protocol: /^https?$/ }),
     LOG_LEVEL: z.enum(['debug', 'info', 'warn', 'error']).default('info'),
     // Secret. Signs the anonymous owner cookie.
     SESSION_SECRET: z.string().min(32, 'must be at least 32 characters'),
@@ -38,7 +37,6 @@ export type ModelConfig = { provider: 'anthropic'; apiKey: string; model: string
 
 export type Config = Readonly<{
   environment: Env['NODE_ENV']
-  appBaseUrl: string
   logLevel: Env['LOG_LEVEL']
   sessionSecret: string
   database: DatabaseConfig
@@ -65,7 +63,6 @@ export function parseConfig(env: Record<string, string | undefined>): Config {
     : null
   return Object.freeze({
     environment: data.NODE_ENV,
-    appBaseUrl: data.APP_BASE_URL.replace(/\/+$/, ''),
     logLevel: data.LOG_LEVEL,
     sessionSecret: data.SESSION_SECRET,
     database,

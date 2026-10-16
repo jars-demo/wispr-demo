@@ -3,23 +3,16 @@ import { describe, expect, it } from 'vitest'
 import { ConfigError, parseConfig } from '@/server/config'
 
 const SECRET = 'x'.repeat(32)
-const base = { APP_BASE_URL: 'http://localhost:3000', SESSION_SECRET: SECRET }
+const base = { SESSION_SECRET: SECRET }
 
 describe('parseConfig', () => {
-  it('accepts a minimal development environment and defaults to embedded PGlite', () => {
+  it('needs only a session secret in development and defaults to embedded PGlite', () => {
     const config = parseConfig(base)
 
-    expect(config.appBaseUrl).toBe('http://localhost:3000')
     expect(config.logLevel).toBe('info')
     expect(config.environment).toBe('development')
     expect(config.database).toEqual({ kind: 'pglite', dir: '.data/pglite' })
     expect(config.model).toBeNull()
-  })
-
-  it('strips trailing slashes from the base URL', () => {
-    expect(parseConfig({ ...base, APP_BASE_URL: 'https://r.example.com//' }).appBaseUrl).toBe(
-      'https://r.example.com',
-    )
   })
 
   it('uses hosted Postgres when DATABASE_URL is set', () => {
@@ -48,8 +41,7 @@ describe('parseConfig', () => {
   })
 
   it.each([
-    [{ APP_BASE_URL: undefined }, /APP_BASE_URL/],
-    [{ APP_BASE_URL: 'javascript:alert(1)' }, /APP_BASE_URL/],
+    [{ SESSION_SECRET: undefined }, /SESSION_SECRET/],
     [{ LOG_LEVEL: 'loud' }, /LOG_LEVEL/],
     [{ SESSION_SECRET: 'short' }, /SESSION_SECRET/],
     [{ DATABASE_URL: 'mysql://nope' }, /DATABASE_URL/],

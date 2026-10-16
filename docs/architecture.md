@@ -71,7 +71,7 @@ Claims are Backed up, Not true or Can't tell.
 
 `src/server/config.ts` parses `process.env` with zod and freezes the result.
 `src/instrumentation.ts` calls it at server start so a bad deploy fails before serving traffic.
-Verified in M1: starting the production server without `APP_BASE_URL` fails with an error that
+Verified in M1: starting the production server without `SESSION_SECRET` fails with an error that
 names the variable.
 
 ## Design system

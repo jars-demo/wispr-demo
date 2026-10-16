@@ -74,7 +74,6 @@ start when one is missing or invalid, and the error names the variable without e
 
 | Variable            | Required               | Kind   | Purpose                                                     |
 | ------------------- | ---------------------- | ------ | ----------------------------------------------------------- |
-| `APP_BASE_URL`      | Yes                    | Config | Public base URL                                             |
 | `SESSION_SECRET`    | Yes                    | Secret | Signs the anonymous owner cookie (32+ characters)           |
 | `DATABASE_URL`      | In production          | Secret | Hosted Postgres. Empty locally to use PGlite                |
 | `PGLITE_DIR`        | No (`.data/pglite`)    | Config | Where the local database lives                              |
