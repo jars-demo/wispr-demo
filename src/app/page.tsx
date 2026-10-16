@@ -133,10 +133,16 @@ export default function HomePage() {
 
         <section className="mx-auto max-w-5xl px-4 pb-24">
           <TiltCard className="cta-glow relative flex flex-col items-center gap-7 overflow-hidden rounded-panel bg-ink px-6 py-16 text-center text-canvas sm:py-20">
-            <h2 className="font-display text-5xl leading-[1.02] tracking-[-0.025em] text-balance sm:text-6xl">
+            <h2
+              data-depth
+              style={{ '--depth': 70 } as React.CSSProperties}
+              className="font-display text-5xl leading-[1.02] tracking-[-0.025em] text-balance sm:text-6xl"
+            >
               You said it. <em className="text-accent italic">Now see it done.</em>
             </h2>
             <a
+              data-depth
+              style={{ '--depth': 110 } as React.CSSProperties}
               href="#start"
               className="inline-flex h-12 items-center gap-2 rounded-full bg-canvas px-6 text-[15px] font-medium text-ink transition-transform duration-200 hover:scale-[1.03] active:scale-[0.97]"
             >

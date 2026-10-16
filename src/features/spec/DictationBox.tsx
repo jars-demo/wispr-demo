@@ -15,7 +15,7 @@ export function DictationBox({
   disabled: boolean
 }) {
   return (
-    <div className="glass flex flex-col gap-3 rounded-panel p-3 sm:p-4">
+    <div className="glow-box glass flex flex-col gap-3 rounded-panel p-3 sm:p-4">
       <WisprHint />
       <label htmlFor="transcript" className="sr-only">
         What do you want your agent to do?

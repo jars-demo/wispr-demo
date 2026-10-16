@@ -37,7 +37,7 @@ export function VoiceStart() {
         event.preventDefault()
         submit()
       }}
-      className="glass-strong flex w-full max-w-2xl flex-col gap-3 rounded-[2rem] p-3 text-left shadow-lift sm:p-4"
+      className="glow-box glass-strong flex w-full max-w-2xl flex-col gap-3 rounded-[2rem] p-3 text-left shadow-lift sm:p-4"
     >
       <WisprHint />
       <label htmlFor="start-text" className="sr-only">
