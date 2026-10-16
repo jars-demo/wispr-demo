@@ -47,6 +47,7 @@ docs/                        architecture.md, decisions/ (ADRs), CHANGELOG.md
 npm ci
 npm run dev
 npm run check            # lint + typecheck + format:check + test
+npm run verify           # check + production build: run before every push
 npm run build
 ```
 
