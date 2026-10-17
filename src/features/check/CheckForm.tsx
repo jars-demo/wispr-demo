@@ -61,7 +61,7 @@ export function CheckForm({
       className="flex flex-col gap-6"
     >
       <section className="glass flex flex-col gap-4 rounded-panel p-4 sm:p-6">
-        <div className="flex items-center justify-between gap-3">
+        <div className="flex flex-wrap items-center justify-between gap-3">
           <h2 className="text-[15px] font-semibold tracking-tight">What your agent changed</h2>
           <div
             role="tablist"
@@ -75,7 +75,7 @@ export function CheckForm({
                 role="tab"
                 aria-selected={mode === m}
                 onClick={() => setMode(m)}
-                className={`h-8 rounded-full px-3 text-[13px] font-medium transition-colors ${
+                className={`h-8 rounded-full px-3 text-[13px] font-medium whitespace-nowrap transition-colors ${
                   mode === m ? 'bg-surface text-ink shadow-soft' : 'text-muted hover:text-ink'
                 }`}
               >
