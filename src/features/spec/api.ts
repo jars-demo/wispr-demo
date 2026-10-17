@@ -71,3 +71,10 @@ export type CheckRequest = { diff: string; link: string; summary: string; testOu
 export function createCheck(specId: string, body: CheckRequest): Promise<{ id: string }> {
   return send(`/api/specs/${specId}/checks`, { method: 'POST', body: JSON.stringify(body) })
 }
+
+export function markSent(specId: string, via: string, ref?: string): Promise<{ sentAt: string }> {
+  return send(`/api/specs/${specId}/sent`, {
+    method: 'POST',
+    body: JSON.stringify({ via, ref: ref ?? null }),
+  })
+}

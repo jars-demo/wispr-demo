@@ -65,4 +65,13 @@ export const MIGRATIONS: readonly Migration[] = [
       create index checks_spec_created_idx on checks (spec_id, created_at desc);
     `,
   },
+  {
+    version: '0003_sent',
+    sql: `
+      alter table specs
+        add column sent_at timestamptz,
+        add column sent_via text check (char_length(sent_via) <= 40),
+        add column sent_ref text check (char_length(sent_ref) <= 300);
+    `,
+  },
 ]

@@ -4,7 +4,14 @@ import type { SpecDraft } from '@/domain/spec'
 import { runMigrations } from '@/server/db/migrate'
 import { createPgliteDb } from '@/server/db/pglite'
 import type { Db } from '@/server/db/types'
-import { createSpec, deleteSpec, getSpec, listSpecs, updateSpec } from '@/server/specs/repository'
+import {
+  createSpec,
+  deleteSpec,
+  getSpec,
+  listSpecs,
+  markSent,
+  updateSpec,
+} from '@/server/specs/repository'
 
 // Real PostgreSQL (PGlite, in memory). A fresh database per test.
 
@@ -148,5 +155,23 @@ describe('listSpecs and deleteSpec', () => {
     expect(await getSpec(db, ALICE, id)).toBeNull()
     expect(await db.query('select 1 from spec_versions')).toEqual([])
     expect(await db.query('select 1 from spec_items')).toEqual([])
+  })
+})
+
+describe('markSent', () => {
+  it('records where a receipt went, for its owner only', async () => {
+    const { id } = await createSpec(db, ALICE, crypto.randomUUID(), draft)
+    const ref = 'https://github.com/jars-demo/wispr-demo/issues/1'
+
+    expect(await markSent(db, BOB, id, 'copilot', ref)).toBeNull()
+    expect((await getSpec(db, ALICE, id))?.sentAt).toBeNull()
+
+    expect(await markSent(db, ALICE, id, 'copilot', ref)).toBeInstanceOf(Date)
+    const spec = await getSpec(db, ALICE, id)
+    expect(spec).toMatchObject({ sentVia: 'copilot', sentRef: ref })
+    expect(spec?.sentAt).toBeInstanceOf(Date)
+
+    const [summary] = await listSpecs(db, ALICE)
+    expect(summary).toMatchObject({ sentVia: 'copilot', lastCheck: null })
   })
 })

@@ -1,3 +1,4 @@
+import type { CheckResult } from '@/domain/check/engine'
 import type { Db } from '@/server/db/types'
 import {
   assignCodes,
@@ -10,15 +11,19 @@ import {
 // Every function takes ownerId and filters by it. Another owner's spec behaves exactly like a
 // spec that does not exist, so existence is never leaked.
 
-export type SpecSummary = {
+export type SentInfo = { sentAt: Date | null; sentVia: string | null; sentRef: string | null }
+
+export type SpecSummary = SentInfo & {
   id: string
   title: string
   version: number
   requirementCount: number
   updatedAt: Date
+  lastCheck: CheckResult | null
+  lastCheckAt: Date | null
 }
 
-export type SpecRecord = {
+export type SpecRecord = SentInfo & {
   id: string
   title: string
   version: number
@@ -104,9 +109,12 @@ export async function getSpec(db: Db, ownerId: string, id: string): Promise<Spec
     version_id: string
     created_at: Date
     updated_at: Date
+    sent_at: Date | null
+    sent_via: string | null
+    sent_ref: string | null
   }>(
     `select s.id, s.title, s.current_version as version, v.transcript, v.engine, v.id as version_id,
-            s.created_at, s.updated_at
+            s.created_at, s.updated_at, s.sent_at, s.sent_via, s.sent_ref
        from specs s
        join spec_versions v on v.spec_id = s.id and v.version = s.current_version
       where s.id = $1 and s.owner_id = $2`,
@@ -126,6 +134,9 @@ export async function getSpec(db: Db, ownerId: string, id: string): Promise<Spec
     engine: spec.engine,
     createdAt: spec.created_at,
     updatedAt: spec.updated_at,
+    sentAt: spec.sent_at,
+    sentVia: spec.sent_via,
+    sentRef: spec.sent_ref,
     items: items.map((row) => ({
       position: row.position,
       code: row.code,
@@ -145,10 +156,21 @@ export async function listSpecs(db: Db, ownerId: string, limit = 50): Promise<Sp
     version: number
     requirement_count: number
     updated_at: Date
+    sent_at: Date | null
+    sent_via: string | null
+    sent_ref: string | null
+    last_check: CheckResult | null
+    last_check_at: Date | null
   }>(
     `select s.id, s.title, s.current_version as version, s.updated_at,
+            s.sent_at, s.sent_via, s.sent_ref,
             (select count(*)::int from spec_items i
-              where i.spec_version_id = v.id and i.kind = 'requirement') as requirement_count
+              where i.spec_version_id = v.id and i.kind = 'requirement') as requirement_count,
+            (select c.result from checks c
+              where c.spec_id = s.id and c.owner_id = s.owner_id
+              order by c.created_at desc limit 1) as last_check,
+            (select max(c.created_at) from checks c
+              where c.spec_id = s.id and c.owner_id = s.owner_id) as last_check_at
        from specs s
        join spec_versions v on v.spec_id = s.id and v.version = s.current_version
       where s.owner_id = $1
@@ -162,6 +184,11 @@ export async function listSpecs(db: Db, ownerId: string, limit = 50): Promise<Sp
     version: row.version,
     requirementCount: row.requirement_count,
     updatedAt: row.updated_at,
+    sentAt: row.sent_at,
+    sentVia: row.sent_via,
+    sentRef: row.sent_ref,
+    lastCheck: row.last_check,
+    lastCheckAt: row.last_check_at,
   }))
 }
 
@@ -203,4 +230,21 @@ export async function deleteSpec(db: Db, ownerId: string, id: string): Promise<b
     ownerId,
   ])
   return rows.length > 0
+}
+
+/** Records that the receipt was handed to an agent. Sending again replaces the last record. */
+export async function markSent(
+  db: Db,
+  ownerId: string,
+  id: string,
+  via: string,
+  ref: string | null,
+): Promise<Date | null> {
+  const [row] = await db.query<{ sent_at: Date }>(
+    `update specs set sent_at = now(), sent_via = $3, sent_ref = $4
+      where id = $1 and owner_id = $2
+      returning sent_at`,
+    [id, ownerId, via, ref],
+  )
+  return row?.sent_at ?? null
 }
