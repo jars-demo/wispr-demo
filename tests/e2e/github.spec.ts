@@ -28,6 +28,14 @@ function cors(route: Route, status: number, body: string, contentType = 'applica
 
 test('send to Copilot on GitHub, then the pull request is checked by itself', async ({ page }) => {
   const seen: Seen[] = []
+  // Every request that leaves the page, to prove the token goes nowhere but GitHub.
+  const leaks: string[] = []
+  page.on('request', (request) => {
+    const url = new URL(request.url())
+    if (url.hostname === 'api.github.com') return
+    const sent = JSON.stringify(request.headers()) + (request.postData() ?? '') + request.url()
+    if (sent.includes('github_pat_test')) leaks.push(request.url())
+  })
   await page.route('https://api.github.com/**', async (route) => {
     const request = route.request()
     const url = new URL(request.url())
@@ -103,6 +111,7 @@ test('send to Copilot on GitHub, then the pull request is checked by itself', as
   expect(issue?.body).toMatchObject({ assignees: ['copilot-swe-agent[bot]'] })
   expect(JSON.stringify(issue?.body)).toContain('## Requirements')
   expect(seen.every((call) => call.auth === 'Bearer github_pat_test')).toBe(true)
+  expect(leaks, 'token sent somewhere other than api.github.com').toEqual([])
 
   // The receipt now says where it went.
   await page.goto(receiptUrl)
