@@ -30,6 +30,11 @@ src/proxy.ts                 issues the signed anonymous owner cookie (handlers 
 src/components/              shared UI; ui/ primitives, mockups/ labelled static mockups
 src/features/spec/           client UI for checklists: composer, editor, dictation, actions
 src/domain/                  pure TypeScript: spec schema and codes, rules engine, exports, verdicts
+src/domain/receipt-status.ts ready, sent or checked: the one source for every status stamp
+src/domain/agent-handoff.ts  send targets (GitHub, local, chat), shell quoting, deep links
+src/domain/github-handoff.ts issue shape per agent, linked pull request, "is it ready" rules
+src/features/connect/        browser-only GitHub: token in localStorage, calls api.github.com
+                             directly; Receipts' server never sees the token
 src/server/config.ts         the ONLY reader of process.env (zod, fail fast, never echoes values)
 src/server/db/               Db interface, PGlite and postgres.js adapters, migrations, migrator
 src/server/specs/            repository (owner-scoped SQL), structure service, model wiring
