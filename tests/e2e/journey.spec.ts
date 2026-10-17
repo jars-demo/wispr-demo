@@ -51,7 +51,10 @@ test('talking (via Wispr Flow) or typing on the landing page becomes a saved che
       .filter({ hasText: /signup/i })
       .first(),
   ).toBeVisible()
-  await expect(page.getByRole('button', { name: 'Copy for your agent' })).toBeVisible()
+  await page.getByRole('combobox', { name: 'Your agent', exact: true }).selectOption('codex')
+  await expect(page.getByRole('button', { name: 'Send to Codex CLI' })).toBeVisible()
+  await page.getByText('Preview the brief').click()
+  await expect(page.getByText('### Not done or unsure')).toBeVisible()
 
   // Sending starts a short buffer, then the check opens on the same page.
   const download = page.waitForEvent('download')
