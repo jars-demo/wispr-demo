@@ -2,7 +2,7 @@
 
 Say what you want. Get proof your coding agent did it.
 
-Receipts turns a spoken (or typed) request into a short checklist, then checks your coding
+Receipts turns a spoken (or typed) request into a receipt for your coding agent, sends it, then checks your coding
 agent's work against it using whatever evidence you have: a GitHub pull request or compare link,
 pasted `git diff`, the agent's own summary, or pasted test output. Each item comes back Found,
 Partly, Missing, Off-limits or Can't tell, with the lines that support it, and each claim the
@@ -13,26 +13,33 @@ track.
 
 ## Status
 
-| Milestone | Scope                                                             | State   |
-| --------- | ----------------------------------------------------------------- | ------- |
-| M1        | Foundation, config, CI, design system, design preview             | Done    |
-| M2        | Checklists: dictate, organise, review, save, edit, export, delete | Done    |
-| M3        | Check the work: diff or GitHub link, cited answers, claim checks  | Done    |
-| M4        | Sharing, PWA, sign-in, agent hand-off links                       | Next    |
-| M5 to M8  | Beta, hardening, deploy, submission                               | Planned |
+| Milestone | Scope                                                            | State   |
+| --------- | ---------------------------------------------------------------- | ------- |
+| M1        | Foundation, config, CI, design system, design preview            | Done    |
+| M2        | Receipts: dictate, organise, review, save, edit, export, delete  | Done    |
+| M3        | Check the work: diff or GitHub link, cited answers, claim checks | Done    |
+| M4        | Send to agents (GitHub, CLI, chat), auto-check, status stamps    | Done    |
+| M5 to M8  | Beta, hardening, deploy, submission                              | Planned |
 
 What works today (live at https://wispr.jishanahmed.in):
 
 - **Say it** (`/`, `/new`): click the box, hold your Wispr Flow key and talk (or type). Receipts
   organises it into requirements, things to leave alone and open questions, each with the words it
   came from. You review and edit before anything is saved.
-- **Hand it over** (`/specs/:id`): copy a ready prompt for your agent or Markdown for an issue.
-  Edit (each save is a new version) or delete.
-- **Check it** (`/specs/:id/check`): paste a `git diff` or a public GitHub pull request, compare or
-  commit link, plus the agent's summary and test output. Each requirement comes back Found (with
-  cited lines), Partly, Missing or Can't tell; things to leave alone and the agent's claims are
-  checked too. One click copies a fix-up prompt for whatever is missing.
-- No sign-up. Checklists belong to your browser through a signed, HttpOnly cookie.
+- **Send it** (`/specs/:id`): your request printed as a receipt, with its status stamped on
+  (Ready to send, Sent to Copilot, Done, 2 of 3 done). One tap on an agent's logo sends it:
+  - **On GitHub:** connect a fine-grained token once (kept only in your browser, sent only to
+    api.github.com). Receipts opens an issue for **Copilot** (assigned) or **Claude** (`@claude`,
+    needs the Claude GitHub app), follows it to the pull request and checks it by itself.
+  - **On your machine:** a ready terminal command for **Claude Code** or **Codex CLI**, or a
+    prompt link that opens **Cursor**.
+  - **In a chat:** Claude.ai or ChatGPT, with the brief copied as a backup.
+- **Check it** (same page, step 2): for GitHub sends this happens on its own. Otherwise paste a
+  `git diff` or a public GitHub pull request, compare or commit link, plus the agent's summary and
+  test output. Each requirement comes back Found (with cited lines), Partly, Missing or Can't
+  tell; things to leave alone and the agent's claims are checked too. One click copies a fix-up
+  prompt for whatever is missing.
+- No sign-up. Receipts belong to your browser through a signed, HttpOnly cookie.
 
 Voice input is Wispr Flow: it types into whichever box has focus, so the app has no microphone
 code of its own.
