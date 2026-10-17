@@ -15,7 +15,7 @@ Guidance for AI coding agents and developers working in this repository. Humans:
 
 ## What this is
 
-Receipts: speak a request, get a checklist for a coding agent, then check the agent's work
+Receipts: speak a request, get a receipt for your coding agent, send it, then check the agent's work
 against it with evidence. Next.js 16 (App Router, Cache Components) with TypeScript in strict
 mode, Tailwind CSS 4, PostgreSQL (PGlite locally, hosted in production) and Vitest. One
 deployable app.
@@ -25,10 +25,10 @@ deployable app.
 ```text
 src/app/                     pages and thin route handlers only (no business rules here)
 src/app/api/specs/           structure (POST), list/create, get/update/delete by id
-src/app/new, specs/          the checklist flow; data-reading pages render inside <Suspense>
+src/app/new, specs/          the receipt flow; data-reading pages render inside <Suspense>
 src/proxy.ts                 issues the signed anonymous owner cookie (handlers re-verify it)
 src/components/              shared UI; ui/ primitives, mockups/ labelled static mockups
-src/features/spec/           client UI for checklists: composer, editor, dictation, actions
+src/features/spec/           client UI for receipts: composer, editor, send and check
 src/domain/                  pure TypeScript: spec schema and codes, rules engine, exports, verdicts
 src/domain/receipt-status.ts ready, sent or checked: the one source for every status stamp
 src/domain/agent-handoff.ts  send targets (GitHub, local, chat), shell quoting, deep links

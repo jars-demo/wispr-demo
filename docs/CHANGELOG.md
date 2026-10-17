@@ -5,12 +5,21 @@ All notable user-facing changes are recorded here, following
 
 ## [Unreleased]
 
+### Changed
+
+- Checklists are now called receipts everywhere you can see them, each with a status stamp: Ready
+  to send, Sent to an agent, Done or N of M done. The flow is three steps: speak and send, check
+  the work, done or not.
+
 ### Removed
 
 - Browser speech input and spoken read-back. Voice is Wispr Flow, which types into any text box.
 
 ### Added
 
+- One-tap sending by agent logo: Copilot and Claude on GitHub (with a token kept only in the
+  browser), Claude Code and Codex CLI commands, a Cursor prompt link, and chat sites. GitHub sends
+  are followed to the pull request and checked automatically.
 - Optional Groq AI (gpt-oss-20b to organise, gpt-oss-120b to check). Every AI verdict must quote
   lines that exist in the diff, or it becomes Can't tell; test claims stay rule-based.
 - Check the work: paste a diff or a public GitHub link, plus the agent's summary and test output,

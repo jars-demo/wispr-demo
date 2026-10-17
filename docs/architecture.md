@@ -1,6 +1,7 @@
 # Architecture
 
-Status: M2 (checklists) built. Sections marked _planned_ describe the agreed design for later
+Status: M1 to M4 built (receipts, checks, sending to agents). Requests were called checklists
+before M4. Sections marked _planned_ describe the agreed design for later
 milestones and are not built yet.
 
 ## System boundary
