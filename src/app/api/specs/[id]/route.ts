@@ -11,7 +11,7 @@ const idSchema = z.uuid()
 
 type Context = RouteContext<'/api/specs/[id]'>
 
-const notFound = () => problem(404, 'That checklist does not exist, or it is not yours.')
+const notFound = () => problem(404, 'That receipt does not exist, or it is not yours.')
 
 async function specId(context: Context): Promise<string | null> {
   const { id } = await context.params
@@ -32,7 +32,7 @@ export const PUT = withOwner('specs.update', async (request, { ownerId }, contex
   const result = await updateSpec(await getDb(), ownerId, id, expectedVersion, draft)
   if (result.status === 'not_found') return notFound()
   if (result.status === 'conflict') {
-    return problem(409, 'This checklist changed in another tab. Reload to see the latest.', {
+    return problem(409, 'This receipt changed in another tab. Reload to see the latest.', {
       currentVersion: result.currentVersion,
     })
   }

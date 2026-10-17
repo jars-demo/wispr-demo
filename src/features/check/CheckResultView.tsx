@@ -7,7 +7,7 @@ import type { Citation, CheckResult } from '@/domain/check/engine'
 
 function CitationBlock({ citation }: { citation: Citation }) {
   return (
-    <div className="overflow-hidden rounded-xl bg-surface-2">
+    <div className="max-w-full min-w-0 overflow-hidden rounded-xl bg-surface-2">
       <div className="flex items-center justify-between gap-2 px-3 pt-2 font-mono text-[11px] text-muted">
         <span className="truncate">{citation.file}</span>
         <span className="shrink-0">{citation.lines}</span>

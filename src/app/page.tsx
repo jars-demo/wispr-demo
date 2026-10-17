@@ -13,7 +13,7 @@ const STEPS = [
   {
     title: 'Say',
     em: 'it.',
-    body: 'Hold your Wispr Flow key and talk it through like you would to a teammate. Receipts turns it into a short checklist. Anything vague becomes a question, never a guess.',
+    body: 'Hold your Wispr Flow key and talk it through like you would to a teammate. Receipts turns it into a short receipt. Anything vague becomes a question, never a guess.',
   },
   {
     title: 'Hand it',
@@ -55,8 +55,8 @@ export default function HomePage() {
             className="rise mt-5 max-w-md text-[17px] leading-relaxed text-pretty text-ink-2"
             style={{ '--delay': '160ms' } as React.CSSProperties}
           >
-            Talk it through with Wispr Flow. Receipts writes the checklist for your coding agent,
-            then checks the work against what you said.
+            Talk it through with Wispr Flow. Receipts writes the receipt for your coding agent, then
+            checks the work against what you said.
           </p>
           <div
             className="rise relative mt-9 flex w-full justify-center"

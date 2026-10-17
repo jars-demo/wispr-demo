@@ -59,7 +59,7 @@ describe('groundModelOutput', () => {
 
     expect(result.droppedUngrounded).toBe(2)
     expect(result.items[0]?.acceptance).toBeUndefined()
-    expect(result.title).toBe('Untitled checklist')
+    expect(result.title).toBe('Untitled receipt')
   })
 })
 

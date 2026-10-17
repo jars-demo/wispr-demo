@@ -1,6 +1,6 @@
 import { groupByKind, SPEC_ITEM_COPY, SPEC_ITEM_KINDS, type SpecItem } from '@/domain/spec'
 
-// Read-only checklist, grouped. Server component.
+// Read-only receipt, grouped. Server component.
 
 export function SpecView({ items }: { items: SpecItem[] }) {
   const groups = groupByKind(items)

@@ -62,7 +62,7 @@ describe('structureWithRules', () => {
     expect(structureWithRules('Okay. Thanks. That is it. Hmm.').items).toEqual([])
   })
 
-  it('titles the checklist from the first requirement, shortened to ten words', () => {
+  it('titles the receipt from the first requirement, shortened to ten words', () => {
     const { title } = structureWithRules(
       'Add rate limiting to the login route with a sliding time window. Add tests.',
     )
@@ -77,11 +77,11 @@ describe('structureWithRules', () => {
   })
 
   it('falls back to a neutral title when nothing is a requirement', () => {
-    expect(structureWithRules('Maybe add caching?').title).toBe('Untitled checklist')
+    expect(structureWithRules('Maybe add caching?').title).toBe('Untitled receipt')
   })
 
   it('returns nothing, rather than inventing items, for empty input', () => {
-    expect(structureWithRules('   ')).toEqual({ title: 'Untitled checklist', items: [] })
+    expect(structureWithRules('   ')).toEqual({ title: 'Untitled receipt', items: [] })
   })
 
   it('caps the number of items and the length of each one', () => {

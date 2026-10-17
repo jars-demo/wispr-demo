@@ -20,7 +20,7 @@ export function SiteFooter() {
         </span>
         <nav aria-label="Footer" className="flex flex-wrap gap-x-5 gap-y-2">
           <Link href="/specs" className="hover:text-ink">
-            Your checklists
+            Your receipts
           </Link>
           <Link href="/#how-it-works" className="hover:text-ink">
             How it works

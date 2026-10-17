@@ -57,7 +57,7 @@ export function groundModelOutput(transcript: string, raw: RawModelOutput): Mode
   }
 
   return {
-    title: clip(raw.title, LIMITS.title) ?? 'Untitled checklist',
+    title: clip(raw.title, LIMITS.title) ?? 'Untitled receipt',
     items,
     droppedUngrounded: dropped,
   }

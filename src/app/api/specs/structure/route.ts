@@ -6,7 +6,7 @@ import { hitRateLimit } from '@/server/rate-limit'
 import { getModelStructurer } from '@/server/specs/model'
 import { structureTranscript } from '@/server/specs/structure'
 
-// Turns a transcript into a draft checklist. Nothing is saved here.
+// Turns a transcript into a draft receipt. Nothing is saved here.
 
 export const POST = withOwner('specs.structure', async (request, { ownerId }) => {
   const { transcript } = await readJson(request, transcriptSchema)
@@ -14,7 +14,7 @@ export const POST = withOwner('specs.structure', async (request, { ownerId }) =>
   if (!limit.allowed) {
     return problem(
       429,
-      'You have made a lot of checklists this hour. Try again shortly.',
+      'You have made a lot of receipts this hour. Try again shortly.',
       {},
       { 'Retry-After': String(limit.retryAfterSeconds) },
     )

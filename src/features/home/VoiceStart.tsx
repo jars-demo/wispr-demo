@@ -62,7 +62,7 @@ export function VoiceStart() {
       <div className="flex items-center justify-between gap-3 pl-2">
         <span className="text-[12px] text-muted">Free, no sign-up. Enter to go.</span>
         <button type="submit" disabled={!text.trim()} className={buttonStyles('primary', 'lg')}>
-          Make my checklist
+          Make my receipt
         </button>
       </div>
     </form>

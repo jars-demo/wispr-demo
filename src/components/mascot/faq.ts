@@ -4,7 +4,7 @@ export const MASCOT_FAQ: { question: string; answer: string }[] = [
   {
     question: 'What is Receipts?',
     answer:
-      'You say what you want built, Receipts turns it into a checklist for your coding agent, and then checks the agent’s work against it with the exact lines as proof.',
+      'You say what you want built, Receipts turns it into a receipt for your coding agent, and then checks the agent’s work against it with the exact lines as proof.',
   },
   {
     question: 'How do I talk to it?',
@@ -24,7 +24,7 @@ export const MASCOT_FAQ: { question: string; answer: string }[] = [
   {
     question: 'Is my code stored?',
     answer:
-      'No. Only the result is saved, with short quotes. Your checklists belong to your browser, and you can delete them any time.',
+      'No. Only the result is saved, with short quotes. Your receipts belong to your browser, and you can delete them any time.',
   },
   {
     question: 'Is it free?',

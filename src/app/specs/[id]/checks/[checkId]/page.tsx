@@ -4,9 +4,12 @@ import { Suspense } from 'react'
 import { z } from 'zod'
 
 import { LoadingBlock, PageShell } from '@/components/PageShell'
+import { ReceiptStamp } from '@/components/ReceiptStamp'
+import { Steps } from '@/components/Steps'
 import { VerdictSheets } from '@/components/ui/VerdictSheets'
 import { describeCheck, toFixPrompt } from '@/domain/check/report'
 import { EVIDENCE_SOURCE_COPY } from '@/domain/evidence-source'
+import { receiptStatus } from '@/domain/receipt-status'
 import { CheckActions } from '@/features/check/CheckActions'
 import { CheckResultView } from '@/features/check/CheckResultView'
 import { getCheck } from '@/server/checks/repository'
@@ -43,13 +46,21 @@ async function ResultLoader({
 
   return (
     <>
+      <Steps current={3} />
       <header className="rise mb-8 flex flex-col gap-3">
         <span className="text-[12px] font-medium tracking-[0.16em] text-muted uppercase">
-          Check result
+          Step 3 · Done or not
         </span>
-        <h1 className="font-display text-5xl leading-[1] tracking-[-0.03em] text-balance sm:text-6xl">
-          {found} of {total} <em className="italic">{allFound ? 'found. Nice.' : 'found.'}</em>
-        </h1>
+        <div className="flex flex-wrap items-start justify-between gap-x-4 gap-y-3">
+          <h1 className="min-w-0 font-display text-5xl leading-[1] tracking-[-0.03em] text-balance sm:text-6xl">
+            {found} of {total} <em className="italic">{allFound ? 'found. Nice.' : 'found.'}</em>
+          </h1>
+          <div className="shrink-0 pt-2">
+            <ReceiptStamp
+              status={receiptStatus({ sentAt: null, sentVia: null, lastCheck: check.result })}
+            />
+          </div>
+        </div>
         <p className="text-[15px] text-ink-2">{describeCheck(check.result)}</p>
         {(check.result.notices ?? []).map((notice) => (
           <p key={notice} className="rounded-xl bg-unknown-wash px-3 py-2 text-sm text-unknown">

@@ -1,6 +1,6 @@
 import { z } from 'zod'
 
-// A spec is what the user asked for, as a short checklist. Codes (R1, N1, Q1) are derived from
+// A spec is what the user asked for, as a short receipt. Codes (R1, N1, Q1) are derived from
 // order and kind on the server, never trusted from the client.
 
 export const SPEC_ITEM_KINDS = ['requirement', 'non_goal', 'open_question'] as const

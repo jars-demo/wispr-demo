@@ -42,7 +42,7 @@ export default function CheckPage(props: PageProps<'/specs/[id]/check'>) {
   return (
     <PageShell>
       <PageHeader eyebrow="Step 3 of 3" title="Check the" em="work." />
-      <Suspense fallback={<LoadingBlock label="Loading checklist" />}>
+      <Suspense fallback={<LoadingBlock label="Loading receipt" />}>
         <CheckLoader params={props.params} />
       </Suspense>
     </PageShell>

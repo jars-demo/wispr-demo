@@ -1,6 +1,6 @@
 import { groupByKind, type SpecItem } from './spec'
 
-// Formats a saved checklist for a coding agent or an issue tracker. Pure string building, so the
+// Formats a saved receipt for a coding agent or an issue tracker. Pure string building, so the
 // exact text users paste into their agent is covered by tests.
 
 export type ExportableSpec = { title: string; items: readonly SpecItem[] }
@@ -32,7 +32,7 @@ export function toMarkdown(spec: ExportableSpec): string {
 /**
  * A full brief for a coding agent: the task, every requirement with its code, what to leave
  * alone, questions to settle first, how to work, and a report format Receipts can check. Only
- * the checklist items carry the user's content; everything else is fixed working practice, so
+ * the receipt items carry the user's content; everything else is fixed working practice, so
  * nothing is invented about what the user wants.
  */
 export function toAgentPrompt(spec: ExportableSpec): string {

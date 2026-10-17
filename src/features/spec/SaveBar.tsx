@@ -1,6 +1,6 @@
 'use client'
 
-// Floating glass action bar pinned to the bottom of the screen while reviewing a checklist.
+// Floating glass action bar pinned to the bottom of the screen while reviewing a receipt.
 
 export function SaveBar({ error, children }: { error: string | null; children: React.ReactNode }) {
   return (

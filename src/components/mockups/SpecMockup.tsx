@@ -30,7 +30,7 @@ export function SpecMockup() {
           <p className="text-[15px] leading-relaxed text-ink-2">{SAMPLE_TRANSCRIPT}</p>
           <div className="mt-auto flex items-center gap-2 pt-2">
             <span className="inline-flex h-10 items-center rounded-full bg-ink px-5 text-sm font-medium text-canvas">
-              Turn into a checklist
+              Turn into a receipt
             </span>
             <span className="glass inline-flex size-10 items-center justify-center rounded-full">
               <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">

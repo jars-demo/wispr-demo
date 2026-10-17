@@ -15,7 +15,7 @@ import {
 import { hitRateLimit } from '@/server/rate-limit'
 import { getSpec } from '@/server/specs/repository'
 
-// Runs a check of the agent's work against the current version of a checklist and stores it.
+// Runs a check of the agent's work against the current version of a receipt and stores it.
 
 const bodySchema = z
   .object({
@@ -33,7 +33,7 @@ type Context = RouteContext<'/api/specs/[id]/checks'>
 
 export const POST = withOwner('checks.create', async (request, { ownerId }, context: Context) => {
   const { id } = await context.params
-  if (!z.uuid().safeParse(id).success) return problem(404, 'That checklist does not exist.')
+  if (!z.uuid().safeParse(id).success) return problem(404, 'That receipt does not exist.')
   const body = await readJson(request, bodySchema, 600_000)
 
   const db = await getDb()
@@ -48,7 +48,7 @@ export const POST = withOwner('checks.create', async (request, { ownerId }, cont
   }
 
   const spec = await getSpec(db, ownerId, id)
-  if (!spec) return problem(404, 'That checklist does not exist, or it is not yours.')
+  if (!spec) return problem(404, 'That receipt does not exist, or it is not yours.')
 
   let diff = body.diff
   const sources: EvidenceSourceKind[] = []

@@ -16,7 +16,7 @@ const instrumentSerif = Instrument_Serif({
 export const metadata: Metadata = {
   title: { default: 'Receipts · Say it. Get proof it was done.', template: '%s · Receipts' },
   description:
-    'Talk to Receipts, hand the checklist to Claude Code, Codex or Cursor, then check the work against what you said.',
+    'Talk to Receipts, hand the receipt to Claude Code, Codex or Cursor, then check the work against what you said.',
 }
 
 export const viewport: Viewport = {

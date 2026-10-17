@@ -57,7 +57,7 @@ export function finaliseDraft(
   })
   if (result.success) return { ok: true, value: result.data }
   const issue = result.error.issues[0]
-  if (issue?.path[0] === 'title') return { ok: false, message: 'Give the checklist a title.' }
+  if (issue?.path[0] === 'title') return { ok: false, message: 'Give the receipt a title.' }
   if (
     issue?.message === 'needs at least one requirement' ||
     issue?.message === 'needs at least one item'

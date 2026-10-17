@@ -32,7 +32,7 @@ export function CheckActions({ specId, fixPrompt }: { specId: string; fixPrompt:
           Check again
         </Link>
         <Link href={`/specs/${specId}`} className={buttonStyles('ghost')}>
-          Back to checklist
+          Back to receipt
         </Link>
       </div>
       <p aria-live="polite" className="min-h-5 text-sm text-ok">

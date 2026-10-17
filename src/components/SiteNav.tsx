@@ -29,7 +29,7 @@ export function SiteNav() {
         <div className="flex items-center gap-1">
           <Link
             href="/specs"
-            aria-label="My checklists"
+            aria-label="My receipts"
             className="inline-flex size-10 items-center justify-center rounded-full text-ink-2 transition-colors hover:bg-surface-2 sm:hidden"
           >
             <ListIcon />
@@ -37,7 +37,7 @@ export function SiteNav() {
           {/* The wrapper hides this on phones; the button styles set their own display. */}
           <div className="hidden sm:flex">
             <Link href="/specs" className={buttonStyles('ghost')}>
-              My checklists
+              My receipts
             </Link>
           </div>
           <Link href="/new" className={buttonStyles('primary')}>

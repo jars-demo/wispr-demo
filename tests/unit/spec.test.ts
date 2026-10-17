@@ -88,7 +88,7 @@ describe('exports', () => {
     expect(prompt).toContain('Do not say tests pass unless you ran them and saw them pass.')
   })
 
-  it('carries only the checklist items as content, and skips empty sections', () => {
+  it('carries only the receipt items as content, and skips empty sections', () => {
     const prompt = toAgentPrompt({
       title: 'Add tests',
       items: assignCodes([{ kind: 'requirement', text: 'Add tests.' }]),

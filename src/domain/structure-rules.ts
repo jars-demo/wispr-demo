@@ -1,6 +1,6 @@
 import { LIMITS, type SpecItemInput } from './spec'
 
-// Deterministic structuring: turns a spoken request into a checklist without any model.
+// Deterministic structuring: turns a spoken request into a receipt without any model.
 // It never invents content: every item is a cleaned-up clause the user actually said, and its
 // sourceQuote is an exact substring of the transcript.
 
@@ -54,7 +54,7 @@ const TITLE_WORDS = 10
 
 function titleFrom(items: readonly SpecItemInput[]): string {
   const first = items.find((item) => item.kind === 'requirement')
-  if (!first) return 'Untitled checklist'
+  if (!first) return 'Untitled receipt'
   const sentence = first.text.replace(/[.!?]+$/, '')
   // Prefer the first clause ("Add rate limiting to the login route, five per minute").
   const clause = sentence.split(/[,;:]\s+|\s+-\s+/)[0] ?? sentence

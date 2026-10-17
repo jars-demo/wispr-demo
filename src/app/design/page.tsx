@@ -160,7 +160,7 @@ export default function DesignPreviewPage() {
         <Section
           id="spec-screen"
           title="Screen 1: what you asked for"
-          intro="What you said on one side, the checklist on the other. A vague phrase becomes a question for you, not a requirement."
+          intro="What you said on one side, the receipt on the other. A vague phrase becomes a question for you, not a requirement."
         >
           <SpecMockup />
         </Section>
@@ -231,7 +231,7 @@ export default function DesignPreviewPage() {
             </p>
             <p className="text-2xl font-semibold tracking-tight">Rate-limit the login endpoint</p>
             <p className="max-w-xl text-[17px] leading-relaxed text-ink-2">
-              Body text is generous so a long checklist still reads easily.
+              Body text is generous so a long receipt still reads easily.
             </p>
             <p className="font-mono text-sm text-muted">src/app/api/login/route.ts L14-L18</p>
           </div>

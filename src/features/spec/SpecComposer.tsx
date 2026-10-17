@@ -14,7 +14,7 @@ import { DictationBox } from './DictationBox'
 import { finaliseDraft, PENDING_TRANSCRIPT_KEY, toDraftItems, type Draft } from './draft'
 import { SaveBar } from './SaveBar'
 
-// Step 1: say it. Step 2: check the checklist. Step 3: save. Nothing is stored until Save.
+// Step 1: say it. Step 2: check the receipt. Step 3: save. Nothing is stored until Save.
 
 const EXAMPLE = SAMPLE_REQUEST
 
@@ -37,7 +37,7 @@ export function SpecComposer() {
   const [draft, setDraft] = useState<Draft>({ title: '', items: [] })
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  // One id per draft makes a double-clicked or retried save land on the same checklist.
+  // One id per draft makes a double-clicked or retried save land on the same receipt.
   const clientId = useRef<string | null>(null)
   const started = useRef(false)
 
@@ -94,9 +94,9 @@ export function SpecComposer() {
   if (phase.step === 'say') {
     return (
       <div className="flex flex-col gap-4">
-        <PageHeader eyebrow="Step 1 of 3" title="Say what you" em="want.">
+        <PageHeader eyebrow="Step 1 · Speak and send" title="Say what you" em="want.">
           <p className="max-w-xl text-[17px] leading-relaxed text-ink-2">
-            Talk or type the change. Receipts turns it into a short checklist for your agent. You
+            Talk or type the change. Receipts turns it into a short receipt for your agent. You
             check it before anything is saved.
           </p>
         </PageHeader>
@@ -121,7 +121,7 @@ export function SpecComposer() {
             disabled={busy || transcript.trim() === ''}
             className={buttonStyles('primary', 'lg')}
           >
-            {busy ? 'Organising…' : 'Turn into a checklist'}
+            {busy ? 'Organising…' : 'Turn into a receipt'}
           </button>
         </div>
       </div>
@@ -130,7 +130,7 @@ export function SpecComposer() {
 
   return (
     <div>
-      <PageHeader eyebrow="Step 2 of 3" title="Is this what you" em="meant?" />
+      <PageHeader eyebrow="Step 1 · Speak and send" title="Is this what you" em="meant?" />
       <div className="-mt-4 mb-8 flex flex-col gap-3">
         {phase.notices.map((notice) => (
           <p key={notice} className="rounded-xl bg-unknown-wash px-3 py-2 text-sm text-unknown">
@@ -155,7 +155,7 @@ export function SpecComposer() {
           Back
         </button>
         <button type="button" onClick={save} disabled={busy} className={buttonStyles('primary')}>
-          {busy ? 'Saving…' : 'Looks good, next'}
+          {busy ? 'Printing…' : 'Print my receipt'}
         </button>
       </SaveBar>
     </div>

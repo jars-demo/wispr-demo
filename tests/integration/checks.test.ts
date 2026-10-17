@@ -61,7 +61,7 @@ describe('checks repository', () => {
     expect(await listChecks(db, 'bob', specId)).toEqual([])
   })
 
-  it('deletes checks along with their checklist', async () => {
+  it('deletes checks along with their receipt', async () => {
     const { specId } = await seed('alice')
     await deleteSpec(db, 'alice', specId)
 

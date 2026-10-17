@@ -6,7 +6,7 @@ import { LIMITS, SPEC_ITEM_COPY, SPEC_ITEM_KINDS, type SpecItemKind } from '@/do
 
 import { emptyItem, liveCodes, type Draft, type DraftItem } from './draft'
 
-// Controlled editor for a checklist: three groups, each row editable, movable and removable.
+// Controlled editor for a receipt: three groups, each row editable, movable and removable.
 
 const ADD_LABEL: Record<SpecItemKind, string> = {
   requirement: 'Add something to do',
