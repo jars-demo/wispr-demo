@@ -29,7 +29,31 @@ export function SiteFooter() {
             Design
           </Link>
         </nav>
-        <span>Built for No Hands: The Wispr Challenge, October 2026.</span>
+      </div>
+      <div className="mx-auto max-w-5xl px-4 pb-10">
+        <p className="max-w-3xl text-[13px] leading-relaxed text-muted">
+          <span className="font-medium text-ink-2">About this project.</span> Receipts is a demo
+          built to show{' '}
+          <a href="https://wisprflow.ai" className="underline underline-offset-4 hover:text-ink">
+            Wispr Flow
+          </a>{' '}
+          in a developer&apos;s day: you speak, and your coding agent gets the work. It was made for{' '}
+          <a
+            href="https://www.wemakedevs.org/wispr"
+            className="underline underline-offset-4 hover:text-ink"
+          >
+            No Hands: The Wispr Challenge
+          </a>{' '}
+          by WeMakeDevs and Wispr Flow (October 2026, Builders track), which is why it lives at
+          wispr.jishanahmed.in. It is an independent entry, not an official Wispr product.{' '}
+          <a
+            href="https://github.com/jars-demo/wispr-demo"
+            className="underline underline-offset-4 hover:text-ink"
+          >
+            Source on GitHub
+          </a>
+          .
+        </p>
       </div>
     </footer>
   )
