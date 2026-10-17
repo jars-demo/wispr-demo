@@ -81,8 +81,21 @@ describe('exports', () => {
   it('asks the agent to resolve open questions first and to report honestly', () => {
     const prompt = toAgentPrompt(spec)
 
-    expect(prompt.indexOf('ask me these questions')).toBeLessThan(prompt.indexOf('Implement'))
-    expect(prompt).toContain('- **N1** Do not change signup.')
+    expect(prompt.indexOf('Ask me these questions')).toBeLessThan(prompt.indexOf('## Requirements'))
+    expect(prompt).toContain('- **R1** Limit login attempts. Done when: A 6th try returns 429.')
+    expect(prompt).toContain('## Do not change\n\n- **N1** Do not change signup.')
+    expect(prompt).toContain('- R2: done, partly or not done.')
     expect(prompt).toContain('Do not say tests pass unless you ran them and saw them pass.')
+  })
+
+  it('carries only the checklist items as content, and skips empty sections', () => {
+    const prompt = toAgentPrompt({
+      title: 'Add tests',
+      items: assignCodes([{ kind: 'requirement', text: 'Add tests.' }]),
+    })
+
+    expect(prompt).not.toContain('Ask me these questions')
+    expect(prompt).not.toContain('## Do not change')
+    expect(prompt.match(/\*\*R\d\*\*/g)).toEqual(['**R1**'])
   })
 })
