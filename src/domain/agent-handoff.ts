@@ -2,18 +2,31 @@
 // agent gets the most direct route that really exists: a terminal command to paste, or a link
 // that opens the agent with the brief filled in. Pure functions, unit tested.
 
-export type AgentId = 'claude-code' | 'codex' | 'cursor' | 'claude-web' | 'chatgpt' | 'other'
+export type AgentId =
+  | 'copilot'
+  | 'claude-github'
+  | 'claude-code'
+  | 'codex'
+  | 'cursor'
+  | 'claude-web'
+  | 'chatgpt'
+  | 'other'
 export type Shell = 'posix' | 'powershell'
 
-export type Agent = { id: AgentId; name: string; hint: string }
+/** github: Receipts opens an issue and the agent starts on its own. local: you run it. */
+export type AgentKind = 'github' | 'local' | 'chat'
+
+export type Agent = { id: AgentId; name: string; hint: string; kind: AgentKind }
 
 export const AGENTS: readonly Agent[] = [
-  { id: 'claude-code', name: 'Claude Code', hint: 'Copies a terminal command' },
-  { id: 'codex', name: 'Codex CLI', hint: 'Copies a terminal command' },
-  { id: 'cursor', name: 'Cursor', hint: 'Opens Cursor with the brief' },
-  { id: 'claude-web', name: 'Claude.ai', hint: 'Opens a new chat' },
-  { id: 'chatgpt', name: 'ChatGPT', hint: 'Opens a new chat' },
-  { id: 'other', name: 'Any other agent', hint: 'Copies the brief' },
+  { id: 'copilot', name: 'Copilot', hint: 'Opens an issue and assigns Copilot', kind: 'github' },
+  { id: 'claude-github', name: 'Claude', hint: 'Opens an issue for @claude', kind: 'github' },
+  { id: 'claude-code', name: 'Claude Code', hint: 'Copies a terminal command', kind: 'local' },
+  { id: 'codex', name: 'Codex CLI', hint: 'Copies a terminal command', kind: 'local' },
+  { id: 'cursor', name: 'Cursor', hint: 'Opens Cursor with the brief', kind: 'local' },
+  { id: 'claude-web', name: 'Claude.ai', hint: 'Opens a new chat', kind: 'chat' },
+  { id: 'chatgpt', name: 'ChatGPT', hint: 'Opens a new chat', kind: 'chat' },
+  { id: 'other', name: 'Anything else', hint: 'Copies the brief', kind: 'chat' },
 ]
 
 /** Cursor's documented limit for deeplink URLs. */
@@ -23,6 +36,10 @@ const CHAT_URL_LIMIT = 6000
 
 export function isAgentId(value: unknown): value is AgentId {
   return AGENTS.some((agent) => agent.id === value)
+}
+
+export function agentName(id: string | null): string {
+  return AGENTS.find((agent) => agent.id === id)?.name ?? 'your agent'
 }
 
 /** One quoted argument, safe to paste: nothing inside is expanded by the shell. */
@@ -41,8 +58,12 @@ export type Handoff = {
   note: string
 }
 
+/** For local and chat agents. GitHub agents are sent through the GitHub API instead. */
 export function handoff(agent: AgentId, brief: string, shell: Shell): Handoff {
   switch (agent) {
+    case 'copilot':
+    case 'claude-github':
+      return { copy: brief, note: 'Brief copied. Connect GitHub to send it directly.' }
     case 'claude-code':
       return {
         copy: `claude ${quoteForShell(brief, shell)}`,
