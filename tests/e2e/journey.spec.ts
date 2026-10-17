@@ -38,10 +38,12 @@ test('talking (via Wispr Flow) or typing on the landing page becomes a saved che
   await expect(page.getByLabel('Q1 text')).toHaveValue(/log blocked attempts\?$/i)
   await expectNoSidewaysScroll(page)
 
-  await page.getByRole('button', { name: 'Save checklist' }).click()
+  await page.getByRole('button', { name: 'Looks good, next' }).click()
 
   await expect(page).toHaveURL(/\/specs\/[0-9a-f-]{36}$/)
   await expect(page.getByRole('heading', { level: 1 })).toContainText(/rate limit/i)
+  await expect(page.getByText(/Organised by/)).toHaveCount(0)
+  await page.getByText(/Show the checklist/).click()
   await expect(
     page
       .getByRole('main')
@@ -50,6 +52,14 @@ test('talking (via Wispr Flow) or typing on the landing page becomes a saved che
       .first(),
   ).toBeVisible()
   await expect(page.getByRole('button', { name: 'Copy for your agent' })).toBeVisible()
+
+  // Sending starts a short buffer, then the check opens on the same page.
+  const download = page.waitForEvent('download')
+  await page.getByRole('button', { name: 'Download .md' }).click()
+  expect((await download).suggestedFilename()).toMatch(/\.md$/)
+  await expect(page.getByRole('status').filter({ hasText: 'Your agent is on it' })).toBeVisible()
+  await page.getByRole('button', { name: 'Done already? Check now' }).click()
+  await expect(page.getByRole('button', { name: 'Check the work' })).toBeVisible()
   await expectNoSidewaysScroll(page)
 })
 
@@ -67,10 +77,10 @@ test('the sample journey ends with a check that catches the missing tests', asyn
   await page.goto('/new')
   await page.getByRole('button', { name: 'Fill in an example' }).click()
   await page.getByRole('button', { name: 'Turn into a checklist' }).click()
-  await page.getByRole('button', { name: 'Save checklist' }).click()
+  await page.getByRole('button', { name: 'Looks good, next' }).click()
   await expect(page).toHaveURL(/\/specs\/[0-9a-f-]{36}$/)
 
-  await page.getByRole('link', { name: 'Check the work' }).click()
+  await page.getByRole('button', { name: 'Already sent? Check now' }).click()
   await page.getByRole('button', { name: 'Fill in a sample agent result' }).click()
   await page.getByRole('button', { name: 'Check the work' }).click()
 

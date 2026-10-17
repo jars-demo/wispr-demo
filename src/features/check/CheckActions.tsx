@@ -28,7 +28,7 @@ export function CheckActions({ specId, fixPrompt }: { specId: string; fixPrompt:
             Copy a fix-up prompt
           </button>
         ) : null}
-        <Link href={`/specs/${specId}/check`} className={buttonStyles('secondary')}>
+        <Link href={`/specs/${specId}#check`} className={buttonStyles('secondary')}>
           Check again
         </Link>
         <Link href={`/specs/${specId}`} className={buttonStyles('ghost')}>

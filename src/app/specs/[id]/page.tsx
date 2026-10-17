@@ -6,12 +6,14 @@ import { z } from 'zod'
 import Link from 'next/link'
 
 import { LoadingBlock, PageShell } from '@/components/PageShell'
-import { buttonStyles } from '@/components/ui/button-styles'
 import { describeCheck } from '@/domain/check/report'
 import { listChecks } from '@/server/checks/repository'
 import { toAgentPrompt, toMarkdown } from '@/domain/spec-export'
+import { SAMPLE_REQUEST } from '@/domain/check/sample'
+import { HandoffFlow } from '@/features/spec/HandoffFlow'
 import { SpecActions } from '@/features/spec/SpecActions'
 import { SpecView } from '@/features/spec/SpecView'
+import { getConfig } from '@/server/config'
 import { getDb } from '@/server/db'
 import { getSpec } from '@/server/specs/repository'
 import { currentOwner } from '@/server/session'
@@ -35,44 +37,40 @@ async function SpecDetail({ params }: { params: PageProps<'/specs/[id]'>['params
 
   return (
     <>
-      <header className="rise mb-8 flex flex-col gap-3">
+      <header className="rise mb-6 flex flex-col gap-3">
         <span className="text-[12px] font-medium tracking-[0.16em] text-muted uppercase">
-          Step 3 of 3 · Hand it to your agent
+          Step 3 of 3 · Send it, then check it
         </span>
-        <h1 className="font-display text-5xl leading-[1] tracking-[-0.03em] text-balance sm:text-6xl">
+        <h1 className="font-display text-4xl leading-[1.02] tracking-[-0.03em] text-balance sm:text-6xl">
           {spec.title}
         </h1>
-        <p className="text-[13px] text-muted">
-          Version {spec.version} ·{' '}
-          {spec.engine === 'model' ? 'Organised by Claude' : 'Organised by built-in rules'} ·
-          Updated {dateFormat.format(spec.updatedAt)} UTC
-        </p>
+        <SpecActions id={spec.id} />
       </header>
 
-      <div className="mb-10">
-        <SpecActions id={spec.id} prompt={toAgentPrompt(spec)} markdown={toMarkdown(spec)} />
-      </div>
-
-      <SpecView items={spec.items} />
-
-      <section
-        aria-labelledby="next-heading"
-        className="glass mt-12 flex flex-col gap-4 rounded-panel p-6"
-      >
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <div className="flex flex-col gap-1">
-            <h2 id="next-heading" className="font-display text-3xl tracking-[-0.02em]">
-              Agent done? <em className="italic">Check it.</em>
-            </h2>
-            <p className="text-[15px] text-muted">
-              Paste the diff or a GitHub link, plus what your agent said.
-            </p>
-          </div>
-          <Link href={`/specs/${spec.id}/check`} className={buttonStyles('primary', 'lg')}>
-            Check the work
-          </Link>
+      <details className="group mb-6 rounded-card">
+        <summary className="cursor-pointer list-none text-sm font-medium text-ink-2">
+          <span className="group-open:hidden">Show the checklist ({spec.items.length})</span>
+          <span className="hidden group-open:inline">Hide the checklist</span>
+        </summary>
+        <div className="mt-4">
+          <SpecView items={spec.items} />
         </div>
-        {checks.length > 0 ? (
+      </details>
+
+      <HandoffFlow
+        id={spec.id}
+        title={spec.title}
+        prompt={toAgentPrompt(spec)}
+        markdown={toMarkdown(spec)}
+        showSample={spec.transcript.trim() === SAMPLE_REQUEST}
+        aiEnabled={getConfig().groq !== null}
+      />
+
+      {checks.length > 0 ? (
+        <section aria-labelledby="past-heading" className="mt-8 flex flex-col gap-2">
+          <h2 id="past-heading" className="px-1 text-sm font-medium text-muted">
+            Earlier checks
+          </h2>
           <ul className="flex flex-col gap-1.5">
             {checks.map((c) => (
               <li key={c.id}>
@@ -88,8 +86,8 @@ async function SpecDetail({ params }: { params: PageProps<'/specs/[id]'>['params
               </li>
             ))}
           </ul>
-        ) : null}
-      </section>
+        </section>
+      ) : null}
 
       <details className="mt-6 rounded-card px-1">
         <summary className="cursor-pointer text-sm text-muted">Show what you said</summary>

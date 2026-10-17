@@ -18,11 +18,6 @@ import { SaveBar } from './SaveBar'
 
 const EXAMPLE = SAMPLE_REQUEST
 
-const ENGINE_LABEL: Record<StructuringEngine, string> = {
-  rules: 'Organised by built-in rules',
-  model: 'Organised by Claude, checked against your words',
-}
-
 type Phase = { step: 'say' } | { step: 'review'; engine: StructuringEngine; notices: string[] }
 
 function takePendingTranscript(): string | null {
@@ -137,19 +132,13 @@ export function SpecComposer() {
     <div>
       <PageHeader eyebrow="Step 2 of 3" title="Is this what you" em="meant?" />
       <div className="-mt-4 mb-8 flex flex-col gap-3">
-        <div className="flex flex-wrap items-center gap-2">
-          <span className="inline-flex h-8 items-center gap-2 rounded-full bg-surface-2 px-3 text-[12px] text-ink-2">
-            <span className="size-1.5 rounded-full bg-accent" aria-hidden="true" />
-            {ENGINE_LABEL[phase.engine]}
-          </span>
-        </div>
         {phase.notices.map((notice) => (
           <p key={notice} className="rounded-xl bg-unknown-wash px-3 py-2 text-sm text-unknown">
             {notice}
           </p>
         ))}
         <p className="text-[15px] text-muted">
-          Edit, move or remove anything that is off. Nothing is saved until you press Save.
+          Edit, move or remove anything that is off. Then send it to your agent.
         </p>
       </div>
       <ChecklistEditor draft={draft} onChange={setDraft} />
@@ -166,7 +155,7 @@ export function SpecComposer() {
           Back
         </button>
         <button type="button" onClick={save} disabled={busy} className={buttonStyles('primary')}>
-          {busy ? 'Saving…' : 'Save checklist'}
+          {busy ? 'Saving…' : 'Looks good, next'}
         </button>
       </SaveBar>
     </div>
