@@ -39,7 +39,12 @@ export async function hashSecret(secret: string): Promise<string> {
 }
 
 export type SyncOutcome =
-  | { ok: true; events: number }
+  | {
+      ok: true
+      events: number
+      /** When the name can change again, so the browser can lock the field until then. */
+      renameAfter: string | null
+    }
   | { ok: false; status: 404 | 409 | 422; reason: string; code?: 'name_taken' }
   | {
       ok: false
@@ -90,10 +95,13 @@ export async function syncPlayer(db: Db, input: SyncInput, now = new Date()): Pr
       if (before) await updateOwnPlayer(tx, input.id, secretHash, check.state, input.profile)
       else await insertPlayer(tx, input.id, secretHash, check.state, input.profile)
       if (renamed) await markNameChanged(tx, input.id)
+      const lockedUntil = renamed
+        ? nameLockedUntil(now, now)
+        : nameLockedUntil(await lastNameChange(tx, input.id), now)
       // Hidden players save progress quietly: no public events.
       const events = check.state.hidden ? [] : eventsBetween(before, check.state)
       await insertEvents(tx, input.id, events)
-      return { ok: true, events: events.length }
+      return { ok: true, events: events.length, renameAfter: lockedUntil?.toISOString() ?? null }
     })
   } catch (error) {
     // Two players claimed the same name at the same moment; the index let only one through.

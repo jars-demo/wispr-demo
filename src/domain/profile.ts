@@ -48,7 +48,13 @@ export type Profile = {
    * Saved progress: a random id and the secret that proves this browser owns it. Hidden players
    * are saved but kept off the public board.
    */
-  board: { id: string; secret: string; hidden: boolean } | null
+  board: {
+    id: string
+    secret: string
+    hidden: boolean
+    /** When the name can change again (one rename per NAME_CHANGE_DAYS), as the server said. */
+    renameAfter?: string | null
+  } | null
 }
 
 const MAX = { runs: 60, concepts: 300, days: 120, name: 24 } as const
@@ -92,7 +98,12 @@ const profileSchema = z.object({
   drilled: z.number().int().min(0),
   card: z.object({ template: z.enum(CARD_TEMPLATES), tagline: z.number().int().min(0) }),
   board: z
-    .object({ id: z.uuid(), secret: z.string().min(20), hidden: z.boolean().default(false) })
+    .object({
+      id: z.uuid(),
+      secret: z.string().min(20),
+      hidden: z.boolean().default(false),
+      renameAfter: z.string().nullable().optional(),
+    })
     .nullable(),
 })
 

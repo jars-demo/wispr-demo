@@ -46,9 +46,11 @@ describe('one rename every 180 days', () => {
     )
 
   it('claims freely, allows one rename, then locks the name with the unlock date', async () => {
-    expect(await syncPlayer(db, join(R, 'Ravi'))).toMatchObject({ ok: true })
-    expect(await syncPlayer(db, join(R, 'RAVI'))).toMatchObject({ ok: true }) // case is free
-    expect(await syncPlayer(db, join(R, 'Ravi K'))).toMatchObject({ ok: true })
+    expect(await syncPlayer(db, join(R, 'Ravi'))).toMatchObject({ ok: true, renameAfter: null })
+    expect(await syncPlayer(db, join(R, 'RAVI'))).toMatchObject({ renameAfter: null }) // case is free
+    const renamed = await syncPlayer(db, join(R, 'Ravi K'))
+    // Every save after a rename tells the browser when the name unlocks.
+    expect(renamed.ok && renamed.renameAfter).toBeTruthy()
 
     const locked = await syncPlayer(db, join(R, 'Ravi Kumar'))
     expect(locked).toMatchObject({ ok: false, status: 409, code: 'name_locked', name: 'Ravi K' })

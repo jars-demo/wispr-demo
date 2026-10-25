@@ -34,7 +34,11 @@ export const POST = withErrors('players.sync', async (request, { clientKey }) =>
           : {}
     return problem(outcome.status, outcome.reason, extra)
   }
-  return Response.json({ saved: true, events: outcome.events })
+  return Response.json({
+    saved: true,
+    events: outcome.events,
+    renameAfter: outcome.renameAfter,
+  })
 })
 
 const leaveSchema = z.object({ id: z.uuid(), secret: z.string().min(20).max(100) })

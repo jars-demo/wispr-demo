@@ -47,13 +47,26 @@ export type SaveResult = { ok: true } | { ok: false; message: string; code?: str
 
 async function readProblem(
   response: Response,
-): Promise<{ message: string; code?: string; name?: string }> {
+): Promise<{ message: string; code?: string; name?: string; until?: string }> {
   const body = (await response.json().catch(() => null)) as {
     title?: string
     code?: string
     name?: string
+    until?: string
   } | null
-  return { message: body?.title ?? 'Could not save right now.', code: body?.code, name: body?.name }
+  return {
+    message: body?.title ?? 'Could not save right now.',
+    code: body?.code,
+    name: body?.name,
+    until: body?.until,
+  }
+}
+
+/** Keeps the server's word on when the name unlocks, so the name field can say so. */
+function rememberRenameAfter(value: string | null) {
+  const profile = profileStore.read()
+  if (!profile.board || (profile.board.renameAfter ?? null) === value) return
+  profileStore.write({ ...profile, board: { ...profile.board, renameAfter: value } })
 }
 
 export async function saveProgress(): Promise<SaveResult> {
@@ -74,7 +87,16 @@ export async function saveProgress(): Promise<SaveResult> {
         profile: { ...profile, board: null },
       }),
     })
-    return response.ok ? { ok: true } : { ok: false, ...(await readProblem(response)) }
+    if (response.ok) {
+      const body = (await response.json().catch(() => null)) as {
+        renameAfter?: string | null
+      } | null
+      rememberRenameAfter(body?.renameAfter ?? null)
+      return { ok: true }
+    }
+    const problem = await readProblem(response)
+    if (problem.code === 'name_locked' && problem.until) rememberRenameAfter(problem.until)
+    return { ok: false, ...problem }
   } catch {
     return { ok: false, message: 'You look offline. Progress is still saved in this browser.' }
   }
@@ -113,7 +135,8 @@ export async function claimName(name: string): Promise<SaveResult> {
   if (!clean) return { ok: false, message: 'Pick a name first.' }
   profileStore.write({ ...before, name: clean })
   const result = await saveProgress()
-  if (!result.ok) profileStore.write(before)
+  // A refused rename puts the old name back but keeps what the server said about the lock.
+  if (!result.ok) profileStore.write({ ...before, board: profileStore.read().board })
   return result
 }
 
