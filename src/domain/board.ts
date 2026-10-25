@@ -124,5 +124,5 @@ export type BoardView = {
   top: { rank: number; name: string; avatar: string; xp: number; level: string; isMe: boolean }[]
   me: { rank: number; xp: number } | null
   rivalry: string | null
-  events: { text: string; avatar: string; at: string }[]
+  events: { kind: BoardEventKind; detail: string; text: string; avatar: string; at: string }[]
 }

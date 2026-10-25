@@ -108,6 +108,8 @@ export async function loadBoard(db: Db, meId: string | null): Promise<BoardView>
     me: mine?.me ?? null,
     rivalry: rivalryLine(mine?.me ?? null, mine?.ahead ?? null),
     events: events.map((e) => ({
+      kind: e.kind,
+      detail: e.detail,
       text: describeEvent(e.kind, e.detail, e.name),
       avatar: e.avatar,
       at: e.at,

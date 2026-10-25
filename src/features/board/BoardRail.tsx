@@ -2,13 +2,12 @@
 
 import Link from 'next/link'
 
-import { Avatar } from '@/components/Avatar'
 import { buttonStyles } from '@/components/ui/button-styles'
-import { timeAgo } from '@/domain/feed'
 import { profileStore } from '@/features/game/store'
 import { useHydrated } from '@/lib/local-store'
 
 import { useBoard } from './board-store'
+import { BoardRows, LiveFeed } from './board-ui'
 
 // The live board beside the wire: your rank, who is just ahead, the top five, and what other
 // players just unlocked.
@@ -44,40 +43,21 @@ export function BoardRail() {
           <div className="rounded-card bg-accent-wash px-4 py-3">
             <p className="text-[14px] font-medium">Get on the board</p>
             <p className="text-[13px] text-ink-2">
-              Pick a name and your progress is saved. No sign-up, no forms.
+              Claim a name and your progress is saved. No sign-up, no forms.
             </p>
-            <Link href="/me#save" className={`${buttonStyles('primary')} mt-2`}>
-              Save my progress
+            <Link href="/me" className={`${buttonStyles('primary')} mt-2`}>
+              Claim my name
             </Link>
           </div>
         )}
 
         {view?.top.length ? (
-          <ol className="flex flex-col gap-1.5">
-            {view.top.slice(0, 5).map((row) => (
-              <li
-                key={`${row.rank}-${row.name}`}
-                className={`flex items-center gap-2.5 rounded-full py-1 pr-3 pl-1 ${row.isMe ? 'bg-accent-wash ring-1 ring-accent/40' : ''}`}
-              >
-                <span className="w-6 text-center text-[13px] font-semibold text-muted tabular-nums">
-                  {row.rank === 1 ? '🥇' : row.rank === 2 ? '🥈' : row.rank === 3 ? '🥉' : row.rank}
-                </span>
-                <Avatar id={row.avatar} size={28} />
-                <span className="min-w-0 flex-1 truncate text-[14px]">
-                  {row.name}
-                  {row.isMe ? <span className="text-muted"> (you)</span> : null}
-                </span>
-                <span className="text-[13px] font-medium tabular-nums">
-                  {row.xp.toLocaleString('en-US')}
-                </span>
-              </li>
-            ))}
-          </ol>
+          <BoardRows rows={view.top.slice(0, 5)} compact />
         ) : view ? (
           <p className="text-[13px] text-muted">Nobody on the board yet. First place is open.</p>
         ) : error ? (
           <p className="text-[13px] text-muted">
-            The board is taking a nap. Your progress is safe.
+            The board is taking a nap. Your progress is safe in this browser.
           </p>
         ) : (
           <div className="h-40 animate-pulse rounded-card bg-surface-2/60" aria-hidden="true" />
@@ -85,22 +65,12 @@ export function BoardRail() {
       </div>
 
       {view?.events.length ? (
-        <div className="glass flex flex-col gap-2 rounded-panel p-5">
+        <div className="glass flex flex-col gap-3 rounded-panel p-5">
           <h3 className="flex items-center gap-2 text-[14px] font-semibold">
             <span className="live-dot size-2 rounded-full bg-accent" aria-hidden="true" />
             Just now on Breakdown
           </h3>
-          <ul className="flex flex-col gap-2">
-            {view.events.slice(0, 6).map((event, i) => (
-              <li key={`${event.at}-${i}`} className="flex items-center gap-2.5 text-[13px]">
-                <Avatar id={event.avatar} size={24} />
-                <span className="min-w-0 flex-1">{event.text}</span>
-                <span className="shrink-0 text-[12px] text-muted">
-                  {timeAgo(event.at, new Date())}
-                </span>
-              </li>
-            ))}
-          </ul>
+          <LiveFeed events={view.events} limit={5} />
         </div>
       ) : null}
     </aside>
