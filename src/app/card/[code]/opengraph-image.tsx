@@ -8,8 +8,8 @@ import { AVATAR_ART } from '@/features/card/avatar-art'
 import { CARD_SIZE, CardArt } from '@/features/card/CardArt'
 
 // The share image for a player card: the same template as on the page, filled from the link.
-// The avatar comes in as a data URI and Instrument Serif (OFL) is loaded from the repo, so the
-// image renders without fetching anything.
+// The avatar comes in as a data URI and Geist and Instrument Serif (both OFL, licences beside
+// them) are loaded from the repo, so the image renders without fetching anything.
 
 export const size = CARD_SIZE
 export const contentType = 'image/png'
@@ -33,20 +33,30 @@ const fontFile = (name: string) => readFile(join(process.cwd(), 'src/app/card/fo
 export default async function Image({ params }: { params: Promise<{ code: string }> }) {
   const { code } = await params
   const card = decodeCard(code) ?? FALLBACK
-  const [regular, italic] = await Promise.all([
+  const [sans, sansSemi, sansBold, serif, serifItalic] = await Promise.all([
+    fontFile('Geist-Regular.ttf'),
+    fontFile('Geist-SemiBold.ttf'),
+    fontFile('Geist-Bold.ttf'),
     fontFile('InstrumentSerif-Regular.ttf'),
     fontFile('InstrumentSerif-Italic.ttf'),
   ])
   return new ImageResponse(
     <CardArt
       card={card}
-      assets={{ avatarSrc: AVATAR_ART[card.avatar], display: 'Instrument Serif' }}
+      assets={{
+        avatarSrc: AVATAR_ART[card.avatar],
+        display: 'Instrument Serif',
+        sans: 'Geist',
+      }}
     />,
     {
       ...size,
       fonts: [
-        { name: 'Instrument Serif', data: regular, style: 'normal', weight: 400 },
-        { name: 'Instrument Serif', data: italic, style: 'italic', weight: 400 },
+        { name: 'Geist', data: sans, style: 'normal', weight: 400 },
+        { name: 'Geist', data: sansSemi, style: 'normal', weight: 600 },
+        { name: 'Geist', data: sansBold, style: 'normal', weight: 700 },
+        { name: 'Instrument Serif', data: serif, style: 'normal', weight: 400 },
+        { name: 'Instrument Serif', data: serifItalic, style: 'italic', weight: 400 },
       ],
     },
   )

@@ -95,7 +95,7 @@ export function CardArt({ card, assets = {} }: { card: CardData; assets?: CardAs
             style={{ borderRadius: 999 }}
           />
         </div>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 26 }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 22 }}>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
             <span style={{ fontSize: 58, fontWeight: 700, letterSpacing: -1.6, lineHeight: 1 }}>
               {card.name}
@@ -136,21 +136,68 @@ export function CardArt({ card, assets = {} }: { card: CardData; assets?: CardAs
               />
             ) : null}
           </div>
+          <div style={{ display: 'flex', gap: 10 }}>
+            {shown.map((a) => (
+              <span
+                key={a.id}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 9,
+                  padding: '7px 15px 7px 8px',
+                  borderRadius: 999,
+                  background: p.surface,
+                  fontSize: 18,
+                  fontWeight: 600,
+                }}
+              >
+                <span
+                  style={{
+                    width: 22,
+                    height: 22,
+                    borderRadius: 99,
+                    backgroundImage: METAL[a.tier],
+                  }}
+                />
+                {a.title}
+              </span>
+            ))}
+            {earned.length > shown.length ? (
+              <span
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  padding: '7px 14px',
+                  borderRadius: 999,
+                  background: p.surface,
+                  fontSize: 18,
+                  color: p.muted,
+                }}
+              >
+                +{earned.length - shown.length}
+              </span>
+            ) : null}
+          </div>
         </div>
       </div>
 
-      {/* Footer: tagline and badges */}
+      {/* Footer: the tagline */}
       <div
         style={{
           display: 'flex',
-          alignItems: 'flex-end',
-          justifyContent: 'space-between',
-          gap: 32,
           paddingTop: 26,
           borderTop: `2px solid ${p.chip}`,
         }}
       >
-        <div style={{ display: 'flex', fontSize: 50, lineHeight: 1, letterSpacing: -0.6 }}>
+        <div
+          style={{
+            display: 'flex',
+            fontSize: 52,
+            lineHeight: 1,
+            letterSpacing: -0.6,
+            whiteSpace: 'nowrap',
+          }}
+        >
           {split ? (
             <>
               <span style={{ fontWeight: 700, letterSpacing: -1.4 }}>{split[1]}</span>
@@ -168,43 +215,6 @@ export function CardArt({ card, assets = {} }: { card: CardData; assets?: CardAs
           ) : (
             <span style={{ fontFamily: display, fontStyle: 'italic' }}>{tagline}</span>
           )}
-        </div>
-        <div style={{ display: 'flex', gap: 10, flexShrink: 0 }}>
-          {shown.map((a) => (
-            <span
-              key={a.id}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: 9,
-                padding: '7px 15px 7px 8px',
-                borderRadius: 999,
-                background: p.surface,
-                fontSize: 18,
-                fontWeight: 600,
-              }}
-            >
-              <span
-                style={{ width: 22, height: 22, borderRadius: 99, backgroundImage: METAL[a.tier] }}
-              />
-              {a.title}
-            </span>
-          ))}
-          {earned.length > shown.length ? (
-            <span
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                padding: '7px 14px',
-                borderRadius: 999,
-                background: p.surface,
-                fontSize: 18,
-                color: p.muted,
-              }}
-            >
-              +{earned.length - shown.length}
-            </span>
-          ) : null}
         </div>
       </div>
     </div>
