@@ -8,6 +8,7 @@ import type { Connection } from '@/features/connect/connection'
 import { getCommitDiff, getPullDiff, GitHubError } from '@/features/connect/github'
 import { PASTE_KEY } from '@/features/wire/links'
 
+import { refreshQuota } from './quota'
 import type { Request } from './source'
 
 // Gets a breakdown for a request: samples locally, everything else from /api/breakdown. Private
@@ -28,6 +29,8 @@ export class LoadError extends Error {
   constructor(
     message: string,
     readonly code: string,
+    /** Seconds until a limit resets, when the server said so. */
+    readonly retryAfter: number | null = null,
   ) {
     super(message)
   }
@@ -94,12 +97,16 @@ async function post(body: unknown, ai: OwnAiKey | null) {
     const problem = (await response.json().catch(() => null)) as {
       title?: string
       code?: string
+      retryAfterSeconds?: number
     } | null
     throw new LoadError(
       problem?.title ?? 'Something went wrong. Try again.',
       problem?.code ?? 'error',
+      problem?.retryAfterSeconds ?? null,
     )
   }
+  // A fresh AI run used one free breakdown; a cached public link did not.
+  if (response.headers.get('X-Breakdown-Cache') !== 'hit') void refreshQuota()
   return (await response.json()) as Omit<Loaded, 'repo' | 'url' | 'label' | 'demo'>
 }
 

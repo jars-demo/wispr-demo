@@ -16,6 +16,7 @@ import { announce, profileStore, updateProfile } from '@/features/game/store'
 import { useHydrated } from '@/lib/local-store'
 
 import { Loading } from './Loading'
+import { Problem } from './Problem'
 import { loadBreakdown, LoadError, readPasted, type Loaded } from './load'
 import { Concepts } from './rounds/Concepts'
 import { ExplainBack } from './rounds/ExplainBack'
@@ -30,7 +31,7 @@ const ROUNDS = ['Replay', 'Engineering', 'Predict', 'Explain', 'Score'] as const
 
 type State =
   | { status: 'loading' }
-  | { status: 'error'; message: string; code: string }
+  | { status: 'error'; message: string; code: string; retryAfter: number | null }
   | { status: 'ready'; loaded: Loaded }
 
 function preLabel(params: URLSearchParams): string {
@@ -115,8 +116,18 @@ function Run({
         if (cancelled) return
         setState(
           error instanceof LoadError
-            ? { status: 'error', message: error.message, code: error.code }
-            : { status: 'error', message: 'Something went wrong. Try again.', code: 'error' },
+            ? {
+                status: 'error',
+                message: error.message,
+                code: error.code,
+                retryAfter: error.retryAfter,
+              }
+            : {
+                status: 'error',
+                message: 'Something went wrong on our side. Try again.',
+                code: 'error',
+                retryAfter: null,
+              },
         )
       })
     return () => {
@@ -142,29 +153,12 @@ function Run({
 
   if (state.status === 'error') {
     return (
-      <div className="glass mt-10 flex flex-col items-center gap-4 rounded-panel px-6 py-14 text-center">
-        <p className="text-4xl" aria-hidden="true">
-          🧩
-        </p>
-        <p role="alert" className="max-w-md text-[16px]">
-          {state.message}
-        </p>
-        <div className="flex flex-wrap justify-center gap-2">
-          <button type="button" onClick={onRetry} className={buttonStyles('primary')}>
-            Try again
-          </button>
-          {['no_github', 'bad_key', 'rate_limited', 'too_large', 'ai_not_configured'].includes(
-            state.code,
-          ) ? (
-            <Link href="/settings" className={buttonStyles('secondary')}>
-              Open settings
-            </Link>
-          ) : null}
-          <Link href="/" className={buttonStyles('ghost')}>
-            Back to the wire
-          </Link>
-        </div>
-      </div>
+      <Problem
+        code={state.code}
+        message={state.message}
+        retryAfter={state.retryAfter}
+        onRetry={onRetry}
+      />
     )
   }
 
