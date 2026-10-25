@@ -2,6 +2,8 @@
 
 import { useEffect, useSyncExternalStore } from 'react'
 
+import { visitorHeaders } from './visitor'
+
 // How many free AI breakdowns this visitor has left this hour, from GET /api/breakdown. Fetched
 // when something shows it, and again after each fresh breakdown. Samples, cached public links
 // and the player's own key never use one.
@@ -16,7 +18,7 @@ export async function refreshQuota(): Promise<void> {
   if (loading) return
   loading = true
   try {
-    const response = await fetch('/api/breakdown', { cache: 'no-store' })
+    const response = await fetch('/api/breakdown', { cache: 'no-store', headers: visitorHeaders() })
     if (response.ok) {
       quota = (await response.json()) as Quota
       for (const listener of listeners) listener()

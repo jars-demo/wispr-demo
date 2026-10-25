@@ -40,7 +40,8 @@ product.
 
 ## Free and unlimited
 
-- **2 AI breakdowns per hour per visitor** on the shared key. The search bar shows how many are
+- **2 AI breakdowns per hour per browser** on the shared key, so people sharing one WiFi each
+  get their own. A network ceiling (20 an hour by default) stops one person minting more. The search bar shows how many are
   left and when the next one frees up. A breakdown that fails is not counted.
 - **Public links someone already broke down are free.** Results are cached in Postgres: 30 days
   for a commit (it never changes), 6 hours for a pull request or compare (they can gain commits).
@@ -85,14 +86,15 @@ npm run verify     # check plus a production build
 Every variable is validated in `src/server/config.ts`; error messages name the variable, never its
 value.
 
-| Variable              | Required      | Purpose                                                         |
-| --------------------- | ------------- | --------------------------------------------------------------- |
-| `GROQ_API_KEY`        | No            | Shared AI for breakdowns. Without it, samples and own keys only |
-| `GROQ_MODEL`          | No            | Default `openai/gpt-oss-120b`                                   |
-| `BREAKDOWNS_PER_HOUR` | No            | Free shared-key breakdowns per visitor per hour. Default 2      |
-| `DATABASE_URL`        | In production | Hosted Postgres (Neon) for the leaderboard and saved progress   |
-| `PGLITE_DIR`          | No            | Where local PGlite keeps data. Default `.data/pglite`           |
-| `LOG_LEVEL`           | No            | `debug`, `info`, `warn` or `error`. Default `info`              |
+| Variable                          | Required      | Purpose                                                         |
+| --------------------------------- | ------------- | --------------------------------------------------------------- |
+| `GROQ_API_KEY`                    | No            | Shared AI for breakdowns. Without it, samples and own keys only |
+| `GROQ_MODEL`                      | No            | Default `openai/gpt-oss-120b`                                   |
+| `BREAKDOWNS_PER_HOUR`             | No            | Free shared-key breakdowns per browser per hour. Default 2      |
+| `BREAKDOWNS_PER_NETWORK_PER_HOUR` | No            | Ceiling per network per hour, against abuse. Default 20         |
+| `DATABASE_URL`                    | In production | Hosted Postgres (Neon) for the leaderboard and saved progress   |
+| `PGLITE_DIR`                      | No            | Where local PGlite keeps data. Default `.data/pglite`           |
+| `LOG_LEVEL`                       | No            | `debug`, `info`, `warn` or `error`. Default `info`              |
 
 The database migrates itself on the first request (`src/server/db/migrations.ts`). Migration
 `b0002_drop_receipts` removes the archived Receipts tables from a shared database and leaves
@@ -102,7 +104,7 @@ The database migrates itself on the first request (`src/server/db/migrations.ts`
 
 1. Connect Neon in the Vercel dashboard (Storage). It sets `DATABASE_URL`.
 2. Add `GROQ_API_KEY` under Settings, Environment Variables, for Production. Optional:
-   `BREAKDOWNS_PER_HOUR`, `GROQ_MODEL`, `LOG_LEVEL`.
+   `BREAKDOWNS_PER_HOUR`, `BREAKDOWNS_PER_NETWORK_PER_HOUR`, `GROQ_MODEL`, `LOG_LEVEL`.
 3. Add the custom domain `wispr.jishanahmed.in`. Share links and images always use it.
 4. Push to the production branch. The first request runs the migrations.
 

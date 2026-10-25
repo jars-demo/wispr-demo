@@ -48,6 +48,7 @@ src/components/               Avatar, Badge medallions, Logo and logo-mark, page
 src/server/config.ts          the ONLY reader of process.env
 src/server/breakdown/         prompt, service (budget ladder for big diffs), link result cache
 src/server/rate-limit.ts      fixed-window limits with peek (quota) and refund
+src/server/breakdown/free-quota.ts  free breakdowns: per browser id, ceiling per network
 src/server/providers/ai/      Groq, OpenAI, OpenRouter (compatible) and Anthropic (SDK)
 src/server/board/             owner-scoped leaderboard SQL and service (180-day rename rule)
 src/server/shared/            owner-scoped shared breakdown SQL; shares only server cache entries

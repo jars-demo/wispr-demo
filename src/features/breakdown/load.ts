@@ -11,6 +11,7 @@ import { PASTE_KEY } from '@/features/wire/links'
 
 import { refreshQuota } from './quota'
 import type { Request } from './source'
+import { visitorHeaders } from './visitor'
 
 // Gets a breakdown for a request: samples locally, everything else from /api/breakdown. Private
 // GitHub diffs are fetched here in the browser with the player's token, so the token never leaves.
@@ -82,6 +83,7 @@ async function post(body: unknown, ai: OwnAiKey | null) {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
+        ...visitorHeaders(),
         ...(ai
           ? {
               [AI_HEADERS.provider]: ai.provider,

@@ -31,6 +31,11 @@ const KINDS: Record<string, Kind> = {
     title: 'That was this hour of free breakdowns',
     actions: [OWN_KEY, SAMPLE],
   },
+  network_limit: {
+    icon: Hourglass,
+    title: 'Your network used its free breakdowns',
+    actions: [OWN_KEY, SAMPLE],
+  },
   rate_limited: { icon: Hourglass, title: 'Time for a short breather', actions: ['retry', SAMPLE] },
   busy: { icon: Zap, title: 'The free AI is busy right now', actions: ['retry', OWN_KEY] },
   too_large: { icon: FileWarning, title: 'Too big for the free AI', actions: [OWN_KEY, SAMPLE] },

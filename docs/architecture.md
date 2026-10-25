@@ -16,9 +16,12 @@ images.
 4. For a public link, the server first looks in `breakdown_cache`. A hit returns at once, marked
    `X-Breakdown-Cache: hit`, and costs nothing against the free limit. Otherwise it fetches
    `github.com/<repo>/<pull|commit|compare>.diff` itself.
-5. The shared key allows `BREAKDOWNS_PER_HOUR` (default 2) per visitor; an own key allows 120.
-   The hit is taken just before the model call and refunded if the breakdown fails, so errors
-   never cost a free breakdown. `GET /api/breakdown` reports the quota without spending it.
+5. The shared key allows `BREAKDOWNS_PER_HOUR` (default 2) per browser, counted by a random
+   visitor id the browser keeps and sends as `x-breakdown-visitor`, with a ceiling of
+   `BREAKDOWNS_PER_NETWORK_PER_HOUR` (default 20) per network so minting new ids does not help.
+   A request without an id counts per network at the browser rate. An own key allows 120. The
+   hit is taken just before the model call and refunded if the breakdown fails, so errors never
+   cost a free breakdown. `GET /api/breakdown` reports what this browser has left.
 6. `src/domain/diff.ts` parses the diff, tags every line (`F2.L14`) and picks what fits the
    budget: source before tests before docs, bigger changes first.
 7. The model (shared Groq key, or the player's own key from request headers) returns JSON in a

@@ -34,6 +34,8 @@ branch.
   breakdowns appear on Learn from others and in the live feed, play free, and can be made
   private again from your card page.
 - Names can change once every 180 days.
+- Free breakdowns are counted per browser, so people on one WiFi each get their own 2 an hour,
+  with a per-network ceiling against abuse.
 
 ### Removed
 

@@ -19,6 +19,7 @@ const configSchema = z
     GROQ_MODEL: z.string().default('openai/gpt-oss-120b'),
     // Plain config. Breakdowns one visitor may start per hour (best effort, per server instance).
     BREAKDOWNS_PER_HOUR: z.coerce.number().int().min(1).max(1000).default(2),
+    BREAKDOWNS_PER_NETWORK_PER_HOUR: z.coerce.number().int().min(1).max(10000).default(20),
   })
   .superRefine((env, ctx) => {
     if (env.NODE_ENV === 'production' && !env.DATABASE_URL) {
@@ -38,6 +39,7 @@ export type Config = Readonly<{
   database: DatabaseConfig
   groq: GroqConfig | null
   breakdownsPerHour: number
+  breakdownsPerNetworkPerHour: number
 }>
 
 export class ConfigError extends Error {
@@ -61,6 +63,7 @@ export function parseConfig(env: Record<string, string | undefined>): Config {
     database,
     groq: data.GROQ_API_KEY ? { apiKey: data.GROQ_API_KEY, model: data.GROQ_MODEL } : null,
     breakdownsPerHour: data.BREAKDOWNS_PER_HOUR,
+    breakdownsPerNetworkPerHour: data.BREAKDOWNS_PER_NETWORK_PER_HOUR,
   })
 }
 
