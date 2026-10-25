@@ -199,19 +199,24 @@ export type EventRow = {
   name: string
   avatar: string
   at: string
+  /** The GitHub link of a shared breakdown, for its label. */
+  shareUrl: string | null
 }
 
 export async function recentEvents(db: Db, limit = 15): Promise<EventRow[]> {
+  // A shared event lives only as long as its share: unsharing takes it out of the feed.
   const rows = await db.query<{
     kind: BoardEventKind
     detail: string
     name: string
     avatar: string
     created_at: Date | string
+    share_url: string | null
   }>(
-    `select e.kind, e.detail, p.name, p.avatar, e.created_at
+    `select e.kind, e.detail, p.name, p.avatar, e.created_at, s.url as share_url
      from player_events e join players p on p.id = e.player_id
-     where not p.hidden
+     left join shared_breakdowns s on e.kind = 'shared' and s.id::text = e.detail
+     where not p.hidden and (e.kind <> 'shared' or s.id is not null)
      order by e.created_at desc, e.id desc limit $1`,
     [limit],
   )
@@ -221,6 +226,7 @@ export async function recentEvents(db: Db, limit = 15): Promise<EventRow[]> {
     name: r.name,
     avatar: r.avatar,
     at: new Date(r.created_at).toISOString(),
+    shareUrl: r.share_url,
   }))
 }
 

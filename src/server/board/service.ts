@@ -9,6 +9,7 @@ import {
   type SyncInput,
 } from '@/domain/board'
 import { levelFor } from '@/domain/game'
+import { changeLabel, sharedHref } from '@/domain/shared'
 import type { Db } from '@/server/db'
 
 import {
@@ -110,9 +111,10 @@ export async function loadBoard(db: Db, meId: string | null): Promise<BoardView>
     events: events.map((e) => ({
       kind: e.kind,
       detail: e.detail,
-      text: describeEvent(e.kind, e.detail, e.name),
+      text: describeEvent(e.kind, e.detail, e.name, e.shareUrl ? changeLabel(e.shareUrl) : null),
       avatar: e.avatar,
       at: e.at,
+      href: e.kind === 'shared' ? sharedHref(e.detail) : null,
     })),
   }
 }

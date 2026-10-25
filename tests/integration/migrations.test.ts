@@ -48,6 +48,7 @@ describe('migrations on a database that still holds Receipts', () => {
       'players',
       'rate_limits',
       'schema_migrations',
+      'shared_breakdowns',
     ])
     expect(await db.query('select key from rate_limits')).toEqual([{ key: 'kept' }])
     const versions = await db.query<{ version: string }>(
@@ -58,6 +59,7 @@ describe('migrations on a database that still holds Receipts', () => {
       'b0002_drop_receipts',
       'b0003_unique_names',
       'b0004_breakdown_cache',
+      'b0005_shared_breakdowns',
     ])
   })
 

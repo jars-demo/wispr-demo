@@ -83,4 +83,29 @@ export const MIGRATIONS: readonly Migration[] = [
       create index breakdown_cache_expires_idx on breakdown_cache (expires_at);
     `,
   },
+  {
+    // Breakdowns players chose to make public. A frozen copy, so a pull request that changes later
+    // still plays as it was shared. Deleting the player deletes their shares.
+    version: 'b0005_shared_breakdowns',
+    sql: `
+      create table shared_breakdowns (
+        id uuid primary key,
+        player_id uuid not null references players (id) on delete cascade,
+        source_key text not null check (char_length(source_key) <= 600),
+        url text not null check (char_length(url) <= 500),
+        only_path text check (char_length(only_path) <= 400),
+        repo text not null check (char_length(repo) <= 200),
+        title text not null check (char_length(title) <= 300),
+        result jsonb not null,
+        created_at timestamptz not null default now(),
+        unique (player_id, source_key)
+      );
+      create index shared_breakdowns_created_idx on shared_breakdowns (created_at desc);
+      create index shared_breakdowns_source_idx on shared_breakdowns (source_key);
+
+      alter table player_events drop constraint if exists player_events_kind_check;
+      alter table player_events add constraint player_events_kind_check
+        check (kind in ('joined', 'level', 'achievement', 'avatar', 'shared'));
+    `,
+  },
 ]

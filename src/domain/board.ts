@@ -63,7 +63,7 @@ export function checkSync(input: SyncInput): SyncCheck {
   return { ok: true, state: { ...stats, name, avatar, avatars, hidden: input.hidden } }
 }
 
-export const EVENT_KINDS = ['joined', 'level', 'achievement', 'avatar'] as const
+export const EVENT_KINDS = ['joined', 'level', 'achievement', 'avatar', 'shared'] as const
 export type BoardEventKind = (typeof EVENT_KINDS)[number]
 export type BoardEvent = { kind: BoardEventKind; detail: string }
 
@@ -83,8 +83,16 @@ export function eventsBetween(before: PlayerState | null, after: PlayerState): B
   return events
 }
 
-/** The sentence shown in the live board ticker. Built from known ids only. */
-export function describeEvent(kind: BoardEventKind, detail: string, name: string): string {
+/**
+ * The sentence shown in the live board ticker. Built from known ids only; a shared breakdown is
+ * named by its change label, which the server derives from the GitHub link.
+ */
+export function describeEvent(
+  kind: BoardEventKind,
+  detail: string,
+  name: string,
+  label: string | null = null,
+): string {
   switch (kind) {
     case 'joined':
       return `${name} joined the board`
@@ -101,6 +109,8 @@ export function describeEvent(kind: BoardEventKind, detail: string, name: string
       const a = AVATARS.find((x) => x.id === detail)
       return a ? `${name} unlocked the ${a.name} avatar` : `${name} unlocked an avatar`
     }
+    case 'shared':
+      return `${name} shared a breakdown of ${label ?? 'a change'}`
   }
 }
 
@@ -124,5 +134,13 @@ export type BoardView = {
   top: { rank: number; name: string; avatar: string; xp: number; level: string; isMe: boolean }[]
   me: { rank: number; xp: number } | null
   rivalry: string | null
-  events: { kind: BoardEventKind; detail: string; text: string; avatar: string; at: string }[]
+  events: {
+    kind: BoardEventKind
+    detail: string
+    text: string
+    avatar: string
+    at: string
+    /** Where the event leads: a shared breakdown to play. */
+    href: string | null
+  }[]
 }
