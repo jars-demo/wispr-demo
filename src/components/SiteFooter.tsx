@@ -8,10 +8,25 @@ export function SiteFooter() {
     <footer className="border-t border-hairline">
       <BackToTop />
       <div className="mx-auto flex max-w-6xl flex-col gap-3 px-4 py-8 text-sm text-muted sm:flex-row sm:items-center sm:justify-between">
-        <span className="inline-flex items-center gap-2">
-          <LogoMark size={20} />
-          Breakdown
-        </span>
+        <div className="flex flex-col gap-1">
+          <span className="inline-flex items-center gap-2 font-medium text-ink">
+            <LogoMark size={20} />
+            Breakdown
+          </span>
+          <span className="text-[13px]">
+            Built by{' '}
+            <a
+              href="https://x.com/jishanarshaikh"
+              className="font-medium text-ink-2 hover:text-ink"
+            >
+              @jishanarshaikh
+            </a>
+            , completely hands-free with{' '}
+            <a href="https://x.com/WisprFlow" className="font-medium text-ink-2 hover:text-ink">
+              @WisprFlow
+            </a>
+          </span>
+        </div>
         <nav aria-label="Footer" className="flex flex-wrap gap-x-5 gap-y-2">
           <Link href="/" className="hover:text-ink">
             The wire
