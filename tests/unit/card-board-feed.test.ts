@@ -8,8 +8,9 @@ import {
   rivalryLine,
   type SyncInput,
 } from '@/domain/board'
-import { decodeCard, encodeCard, shareText, type CardData } from '@/domain/card'
+import { decodeCard, encodeCard, shareText, TAGLINES, type CardData } from '@/domain/card'
 import { mergeFeed, parseChangeLink, type FeedItem } from '@/domain/feed'
+import { LEVELS } from '@/domain/game'
 
 const CARD: CardData = {
   name: 'Asha ✨',
@@ -42,16 +43,22 @@ describe('share cards', () => {
     expect(text).toContain('Code whisperer')
     expect(text).toContain('@WisprFlow')
     expect(text).toContain('@jishanarshaikh')
+    expect(text).toContain('@WeMakeDevs')
     expect(text).toContain('wispr.jishanahmed.in')
     expect(text).not.toMatch(/localhost|—/)
   })
 
   it('keeps the X post inside the limit, counting the card link as 23 characters', () => {
-    const text = shareText(
-      { ...CARD, xp: 9_999_999, breakdowns: 99_999, concepts: 99_999 },
-      'Systems thinker',
-    )
-    expect(text.length + 1 + 23).toBeLessThanOrEqual(280)
+    // Every tagline and level title with the biggest numbers, plus a blank line and the link.
+    for (const tagline of TAGLINES.keys()) {
+      for (const level of LEVELS) {
+        const text = shareText(
+          { ...CARD, tagline, xp: 9_999_999, breakdowns: 99_999, concepts: 99_999 },
+          level.title,
+        )
+        expect(text.length + 2 + 23).toBeLessThanOrEqual(280)
+      }
+    }
   })
 })
 

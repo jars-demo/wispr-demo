@@ -141,7 +141,7 @@ const plural = (n: number, one: string, many: string) => `${n} ${n === 1 ? one :
 function numbersLine(card: CardData): string {
   return [
     `${card.xp.toLocaleString('en-US')} XP`,
-    `${plural(card.breakdowns, 'change', 'changes')} broken down`,
+    plural(card.breakdowns, 'breakdown', 'breakdowns'),
     `${plural(card.concepts, 'concept', 'concepts')} unlocked`,
   ].join(', ')
 }
@@ -149,10 +149,12 @@ function numbersLine(card: CardData): string {
 /** X handles credited in every post: the tool it was built with, and who built it. */
 export const WISPR_HANDLE = '@WisprFlow'
 export const MAKER_HANDLE = '@jishanarshaikh'
+export const HOST_HANDLE = '@WeMakeDevs'
 
 /**
- * The X post. Numbers only, never code, repositories or GitHub names. The card link travels
- * separately (X counts it as 23 characters) and unfurls into the card image.
+ * The X post. Numbers only, never code, repositories or GitHub names. It credits the maker, the
+ * WeMakeDevs hackathon it was built for and Wispr Flow. The card link is added after a blank
+ * line (X counts it as 23 characters) and unfurls into the card image.
  */
 export function shareText(card: CardData, levelTitle: string): string {
   return [
@@ -160,7 +162,8 @@ export function shareText(card: CardData, levelTitle: string): string {
     '',
     `I'm a ${levelTitle} on Breakdown: ${numbersLine(card)}.`,
     '',
-    `Built by ${MAKER_HANDLE}, completely hands-free with ${WISPR_HANDLE}.`,
+    `Built by ${MAKER_HANDLE} at the ${HOST_HANDLE} hackathon. 100% hands-free with ${WISPR_HANDLE}.`,
+    '',
     'Try it: wispr.jishanahmed.in',
   ].join('\n')
 }

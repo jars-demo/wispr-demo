@@ -24,6 +24,7 @@ export function cardUrl(card: CardData): string {
   return `${SITE_URL}/card/${encodeCard(card)}`
 }
 
+/** The card link goes inside the text, after a blank line; X's url parameter would glue it on. */
 export function xShareUrl(text: string, url: string): string {
-  return `https://x.com/intent/post?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}`
+  return `https://x.com/intent/post?text=${encodeURIComponent(`${text}\n\n${url}`)}`
 }

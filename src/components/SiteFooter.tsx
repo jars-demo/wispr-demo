@@ -20,8 +20,12 @@ export function SiteFooter() {
               className="font-medium text-ink-2 hover:text-ink"
             >
               @jishanarshaikh
-            </a>
-            , completely hands-free with{' '}
+            </a>{' '}
+            at the{' '}
+            <a href="https://x.com/WeMakeDevs" className="font-medium text-ink-2 hover:text-ink">
+              @WeMakeDevs
+            </a>{' '}
+            hackathon, completely hands-free with{' '}
             <a href="https://x.com/WisprFlow" className="font-medium text-ink-2 hover:text-ink">
               @WisprFlow
             </a>
