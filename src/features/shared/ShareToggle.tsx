@@ -3,46 +3,21 @@
 import { Globe, Lock } from 'lucide-react'
 import { motion, useReducedMotion } from 'motion/react'
 import Link from 'next/link'
-import { useState } from 'react'
 
 import { sharedHref } from '@/domain/shared'
-import { toast } from '@/features/fx/toasts'
-import { profileStore } from '@/features/game/store'
 
-import { shareRun, unshareRun } from './api'
+import type { ShareState } from './useShare'
 
 // The consent switch on the score screen. Off until the player turns it on, and every share can
 // be made private again here or on the card page. Only shown for public GitHub changes.
 
-export function ShareToggle({ url, only }: { url: string; only: string | null }) {
+export function ShareToggle({ state }: { state: ShareState }) {
   const reduce = useReducedMotion()
-  const board = profileStore.use().board
-  const [sharedId, setSharedId] = useState<string | null>(null)
-  const [busy, setBusy] = useState(false)
+  const { sharedId, busy, ready } = state
   const on = sharedId !== null
 
-  async function toggle() {
-    if (!board || busy) return
-    setBusy(true)
-    const owner = { id: board.id, secret: board.secret }
-    if (sharedId) {
-      const ok = await unshareRun(owner, sharedId)
-      if (ok) {
-        setSharedId(null)
-        toast({ tone: 'info', title: 'Private again', body: 'It is off Learn from others.' })
-      } else {
-        toast({ tone: 'error', title: 'Could not make it private. Try again.' })
-      }
-    } else {
-      const result = await shareRun(owner, url, only)
-      if (result.ok) {
-        setSharedId(result.id)
-        toast({ tone: 'info', title: 'Shared', body: 'Others can learn from it now.' })
-      } else {
-        toast({ tone: 'error', title: result.message })
-      }
-    }
-    setBusy(false)
+  function toggle() {
+    void (on ? state.unshare() : state.share())
   }
 
   return (
@@ -63,8 +38,8 @@ export function ShareToggle({ url, only }: { url: string; only: string | null })
           aria-checked={on}
           aria-labelledby="share-title"
           aria-describedby="share-note"
-          disabled={!board || busy}
-          onClick={() => void toggle()}
+          disabled={!ready || busy}
+          onClick={toggle}
           className={`relative mt-0.5 inline-flex h-7 w-12 shrink-0 items-center rounded-full p-0.5 transition-colors disabled:cursor-not-allowed disabled:opacity-40 ${on ? 'bg-accent' : 'bg-surface-2 ring-1 ring-hairline'}`}
         >
           <motion.span
@@ -92,7 +67,7 @@ export function ShareToggle({ url, only }: { url: string; only: string | null })
         ) : (
           <span className="inline-flex items-center gap-1.5 text-muted">
             <Lock aria-hidden="true" className="size-4" />
-            {board ? 'Private. Only you have seen it.' : 'Claim a name above to share it.'}
+            {ready ? 'Private. Only you have seen it.' : 'Claim a name above to share it.'}
           </span>
         )}
       </p>

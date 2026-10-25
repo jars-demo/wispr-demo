@@ -15,7 +15,9 @@ import { CardModal } from '@/features/card/CardModal'
 import { cardFromProfile } from '@/features/card/share'
 import { Confetti } from '@/features/fx/Confetti'
 import { NameClaim } from '@/features/game/NameClaim'
+import { ShareDialog } from '@/features/shared/ShareDialog'
 import { ShareToggle } from '@/features/shared/ShareToggle'
+import { useShare } from '@/features/shared/useShare'
 
 // Round 5: the score. XP counts up, the level bar fills, and every unlock gets its moment.
 
@@ -107,12 +109,15 @@ export function Results({
     return () => window.clearTimeout(id)
   }, [progress])
 
-  // The card pops up once the score has landed, with "Post on X" right in it.
-  const [cardOpen, setCardOpen] = useState(false)
+  // Once the score has landed, a public change first asks to be shared, then the card pops up
+  // with "Post on X" right in it. Anything else goes straight to the card.
+  const sharing = useShare(share?.url ?? '', share?.only ?? null)
+  const [popup, setPopup] = useState<'share' | 'card' | null>(null)
+  const asksToShare = share !== null
   useEffect(() => {
-    const id = window.setTimeout(() => setCardOpen(true), 1400)
+    const id = window.setTimeout(() => setPopup(asksToShare ? 'share' : 'card'), 1400)
     return () => window.clearTimeout(id)
-  }, [])
+  }, [asksToShare])
   const card = cardFromProfile(outcome.profile, new Date().toISOString().slice(0, 10))
 
   const perfect = total > 0 && correct === total
@@ -137,7 +142,18 @@ export function Results({
   return (
     <div className="flex flex-col gap-5">
       {celebrate ? <Confetti seed={xp} /> : null}
-      <CardModal card={card} open={cardOpen} onClose={() => setCardOpen(false)} />
+      {share ? (
+        <ShareDialog
+          state={sharing}
+          open={popup === 'share'}
+          onClose={() => setPopup((p) => (p === 'share' ? 'card' : p))}
+        />
+      ) : null}
+      <CardModal
+        card={card}
+        open={popup === 'card'}
+        onClose={() => setPopup((p) => (p === 'card' ? null : p))}
+      />
       <div className="glass-strong flex flex-col items-center gap-3 rounded-panel px-5 py-8 text-center sm:py-10">
         <p className="text-[13px] font-medium tracking-[0.16em] text-muted uppercase">
           {perfect ? 'Perfect round' : 'Breakdown complete'}
@@ -245,7 +261,7 @@ export function Results({
         </div>
       ) : null}
 
-      {share ? <ShareToggle url={share.url} only={share.only} /> : null}
+      {share ? <ShareToggle state={sharing} /> : null}
 
       {skippedFiles.length && onDrill ? (
         <div className="glass flex flex-col gap-2 rounded-panel p-5">
@@ -296,7 +312,7 @@ export function Results({
       <div className="flex flex-wrap gap-2">
         <button
           type="button"
-          onClick={() => setCardOpen(true)}
+          onClick={() => setPopup('card')}
           className={buttonStyles('accent', 'lg')}
         >
           Share my card
