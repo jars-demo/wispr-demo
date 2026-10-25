@@ -65,14 +65,7 @@ export function SiteFooter() {
           </a>{' '}
           (October 2026, Builders track), which is why it lives at wispr.jishanahmed.in. It is an
           independent entry, not an official Wispr product. Your GitHub token and AI key stay in
-          your browser. Leaderboard numbers are self-reported and checked against the game rules.{' '}
-          <a
-            href="https://github.com/jars-demo/wispr-demo"
-            className="underline underline-offset-4 hover:text-ink"
-          >
-            Source on GitHub
-          </a>
-          .
+          your browser. Leaderboard numbers are self-reported and checked against the game rules.
         </p>
       </div>
     </footer>
