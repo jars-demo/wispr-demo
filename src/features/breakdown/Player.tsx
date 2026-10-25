@@ -1,5 +1,6 @@
 'use client'
 
+import { AnimatePresence, motion, useReducedMotion, type Variants } from 'motion/react'
 import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useCallback, useEffect, useMemo, useState } from 'react'
@@ -28,6 +29,15 @@ import { hrefFor, readRequest, runKey, runSource, type Request } from './source'
 // The breakdown game: replay, engineering, predict, explain back, score.
 
 const ROUNDS = ['Replay', 'Engineering', 'Predict', 'Explain', 'Score'] as const
+
+// Rounds slide in the direction you travel: forward comes from the right, back from the left.
+// The offset stays inside the page gutter so phones never scroll sideways mid-transition.
+const SLIDE: Variants = {
+  enter: (dir: number) => ({ opacity: 0, x: 12 * dir, y: 6 }),
+  center: { opacity: 1, x: 0, y: 0 },
+  exit: (dir: number) => ({ opacity: 0, x: -12 * dir, y: -4 }),
+}
+const FADE: Variants = { enter: { opacity: 0 }, center: { opacity: 1 }, exit: { opacity: 0 } }
 
 type State =
   | { status: 'loading' }
@@ -101,6 +111,8 @@ function Run({
   const router = useRouter()
   const [state, setState] = useState<State>({ status: 'loading' })
   const [round, setRound] = useState(0)
+  const [dir, setDir] = useState(1)
+  const reduce = useReducedMotion()
   const [reached, setReached] = useState(0)
   const [correct, setCorrect] = useState(0)
   const [explain, setExplain] = useState<number | null>(null)
@@ -135,11 +147,15 @@ function Run({
     }
   }, [request, key, fresh])
 
-  const go = useCallback((next: number) => {
-    setRound(next)
-    setReached((r) => Math.max(r, next))
-    window.scrollTo({ top: 0, behavior: 'smooth' })
-  }, [])
+  const go = useCallback(
+    (next: number) => {
+      setDir(next >= round ? 1 : -1)
+      setRound(next)
+      setReached((r) => Math.max(r, next))
+      window.scrollTo({ top: 0, behavior: reduce ? 'auto' : 'smooth' })
+    },
+    [round, reduce],
+  )
 
   const drill = useCallback(
     (path: string) => {
@@ -235,16 +251,24 @@ function Run({
                 disabled={!open}
                 onClick={() => go(i)}
                 aria-current={round === i ? 'step' : undefined}
-                className={`flex shrink-0 items-center gap-1.5 rounded-full px-3 py-1.5 text-[13px] font-medium transition-colors ${
+                className={`relative flex shrink-0 items-center gap-1.5 rounded-full px-3 py-1.5 text-[13px] font-medium transition-colors ${
                   round === i
-                    ? 'bg-ink text-canvas'
+                    ? 'text-canvas'
                     : i < reached
                       ? 'text-ink hover:bg-surface-2'
                       : 'text-muted'
                 }`}
               >
-                <span className="tabular-nums opacity-60">{i + 1}</span>
-                {name}
+                {round === i ? (
+                  <motion.span
+                    layoutId="round-pill"
+                    aria-hidden="true"
+                    transition={{ type: 'spring', stiffness: 420, damping: 34 }}
+                    className="absolute inset-0 rounded-full bg-ink"
+                  />
+                ) : null}
+                <span className="relative tabular-nums opacity-60">{i + 1}</span>
+                <span className="relative">{name}</span>
               </button>
             )
           })}
@@ -264,46 +288,56 @@ function Run({
         </p>
       ) : null}
 
-      <div key={round} className="rise">
-        {round === 0 ? (
-          <Replay
-            breakdown={breakdown}
-            diff={diff}
-            onNext={() => go(1)}
-            onLine={(ref, file) => setLine({ ref, file })}
-            onDrill={drill}
-          />
-        ) : round === 1 ? (
-          <Concepts
-            concepts={breakdown.concepts}
-            diff={diff}
-            known={(name) => known.has(conceptKey(name))}
-            onNext={() => go(2)}
-          />
-        ) : round === 2 ? (
-          <Quiz
-            quiz={breakdown.quiz}
-            diff={diff}
-            onDone={(n) => {
-              setCorrect(n)
-              go(3)
-            }}
-          />
-        ) : round === 3 ? (
-          <ExplainBack explain={breakdown.explainBack} onDone={finish} />
-        ) : outcome ? (
-          <Results
-            outcome={outcome}
-            correct={correct}
-            total={breakdown.quiz.length}
-            explain={explain}
-            explore={breakdown.explore}
-            skippedFiles={diff.skipped.files}
-            saved={profile.board !== null}
-            onDrill={drill}
-          />
-        ) : null}
-      </div>
+      <AnimatePresence mode="wait" initial={false} custom={dir}>
+        <motion.div
+          key={round}
+          custom={dir}
+          variants={reduce ? FADE : SLIDE}
+          initial="enter"
+          animate="center"
+          exit="exit"
+          transition={{ type: 'spring', stiffness: 380, damping: 34, opacity: { duration: 0.18 } }}
+        >
+          {round === 0 ? (
+            <Replay
+              breakdown={breakdown}
+              diff={diff}
+              onNext={() => go(1)}
+              onLine={(ref, file) => setLine({ ref, file })}
+              onDrill={drill}
+            />
+          ) : round === 1 ? (
+            <Concepts
+              concepts={breakdown.concepts}
+              diff={diff}
+              known={(name) => known.has(conceptKey(name))}
+              onNext={() => go(2)}
+            />
+          ) : round === 2 ? (
+            <Quiz
+              quiz={breakdown.quiz}
+              diff={diff}
+              onDone={(n) => {
+                setCorrect(n)
+                go(3)
+              }}
+            />
+          ) : round === 3 ? (
+            <ExplainBack explain={breakdown.explainBack} onDone={finish} />
+          ) : outcome ? (
+            <Results
+              outcome={outcome}
+              correct={correct}
+              total={breakdown.quiz.length}
+              explain={explain}
+              explore={breakdown.explore}
+              skippedFiles={diff.skipped.files}
+              saved={profile.board !== null}
+              onDrill={drill}
+            />
+          ) : null}
+        </motion.div>
+      </AnimatePresence>
 
       {line ? (
         <div
