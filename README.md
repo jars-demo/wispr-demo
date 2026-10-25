@@ -1,14 +1,30 @@
-# Breakdown
+<p align="center">
+  <img src="docs/assets/logo.svg" alt="Breakdown logo" width="88" height="88">
+</p>
 
-**SHIPPED IT? Now understand it.**
+<h1 align="center">Breakdown</h1>
+
+<p align="center"><strong>SHIPPED IT? Now understand it.</strong></p>
+
+<p align="center">
+  <a href="https://wispr.jishanahmed.in">Live site</a> ·
+  <a href="https://wispr.jishanahmed.in/learn">Learn from others</a> ·
+  <a href="docs/architecture.md">Architecture</a> ·
+  <a href="docs/demo/script.md">Demo script</a>
+</p>
+
+<p align="center">
+  <img src="docs/assets/banner.png" alt="Breakdown: SHIPPED IT? Now understand it." width="720">
+</p>
 
 Coding agents ship code in minutes. Breakdown turns each change they ship into a three minute
 game, so you understand what the agent did and the engineering behind it, instead of merging code
 you could not explain.
 
-Live at [wispr.jishanahmed.in](https://wispr.jishanahmed.in). Built for No Hands: The Wispr
-Challenge (WeMakeDevs and Wispr Flow, October 2026). Independent entry, not an official Wispr
-product.
+Live at [wispr.jishanahmed.in](https://wispr.jishanahmed.in). Built by
+[@jishanarshaikh](https://x.com/jishanarshaikh) for No Hands: The Wispr Challenge
+([WeMakeDevs](https://x.com/WeMakeDevs) and [Wispr Flow](https://x.com/WisprFlow), October 2026),
+completely hands-free with Wispr Flow. Independent entry, not an official Wispr product.
 
 ## How it works
 
@@ -130,7 +146,8 @@ postgres.js (Neon) or PGlite locally, Vitest and Playwright. See
 - Fonts in share images: Geist and Instrument Serif, SIL Open Font License (licences in
   `src/app/card/fonts`).
 - Icons: [Lucide](https://lucide.dev) (ISC).
-- Built hands-free with [Wispr Flow](https://wisprflow.ai).
+- Built hands-free with [Wispr Flow](https://wisprflow.ai) for the
+  [WeMakeDevs](https://www.wemakedevs.org) No Hands challenge.
 
 ## License
 
