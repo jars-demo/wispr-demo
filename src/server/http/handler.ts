@@ -1,27 +1,24 @@
 import 'server-only'
 
-import { ConfigError, getConfig } from '@/server/config'
+import { ConfigError } from '@/server/config'
 import { devErrorMessage, errorKind, log } from '@/server/log'
-import { OWNER_COOKIE, verifyOwner } from '@/server/owner'
 
 import { HttpError, problem } from './problem'
 
-// Wraps a route handler: verifies the owner cookie, maps HttpError to its response, and turns
-// anything unexpected into a generic 500 with a request id. Logs ids and codes only.
+// Wraps a route handler: maps HttpError to its response and turns anything unexpected into a
+// generic 500 with a request id. Logs ids, codes and durations only.
 
-export type HandlerContext = { ownerId: string; requestId: string }
+export type HandlerContext = { requestId: string; clientKey: string }
 
-function readCookie(request: Request, name: string): string | undefined {
-  const header = request.headers.get('cookie')
-  if (!header) return undefined
-  for (const part of header.split(';')) {
-    const [key, ...rest] = part.trim().split('=')
-    if (key === name) return decodeURIComponent(rest.join('='))
-  }
-  return undefined
+/** A short hash of the caller's address, for rate limits. The address itself is never stored. */
+async function clientKeyFor(request: Request): Promise<string> {
+  const forwarded = request.headers.get('x-forwarded-for')?.split(',')[0]?.trim()
+  const address = forwarded || request.headers.get('x-real-ip') || 'local'
+  const digest = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(address))
+  return Buffer.from(digest).toString('hex').slice(0, 24)
 }
 
-export function withOwner<Args extends unknown[]>(
+export function withErrors<Args extends unknown[]>(
   route: string,
   handler: (request: Request, context: HandlerContext, ...args: Args) => Promise<Response>,
 ) {
@@ -30,13 +27,11 @@ export function withOwner<Args extends unknown[]>(
     const started = performance.now()
     let response: Response
     try {
-      const ownerId = await verifyOwner(
-        readCookie(request, OWNER_COOKIE),
-        getConfig().sessionSecret,
+      response = await handler(
+        request,
+        { requestId, clientKey: await clientKeyFor(request) },
+        ...args,
       )
-      response = ownerId
-        ? await handler(request, { ownerId, requestId }, ...args)
-        : problem(401, 'Your session is missing. Reload the page and try again.')
     } catch (error) {
       if (error instanceof HttpError) {
         response = error.response

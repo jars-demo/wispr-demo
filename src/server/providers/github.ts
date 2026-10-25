@@ -7,7 +7,7 @@ import 'server-only'
 const LINK =
   /^https:\/\/github\.com\/([\w.-]+)\/([\w.-]+)\/(pull\/\d+|compare\/[\w.\-/~^]+|commit\/[0-9a-f]{7,40})\/?$/i
 
-export const MAX_DIFF_BYTES = 400_000
+export const MAX_DIFF_BYTES = 2_000_000
 
 export type GitHubLink = {
   owner: string
@@ -17,7 +17,12 @@ export type GitHubLink = {
 }
 
 export function parseGitHubLink(url: string): GitHubLink | null {
-  const match = LINK.exec(url.trim().replace(/[?#].*$/, ''))
+  const match = LINK.exec(
+    url
+      .trim()
+      .replace(/[?#].*$/, '')
+      .replace(/\/(files|commits|checks)\/?$/, ''),
+  )
   if (!match?.[1] || !match[2] || !match[3]) return null
   const path = match[3].replace(/\/$/, '')
   const kind = path.startsWith('pull/')
@@ -40,7 +45,7 @@ export async function fetchGitHubDiff(link: GitHubLink): Promise<string> {
   let response: Response
   try {
     response = await fetch(url, {
-      headers: { Accept: 'text/plain', 'User-Agent': 'receipts-check' },
+      headers: { Accept: 'text/plain', 'User-Agent': 'breakdown' },
       redirect: 'follow',
       signal: AbortSignal.timeout(15_000),
       cache: 'no-store',
@@ -50,14 +55,15 @@ export async function fetchGitHubDiff(link: GitHubLink): Promise<string> {
   }
   if (response.status === 404) {
     throw new GitHubFetchError(
-      'That link was not found. Private repositories are not supported yet.',
+      'That link was not found. For a private repository, connect GitHub in Settings first.',
     )
   }
-  if (!response.ok)
-    throw new GitHubFetchError('GitHub refused the request. Paste the diff instead.')
+  if (!response.ok) throw new GitHubFetchError('GitHub refused the request. Try again in a minute.')
   const text = await response.text()
   if (text.length > MAX_DIFF_BYTES) {
-    throw new GitHubFetchError('That change is too large to check here. Paste a smaller diff.')
+    throw new GitHubFetchError(
+      'That change is too large to fetch here. Paste the diff of one part instead.',
+    )
   }
   return text
 }

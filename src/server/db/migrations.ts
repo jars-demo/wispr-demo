@@ -1,77 +1,47 @@
 // Numbered, forward-only migrations. Never edit an applied migration: add a new one.
 // Kept as TypeScript strings so they ship inside the serverless bundle without file lookups.
+// Versions start with "b" so they never collide with the Receipts migrations that may already be
+// recorded in the same database. Receipts' old tables are left alone.
 
 export type Migration = { version: string; sql: string }
 
 export const MIGRATIONS: readonly Migration[] = [
   {
-    version: '0001_specs',
+    version: 'b0001_players',
     sql: `
-      create table specs (
+      create table players (
         id uuid primary key,
-        owner_id text not null,
-        client_id uuid not null,
-        title text not null check (char_length(title) between 1 and 120),
-        current_version integer not null default 1 check (current_version >= 1),
+        secret_hash text not null,
+        name text not null check (char_length(name) between 1 and 24),
+        avatar text not null check (char_length(avatar) between 1 and 24),
+        xp integer not null default 0 check (xp between 0 and 10000000),
+        breakdowns integer not null default 0 check (breakdowns >= 0),
+        concepts integer not null default 0 check (concepts >= 0),
+        achievements text[] not null default '{}',
+        avatars text[] not null default '{}',
+        -- The player's whole local profile, so a restore link can bring it to another device.
+        profile jsonb not null default '{}',
+        hidden boolean not null default false,
         created_at timestamptz not null default now(),
-        updated_at timestamptz not null default now(),
-        unique (owner_id, client_id)
+        updated_at timestamptz not null default now()
       );
-      create index specs_owner_updated_idx on specs (owner_id, updated_at desc);
+      create index players_rank_idx on players (xp desc, updated_at asc);
 
-      create table spec_versions (
-        id uuid primary key,
-        spec_id uuid not null references specs (id) on delete cascade,
-        version integer not null check (version >= 1),
-        transcript text not null default '' check (char_length(transcript) <= 8000),
-        engine text not null check (engine in ('rules', 'model')),
-        created_at timestamptz not null default now(),
-        unique (spec_id, version)
+      create table player_events (
+        id bigint generated always as identity primary key,
+        player_id uuid not null references players (id) on delete cascade,
+        kind text not null check (kind in ('joined', 'level', 'achievement', 'avatar')),
+        detail text not null check (char_length(detail) <= 40),
+        created_at timestamptz not null default now()
       );
+      create index player_events_created_idx on player_events (created_at desc);
 
-      create table spec_items (
-        spec_version_id uuid not null references spec_versions (id) on delete cascade,
-        position integer not null check (position >= 0),
-        code text not null,
-        kind text not null check (kind in ('requirement', 'non_goal', 'open_question')),
-        text text not null check (char_length(text) between 1 and 500),
-        acceptance text check (char_length(acceptance) <= 300),
-        source_quote text check (char_length(source_quote) <= 500),
-        note text check (char_length(note) <= 200),
-        primary key (spec_version_id, position)
-      );
-
-      create table rate_limits (
+      create table if not exists rate_limits (
         key text not null,
         window_start timestamptz not null,
         count integer not null,
         primary key (key, window_start)
       );
-    `,
-  },
-  {
-    version: '0002_checks',
-    sql: `
-      create table checks (
-        id uuid primary key,
-        spec_id uuid not null references specs (id) on delete cascade,
-        owner_id text not null,
-        spec_version integer not null,
-        sources text[] not null,
-        source_label text,
-        result jsonb not null,
-        created_at timestamptz not null default now()
-      );
-      create index checks_spec_created_idx on checks (spec_id, created_at desc);
-    `,
-  },
-  {
-    version: '0003_sent',
-    sql: `
-      alter table specs
-        add column sent_at timestamptz,
-        add column sent_via text check (char_length(sent_via) <= 40),
-        add column sent_ref text check (char_length(sent_ref) <= 300);
     `,
   },
 ]

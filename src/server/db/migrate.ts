@@ -4,7 +4,7 @@ import type { Db } from './types'
 // Applies pending migrations in one transaction under an advisory lock, so two server
 // instances starting together cannot apply the same migration twice.
 
-const MIGRATION_LOCK_ID = 7_224_001
+const MIGRATION_LOCK_ID = 7_224_101
 
 export async function runMigrations(
   db: Db,

@@ -10,26 +10,19 @@ const configSchema = z
   .object({
     NODE_ENV: z.enum(['development', 'test', 'production']).default('development'),
     LOG_LEVEL: z.enum(['debug', 'info', 'warn', 'error']).default('info'),
-    // Secret. Signs the anonymous owner cookie.
-    SESSION_SECRET: z.string().min(32, 'must be at least 32 characters'),
-    // Secret. Hosted Postgres. When absent outside production, an embedded PGlite database is used.
+    // Secret. Hosted Postgres for the leaderboard. When absent outside production, an embedded
+    // PGlite database is used.
     DATABASE_URL: optional(z.string().regex(/^postgres(ql)?:\/\//, 'must be a postgres:// URL')),
     PGLITE_DIR: z.string().default('.data/pglite'),
-    // Secret. Enables model-based structuring. Without it, the rules engine is used.
-    ANTHROPIC_API_KEY: optional(z.string().min(1)),
-    ANTHROPIC_MODEL: z.string().default('claude-opus-5-5'),
-    // Secret. Enables Groq models for organising and checking. Preferred over Anthropic when set.
+    // Secret. Enables AI breakdowns. Without it, only the sample breakdowns work.
     GROQ_API_KEY: optional(z.string().min(1)),
-    GROQ_STRUCTURE_MODEL: z.string().default('openai/gpt-oss-20b'),
-    GROQ_CHECK_MODEL: z.string().default('openai/gpt-oss-120b'),
+    GROQ_MODEL: z.string().default('openai/gpt-oss-120b'),
+    // Plain config. Breakdowns one visitor may start per hour (best effort, per server instance).
+    BREAKDOWNS_PER_HOUR: z.coerce.number().int().min(1).max(1000).default(30),
   })
   .superRefine((env, ctx) => {
     if (env.NODE_ENV === 'production' && !env.DATABASE_URL) {
-      ctx.addIssue({
-        code: 'custom',
-        path: ['DATABASE_URL'],
-        message: 'is required in production',
-      })
+      ctx.addIssue({ code: 'custom', path: ['DATABASE_URL'], message: 'is required in production' })
     }
   })
 
@@ -37,17 +30,14 @@ type Env = z.infer<typeof configSchema>
 
 export type DatabaseConfig = { kind: 'postgres'; url: string } | { kind: 'pglite'; dir: string }
 
-export type ModelConfig = { provider: 'anthropic'; apiKey: string; model: string }
-
-export type GroqConfig = { apiKey: string; structureModel: string; checkModel: string }
+export type GroqConfig = { apiKey: string; model: string }
 
 export type Config = Readonly<{
   environment: Env['NODE_ENV']
   logLevel: Env['LOG_LEVEL']
-  sessionSecret: string
   database: DatabaseConfig
-  model: ModelConfig | null
   groq: GroqConfig | null
+  breakdownsPerHour: number
 }>
 
 export class ConfigError extends Error {
@@ -65,23 +55,12 @@ export function parseConfig(env: Record<string, string | undefined>): Config {
   const database: DatabaseConfig = data.DATABASE_URL
     ? { kind: 'postgres', url: data.DATABASE_URL }
     : { kind: 'pglite', dir: data.PGLITE_DIR }
-  const model: ModelConfig | null = data.ANTHROPIC_API_KEY
-    ? { provider: 'anthropic', apiKey: data.ANTHROPIC_API_KEY, model: data.ANTHROPIC_MODEL }
-    : null
-  const groq: GroqConfig | null = data.GROQ_API_KEY
-    ? {
-        apiKey: data.GROQ_API_KEY,
-        structureModel: data.GROQ_STRUCTURE_MODEL,
-        checkModel: data.GROQ_CHECK_MODEL,
-      }
-    : null
   return Object.freeze({
     environment: data.NODE_ENV,
     logLevel: data.LOG_LEVEL,
-    sessionSecret: data.SESSION_SECRET,
     database,
-    model,
-    groq,
+    groq: data.GROQ_API_KEY ? { apiKey: data.GROQ_API_KEY, model: data.GROQ_MODEL } : null,
+    breakdownsPerHour: data.BREAKDOWNS_PER_HOUR,
   })
 }
 

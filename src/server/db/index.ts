@@ -11,7 +11,7 @@ export type { Db } from './types'
 // One connection per server process. Kept on globalThis so hot reloads in development do not
 // open a new PGlite instance (which would fail on the locked data directory).
 
-const globalForDb = globalThis as typeof globalThis & { __receiptsDb?: Promise<Db> }
+const globalForDb = globalThis as typeof globalThis & { __breakdownDb?: Promise<Db> }
 
 async function connect(): Promise<Db> {
   const { database } = getConfig()
@@ -25,9 +25,9 @@ async function connect(): Promise<Db> {
 }
 
 export function getDb(): Promise<Db> {
-  globalForDb.__receiptsDb ??= connect().catch((error: unknown) => {
-    globalForDb.__receiptsDb = undefined
+  globalForDb.__breakdownDb ??= connect().catch((error: unknown) => {
+    globalForDb.__breakdownDb = undefined
     throw error
   })
-  return globalForDb.__receiptsDb
+  return globalForDb.__breakdownDb
 }
