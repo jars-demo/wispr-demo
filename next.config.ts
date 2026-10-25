@@ -6,6 +6,7 @@ const nextConfig: NextConfig = {
   // PGlite loads its WebAssembly and data files at runtime; bundling it breaks those paths.
   serverExternalPackages: ['@electric-sql/pglite'],
   poweredByHeader: false,
+  logging: false,
   async headers() {
     return [
       {
