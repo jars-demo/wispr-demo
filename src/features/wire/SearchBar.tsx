@@ -5,6 +5,7 @@ import { useState } from 'react'
 
 import { buttonStyles } from '@/components/ui/button-styles'
 import { parseChangeLink } from '@/domain/feed'
+import { QuotaLine } from '@/features/breakdown/QuotaLine'
 
 import { looksLikeDiff, PASTE_KEY } from './links'
 
@@ -39,7 +40,7 @@ export function SearchBar() {
 
   return (
     <form onSubmit={submit} className="flex flex-col gap-2" role="search">
-      <div className="glow-box glass-strong flex items-center gap-2 rounded-full p-1.5 pl-5">
+      <div className="search-shell glow-box glass-strong flex items-center gap-2 rounded-full p-1.5 pl-5">
         <svg
           aria-hidden="true"
           width="18"
@@ -82,9 +83,9 @@ export function SearchBar() {
           {error}
         </p>
       ) : (
-        <p className="px-5 text-[13px] text-muted">
-          Try a senior engineer&apos;s PR from any public repo. Big ones work too.
-        </p>
+        <div className="px-5">
+          <QuotaLine />
+        </div>
       )}
     </form>
   )

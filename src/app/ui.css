@@ -112,6 +112,23 @@
 .field[aria-invalid='true'] {
   box-shadow: inset 0 0 0 1px var(--bad);
 }
+/* Multi-line text: same ring and focus as a field, with card corners. */
+.field-area {
+  display: block;
+  width: 100%;
+  padding: 1rem;
+  border-radius: var(--radius-card);
+  color: var(--ink);
+  background: var(--surface);
+  box-shadow: inset 0 0 0 1px var(--hairline-strong);
+  transition: box-shadow 0.15s ease;
+}
+.field-area:focus-visible {
+  outline: none;
+  box-shadow:
+    inset 0 0 0 1px var(--accent),
+    0 0 0 3px color-mix(in srgb, var(--accent) 22%, transparent);
+}
 .field-mono {
   font-family: var(--font-mono);
   font-size: 13.5px;
@@ -128,13 +145,8 @@
   text-overflow: ellipsis;
 }
 
-/* The search bar draws one ring around itself, so the input inside it shows none. */
-.search-shell:focus-within {
-  box-shadow:
-    0 0 0 1.5px var(--accent),
-    0 0 0 6px color-mix(in srgb, var(--accent) 16%, transparent),
-    var(--shadow-lift);
-}
+/* The search bar's glow is its focus ring, so the input inside it draws none. The global
+   :focus-visible outline is unlayered and beats Tailwind's outline-none, hence this rule. */
 .search-shell input:focus-visible {
   outline: none;
 }

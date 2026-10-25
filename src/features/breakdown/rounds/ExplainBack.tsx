@@ -39,7 +39,7 @@ export function ExplainBack({
             onChange={(event) => setText(event.target.value)}
             rows={6}
             placeholder="Say it like you would to a teammate…"
-            className="block w-full resize-y rounded-card bg-surface p-4 text-[16px] leading-relaxed ring-1 ring-hairline outline-none"
+            className="field-area resize-y text-[16px] leading-relaxed"
           />
         </div>
         <ul className="grid gap-2 sm:grid-cols-2" aria-label="Key ideas">
