@@ -1,125 +1,96 @@
-# Receipts
+# Breakdown
 
-Say what you want. Get proof your coding agent did it.
+**SHIPPED IT? Now understand it.**
 
-Receipts turns a spoken (or typed) request into a receipt for your coding agent, sends it, then checks your coding
-agent's work against it using whatever evidence you have: a GitHub pull request or compare link,
-pasted `git diff`, the agent's own summary, or pasted test output. Each item comes back Found,
-Partly, Missing, Off-limits or Can't tell, with the lines that support it, and each claim the
-agent made is checked against that evidence.
+Coding agents ship code in minutes. Breakdown turns each change they ship into a three minute
+game, so you understand what the agent did and the engineering behind it, instead of merging code
+you could not explain.
 
-Built solo for No Hands: The Wispr Challenge (WeMakeDevs x Wispr Flow, October 2026), Builders
-track.
+Live at [wispr.jishanahmed.in](https://wispr.jishanahmed.in). Built for No Hands: The Wispr
+Challenge (WeMakeDevs and Wispr Flow, October 2026). Independent entry, not an official Wispr
+product.
 
-## Status
+## How it works
 
-| Milestone | Scope                                                            | State   |
-| --------- | ---------------------------------------------------------------- | ------- |
-| M1        | Foundation, config, CI, design system, design preview            | Done    |
-| M2        | Receipts: dictate, organise, review, save, edit, export, delete  | Done    |
-| M3        | Check the work: diff or GitHub link, cited answers, claim checks | Done    |
-| M4        | Send to agents (GitHub, CLI, chat), auto-check, status stamps    | Done    |
-| M5 to M8  | Beta, hardening, deploy, submission                              | Planned |
+1. **The wire.** A news-style feed of recent pull requests and commits. Without GitHub it plays a
+   clearly labelled sample wire. Plug in GitHub once (a read-only token kept in your browser) to
+   see what you and your agents shipped. Or paste any public PR, commit or compare link, or a raw
+   diff, into the search bar.
+2. **Break it down.** Five rounds:
+   - **Replay**: what the agent did, step by step, with the exact lines lighting up.
+   - **Engineering**: two or three concept cards (for example "idempotency") you flip to unlock.
+   - **Predict**: questions about how this exact code behaves. Every answer shows the real lines.
+   - **Explain it back**: say it in your own words. With Wispr Flow you just talk. Key ideas
+     light up as you cover them. Scored by keyword matching, not by AI.
+   - **Score**: XP, levels, achievements and avatar unlocks.
+3. **Drill down.** Tap any line to see where it is explained, or break down one file on its own.
+   Big pull requests are covered most important files first; the rest are listed for file-by-file
+   rounds.
+4. **Show it.** Your card (10 avatars, 2 free and 8 to unlock, 3 templates, 5 taglines) posts to
+   X or LinkedIn with a share image. Pick a name to save progress and join the live leaderboard,
+   which tells you when someone overtakes you. No sign-up, no email.
 
-What works today (live at https://wispr.jishanahmed.in):
+## Honesty rules
 
-- **Say it** (`/`, `/new`): click the box, hold your Wispr Flow key and talk (or type). Receipts
-  organises it into requirements, things to leave alone and open questions, each with the words it
-  came from. You review and edit before anything is saved.
-- **Send it** (`/specs/:id`): your request printed as a receipt, with its status stamped on
-  (Ready to send, Sent to Copilot, Done, 2 of 3 done). One tap on an agent's logo sends it:
-  - **On GitHub:** connect a fine-grained token once (kept only in your browser, sent only to
-    api.github.com). Receipts opens an issue for **Copilot** (assigned) or **Claude** (`@claude`,
-    needs the Claude GitHub app), follows it to the pull request and checks it by itself.
-  - **On your machine:** a ready terminal command for **Claude Code** or **Codex CLI**, or a
-    prompt link that opens **Cursor**.
-  - **In a chat:** Claude.ai or ChatGPT, with the brief copied as a backup.
-- **Check it** (same page, step 2): for GitHub sends this happens on its own. Otherwise paste a
-  `git diff` or a public GitHub pull request, compare or commit link, plus the agent's summary and
-  test output. Each requirement comes back Found (with cited lines), Partly, Missing or Can't
-  tell; things to leave alone and the agent's claims are checked too. One click copies a fix-up
-  prompt for whatever is missing.
-- No sign-up. Receipts belong to your browser through a signed, HttpOnly cookie.
+- Every step, concept and question must cite real lines of the diff. The server checks each
+  reference and drops anything invented; if nothing grounded is left, the breakdown is refused.
+- Sample changes and the sample wire are labelled as samples everywhere.
+- Leaderboard numbers are self-reported by each browser and re-checked against the game rules.
+  It is a game, not a certificate.
+- The GitHub token is only sent to api.github.com. A player's own AI key is sent with each
+  breakdown request and used for that one call; neither is stored or logged.
 
-Voice input is Wispr Flow: it types into whichever box has focus, so the app has no microphone
-code of its own.
+## Run it
 
-## Requirements
-
-- Node.js 22.13 or newer on the 22.x line (see `.nvmrc`)
-- npm (the lockfile is `package-lock.json`)
-
-Nothing else. Locally the database is PGlite, a real PostgreSQL that runs inside the Node
-process and stores its files in `.data/pglite`.
-
-## Setup
+Needs Node 22.13 or later.
 
 ```bash
 npm ci
-cp .env.example .env.local
-# Put a random value of at least 32 characters in SESSION_SECRET, for example:
-node -e "console.log(require('crypto').randomBytes(32).toString('base64url'))"
-npm run dev
+cp .env.example .env.local   # add GROQ_API_KEY for live breakdowns
+npm run dev                  # http://localhost:3000
 ```
 
-Open http://localhost:3000. The database and its tables are created on the first request.
+Without any keys the four sample breakdowns, the card and a local leaderboard (embedded PGlite)
+all work. Live breakdowns need `GROQ_API_KEY`, or a player's own key added in Settings.
 
-To start over with an empty local database, stop the server and delete `.data/`.
+```bash
+npm run check      # lint, typecheck, format check, unit and integration tests
+npm run test:e2e   # Playwright on desktop and phone sizes (starts the dev server)
+npm run verify     # check plus a production build
+```
 
-## Commands
+## Configuration
 
-| Command                | What it does                                                  |
-| ---------------------- | ------------------------------------------------------------- |
-| `npm run dev`          | Development server with hot reload                            |
-| `npm run build`        | Production build                                              |
-| `npm start`            | Serve the production build (needs `DATABASE_URL`)             |
-| `npm run lint`         | ESLint                                                        |
-| `npm run typecheck`    | Generate route types, then `tsc --noEmit`                     |
-| `npm run format:check` | Prettier check (`npm run format` writes)                      |
-| `npm test`             | Unit tests and integration tests (real PostgreSQL via PGlite) |
-| `npm run test:e2e`     | Playwright journeys on desktop and two phone sizes            |
-| `npm run check`        | Lint, typecheck, format check and tests together              |
+Every variable is validated in `src/server/config.ts`; error messages name the variable, never its
+value.
 
-## Environment variables
+| Variable              | Required      | Purpose                                                         |
+| --------------------- | ------------- | --------------------------------------------------------------- |
+| `GROQ_API_KEY`        | No            | Shared AI for breakdowns. Without it, samples and own keys only |
+| `GROQ_MODEL`          | No            | Default `openai/gpt-oss-120b`                                   |
+| `BREAKDOWNS_PER_HOUR` | No            | Shared-key breakdowns per visitor per hour. Default 30          |
+| `DATABASE_URL`        | In production | Hosted Postgres (Neon) for the leaderboard and saved progress   |
+| `PGLITE_DIR`          | No            | Where local PGlite keeps data. Default `.data/pglite`           |
+| `LOG_LEVEL`           | No            | `debug`, `info`, `warn` or `error`. Default `info`              |
 
-All variables are read and validated in one place, `src/server/config.ts`. The server refuses to
-start when one is missing or invalid, and the error names the variable without echoing its value.
+Players can bring their own Groq, OpenAI, Anthropic or OpenRouter key in Settings. With their own
+key a breakdown covers up to 3,000 changed lines at once and the hourly limit rises.
 
-| Variable               | Required                   | Kind   | Purpose                                                     |
-| ---------------------- | -------------------------- | ------ | ----------------------------------------------------------- |
-| `SESSION_SECRET`       | Yes                        | Secret | Signs the anonymous owner cookie (32+ characters)           |
-| `DATABASE_URL`         | In production              | Secret | Hosted Postgres. Empty locally to use PGlite                |
-| `PGLITE_DIR`           | No (`.data/pglite`)        | Config | Where the local database lives                              |
-| `ANTHROPIC_API_KEY`    | No                         | Secret | Turns on organising with Claude. Without it, rules are used |
-| `ANTHROPIC_MODEL`      | No (`claude-opus-5-5`)     | Config | Claude model for organising                                 |
-| `GROQ_API_KEY`         | No                         | Secret | Groq AI for organising and checking (preferred when set)    |
-| `GROQ_STRUCTURE_MODEL` | No (`openai/gpt-oss-20b`)  | Config | Groq model for organising                                   |
-| `GROQ_CHECK_MODEL`     | No (`openai/gpt-oss-120b`) | Config | Groq model for checking the work                            |
-| `LOG_LEVEL`            | No (`info`)                | Config | `debug`, `info`, `warn` or `error`                          |
+## Architecture
 
-## How organising works
+Next.js 16 (App Router, Cache Components), TypeScript strict, Tailwind CSS 4, Postgres through
+postgres.js (Neon) or PGlite locally, Vitest and Playwright. See
+[docs/architecture.md](docs/architecture.md) and [AGENTS.md](AGENTS.md).
 
-Two engines, described in [ADR 0006](docs/decisions/0006-structuring-engines.md):
+## Known limits
 
-- **Built-in rules** (always available): splits what you said into clauses. "Don't", "never" and
-  "leave ... alone" become things to leave alone; "maybe" and questions become open questions,
-  never requirements.
-- **Claude** (when `ANTHROPIC_API_KEY` is set): better wording, then a grounding check drops any
-  item whose quote is not in what you said, and tells you how many were dropped. If Claude is
-  unavailable, the rules run and the page says so.
-
-## Deployment
-
-Planned target: Vercel (Hobby) with a hosted Postgres in `DATABASE_URL`. Not deployed yet. See
-[docs/architecture.md](docs/architecture.md) and [docs/decisions/](docs/decisions/).
-
-## Documentation
-
-- [docs/architecture.md](docs/architecture.md): boundaries, components and data flow
-- [docs/decisions/](docs/decisions/): architecture decision records
-- [docs/CHANGELOG.md](docs/CHANGELOG.md): user-facing changes
-- [AGENTS.md](AGENTS.md): instructions for coding agents working in this repository
+- Live GitHub alerts only update while the page is open; there is no server holding your token.
+- The free shared model has small request limits, so very large changes are split by importance
+  and the remaining files are broken down one at a time.
+- The share link carries the card's numbers, so anyone can make a card with any numbers. The
+  leaderboard re-checks numbers against the game rules but cannot prove them.
+- GitLab and Bitbucket are not connected yet.
 
 ## License
 
-[MIT](LICENSE) © 2026 Jishanahmed AR Shaikh
+MIT

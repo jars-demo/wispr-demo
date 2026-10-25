@@ -5,6 +5,25 @@ All notable user-facing changes are recorded here, following
 
 ## [Unreleased]
 
+Breakdown replaces Receipts (see docs/decisions/0003). Receipts lives on the `receipts-archive`
+branch.
+
+### Added
+
+- The wire: a news-style feed of your recent GitHub pull requests and commits (token kept in the
+  browser), or a labelled sample wire; plus a search bar for any public PR, commit, compare link
+  or pasted diff.
+- Breakdowns in five rounds: replay, engineering concept cards, predict-the-behaviour questions,
+  explain it back (scored without AI, made for talking with Wispr Flow), and a score screen.
+- Every breakdown cites real lines; invented references are removed and shown as a count.
+- Big changes: most important files first, automatic smaller retries, and file-by-file rounds.
+- XP, six levels, ten achievements and ten avatars (two free, eight to unlock).
+- Player cards with three templates and five taglines, shared to X or LinkedIn with an image.
+- Save without an account, restore links, and a live leaderboard with "just overtook you" alerts.
+- Bring your own Groq, OpenAI, Anthropic or OpenRouter key.
+
+## Receipts (archived)
+
 ### Changed
 
 - Checklists are now called receipts everywhere you can see them, each with a status stamp: Ready
