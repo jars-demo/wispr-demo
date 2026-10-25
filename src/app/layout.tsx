@@ -2,12 +2,14 @@ import type { Metadata, Viewport } from 'next'
 import { Geist, Geist_Mono, Instrument_Serif } from 'next/font/google'
 import { Analytics } from '@vercel/analytics/next'
 
+import { Intro } from '@/components/Intro'
 import { Toaster } from '@/features/fx/Toaster'
 import { SITE_URL } from '@/domain/card'
 
 import './globals.css'
 import './fx.css'
 import './ui.css'
+import './intro.css'
 
 // next/font downloads these at build time and serves them from our own origin.
 const geistSans = Geist({ variable: '--font-geist-sans', subsets: ['latin'] })
@@ -41,6 +43,7 @@ export default function RootLayout({ children }: LayoutProps<'/'>) {
       className={`${geistSans.variable} ${geistMono.variable} ${instrumentSerif.variable} h-full antialiased`}
     >
       <body className="flex min-h-full flex-col">
+        <Intro />
         <a
           href="#main"
           className="sr-only rounded-full bg-ink px-4 py-2 text-canvas focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-50"
