@@ -7,7 +7,7 @@ import { refreshBoard } from '@/features/board/board-store'
 import { toast } from '@/features/fx/toasts'
 import { useHydrated } from '@/lib/local-store'
 
-import { SaveForm } from './SaveForm'
+import { NameClaim } from './NameClaim'
 import { profileStore, restoreLink, startSaving, stopSaving } from './store'
 
 // Saving without an account: a name, a restore link for other devices, and a way out.
@@ -18,7 +18,7 @@ export function SaveSection() {
   const [busy, setBusy] = useState(false)
 
   if (!hydrated) return <div className="h-24 animate-pulse rounded-card bg-surface-2/60" />
-  if (!profile.board) return <SaveForm />
+  if (!profile.board) return <NameClaim />
 
   const board = profile.board
   const link = restoreLink(profile)
@@ -27,7 +27,7 @@ export function SaveSection() {
     setBusy(true)
     const result = await startSaving(profile.name, hidden)
     setBusy(false)
-    if (!result.ok) toast({ tone: 'error', icon: '⚠️', title: result.message })
+    if (!result.ok) toast({ tone: 'error', title: result.message })
     else void refreshBoard()
   }
 
@@ -39,11 +39,10 @@ export function SaveSection() {
       result.ok
         ? {
             tone: 'info',
-            icon: '🗑️',
             title: 'Saved progress deleted',
             body: 'Your progress stays in this browser.',
           }
-        : { tone: 'error', icon: '⚠️', title: result.message },
+        : { tone: 'error', title: result.message },
     )
     void refreshBoard()
   }
@@ -67,8 +66,8 @@ export function SaveSection() {
               if (!link) return
               navigator.clipboard
                 .writeText(link)
-                .then(() => toast({ tone: 'info', icon: '🔑', title: 'Restore link copied' }))
-                .catch(() => toast({ tone: 'error', icon: '⚠️', title: 'Copy failed' }))
+                .then(() => toast({ tone: 'info', title: 'Restore link copied' }))
+                .catch(() => toast({ tone: 'error', title: 'Copy failed' }))
             }}
             className={buttonStyles('primary')}
           >

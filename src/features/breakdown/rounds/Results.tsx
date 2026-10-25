@@ -3,12 +3,18 @@
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
 
+import { Brain } from 'lucide-react'
+import { motion, useReducedMotion } from 'motion/react'
+
 import { Avatar } from '@/components/Avatar'
+import { Badge, TIER_LABEL } from '@/components/Badge'
 import { buttonStyles } from '@/components/ui/button-styles'
-import { ACHIEVEMENTS, levelFor, XP } from '@/domain/game'
+import { achievementById, avatarById, levelFor, XP } from '@/domain/game'
 import type { RunOutcome } from '@/domain/profile'
+import { CardModal } from '@/features/card/CardModal'
+import { cardFromProfile } from '@/features/card/share'
 import { Confetti } from '@/features/fx/Confetti'
-import { SaveForm } from '@/features/game/SaveForm'
+import { NameClaim } from '@/features/game/NameClaim'
 
 // Round 5: the score. XP counts up, the level bar fills, and every unlock gets its moment.
 
@@ -33,6 +39,38 @@ function useCountUp(target: number, ms = 1100): number {
     return () => cancelAnimationFrame(frame)
   }, [target, ms])
   return value
+}
+
+/** One unlock, springing in after the ones before it. */
+function Unlock({
+  i,
+  art,
+  children,
+}: {
+  i: number
+  art: React.ReactNode
+  children: React.ReactNode
+}) {
+  const reduce = useReducedMotion()
+  return (
+    <motion.li
+      initial={reduce ? false : { opacity: 0, y: 10, scale: 0.9 }}
+      animate={{ opacity: 1, y: 0, scale: 1 }}
+      transition={{ type: 'spring', stiffness: 380, damping: 22, delay: 0.5 + i * 0.18 }}
+      className="flex items-center gap-3 rounded-card bg-surface px-2.5 py-2 text-[14px] ring-1 ring-hairline"
+    >
+      {art}
+      <span className="min-w-0">{children}</span>
+    </motion.li>
+  )
+}
+
+function LevelMark({ level }: { level: number }) {
+  return (
+    <span className="grid size-11 shrink-0 place-items-center rounded-full bg-ink font-display text-2xl text-canvas">
+      {level}
+    </span>
+  )
 }
 
 export function Results({
@@ -65,6 +103,14 @@ export function Results({
     return () => window.clearTimeout(id)
   }, [progress])
 
+  // The card pops up once the score has landed, with "Post on X" right in it.
+  const [cardOpen, setCardOpen] = useState(false)
+  useEffect(() => {
+    const id = window.setTimeout(() => setCardOpen(true), 1400)
+    return () => window.clearTimeout(id)
+  }, [])
+  const card = cardFromProfile(outcome.profile, new Date().toISOString().slice(0, 10))
+
   const perfect = total > 0 && correct === total
   const celebrate = perfect || outcome.levelUp !== null || outcome.newAchievements.length > 0
   const replay =
@@ -87,6 +133,7 @@ export function Results({
   return (
     <div className="flex flex-col gap-5">
       {celebrate ? <Confetti seed={xp} /> : null}
+      <CardModal card={card} open={cardOpen} onClose={() => setCardOpen(false)} />
       <div className="glass-strong flex flex-col items-center gap-3 rounded-panel px-5 py-8 text-center sm:py-10">
         <p className="text-[13px] font-medium tracking-[0.16em] text-muted uppercase">
           {perfect ? 'Perfect round' : 'Breakdown complete'}
@@ -138,43 +185,41 @@ export function Results({
 
         <div className="glass flex flex-col gap-3 rounded-panel p-5">
           <h3 className="text-[15px] font-semibold">Unlocked</h3>
-          {outcome.levelUp ? (
-            <p className="pop rounded-card bg-ink px-3 py-2 text-[14px] text-canvas">
-              ⬆️ Level {outcome.levelUp.to}: {level.title}
-            </p>
-          ) : null}
-          {outcome.newAchievements.map((id) => {
-            const a = ACHIEVEMENTS.find((x) => x.id === id)
-            return a ? (
-              <p
+          <ul className="flex flex-col gap-2">
+            {outcome.levelUp ? (
+              <Unlock i={0} art={<LevelMark level={outcome.levelUp.to} />}>
+                <span className="font-medium">Level {outcome.levelUp.to}</span> · {level.title}
+              </Unlock>
+            ) : null}
+            {outcome.newAchievements.map((id, i) => {
+              const a = achievementById(id)
+              return a ? (
+                <Unlock key={id} i={i + 1} art={<Badge id={id} size={44} />}>
+                  <span className="font-medium">{a.title}</span>
+                  <span className="text-muted"> · {TIER_LABEL[a.tier]} badge</span>
+                </Unlock>
+              ) : null
+            })}
+            {outcome.newAvatars.map((id, i) => (
+              <Unlock
                 key={id}
-                className="pop flex items-center gap-2 rounded-card bg-accent-wash px-3 py-2 text-[14px]"
+                i={i + 1 + outcome.newAchievements.length}
+                art={<Avatar id={id} size={44} />}
               >
-                <span aria-hidden="true" className="text-xl">
-                  {a.emoji}
-                </span>
-                <span>
-                  <span className="font-medium">{a.title}</span> · {a.how}
-                </span>
-              </p>
-            ) : null
-          })}
-          {outcome.newAvatars.map((id) => (
-            <p
-              key={id}
-              className="pop flex items-center gap-2 rounded-card bg-accent-wash px-3 py-2 text-[14px]"
-            >
-              <Avatar id={id} size={28} /> New avatar unlocked
-            </p>
-          ))}
+                <span className="font-medium">{avatarById(id).name}</span>
+                <span className="text-muted"> · new avatar</span>
+              </Unlock>
+            ))}
+          </ul>
           {outcome.newConcepts.length ? (
             <div className="flex flex-wrap gap-1.5">
               {outcome.newConcepts.map((c) => (
                 <span
                   key={c}
-                  className="rounded-full bg-surface px-2.5 py-1 text-[13px] ring-1 ring-hairline"
+                  className="inline-flex items-center gap-1.5 rounded-full bg-surface px-2.5 py-1 text-[13px] ring-1 ring-hairline"
                 >
-                  🧠 {c}
+                  <Brain aria-hidden="true" className="size-3.5 text-accent-text" />
+                  {c}
                 </span>
               ))}
             </div>
@@ -192,7 +237,7 @@ export function Results({
         <div id="save" className="glass rounded-panel p-5">
           <h3 className="text-[15px] font-semibold">Keep this progress and get on the board</h3>
           <p className="mb-3 text-[14px] text-ink-2">Just a name. No sign-up, no email.</p>
-          <SaveForm />
+          <NameClaim id="results-name" />
         </div>
       ) : null}
 
@@ -233,9 +278,13 @@ export function Results({
       ) : null}
 
       <div className="flex flex-wrap gap-2">
-        <Link href="/me" className={buttonStyles('accent', 'lg')}>
+        <button
+          type="button"
+          onClick={() => setCardOpen(true)}
+          className={buttonStyles('accent', 'lg')}
+        >
           Share my card
-        </Link>
+        </button>
         <Link href="/" className={buttonStyles('secondary', 'lg')}>
           Next change
         </Link>

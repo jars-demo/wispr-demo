@@ -2,7 +2,7 @@ import { encodeCard, SITE_URL, type CardData } from '@/domain/card'
 import { streakFrom } from '@/domain/game'
 import type { Profile } from '@/domain/profile'
 
-// Turns a profile into the card that gets shared, and the links that share it.
+// Turns a profile into the card that gets shared, and the X link that shares it.
 
 export function cardFromProfile(profile: Profile, today: string): CardData {
   return {
@@ -19,14 +19,11 @@ export function cardFromProfile(profile: Profile, today: string): CardData {
   }
 }
 
-export function cardUrl(card: CardData, origin = SITE_URL): string {
-  return `${origin}/card/${encodeCard(card)}`
+/** Always the public site, even when running locally, so shared links never point at localhost. */
+export function cardUrl(card: CardData): string {
+  return `${SITE_URL}/card/${encodeCard(card)}`
 }
 
 export function xShareUrl(text: string, url: string): string {
   return `https://x.com/intent/post?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}`
-}
-
-export function linkedInShareUrl(url: string): string {
-  return `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(url)}`
 }

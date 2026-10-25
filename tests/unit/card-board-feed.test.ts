@@ -13,7 +13,7 @@ import { mergeFeed, parseChangeLink, type FeedItem } from '@/domain/feed'
 
 const CARD: CardData = {
   name: 'Asha ✨',
-  avatar: 'owl',
+  avatar: 'spotter',
   xp: 1234,
   breakdowns: 5,
   concepts: 9,
@@ -36,11 +36,22 @@ describe('share cards', () => {
     expect(decodeCard(sneaky)).toMatchObject({ avatar: 'dev-he', achievements: ['first'] })
   })
 
-  it('writes post text from numbers only', () => {
+  it('writes the X post from numbers only, tagging Wispr Flow and the maker', () => {
     const text = shareText(CARD, 'Code whisperer')
     expect(text).toContain('1,234 XP')
     expect(text).toContain('Code whisperer')
-    expect(text).not.toMatch(/—/)
+    expect(text).toContain('@WisprFlow')
+    expect(text).toContain('@jishanarshaikh')
+    expect(text).toContain('wispr.jishanahmed.in')
+    expect(text).not.toMatch(/localhost|—/)
+  })
+
+  it('keeps the X post inside the limit, counting the card link as 23 characters', () => {
+    const text = shareText(
+      { ...CARD, xp: 9_999_999, breakdowns: 99_999, concepts: 99_999 },
+      'Systems thinker',
+    )
+    expect(text.length + 1 + 23).toBeLessThanOrEqual(280)
   })
 })
 
@@ -48,7 +59,7 @@ const SYNC: SyncInput = {
   id: '6f1c2a5e-7d1b-4a0e-9a57-0d7f2b0c9e11',
   secret: 'x'.repeat(32),
   name: '  Ravi  ',
-  avatar: 'dragon',
+  avatar: 'staff',
   xp: 400,
   breakdowns: 1,
   concepts: 2,
@@ -64,7 +75,7 @@ describe('leaderboard checks', () => {
     expect(check.state.name).toBe('Ravi')
     expect(check.state.achievements).toEqual(['first'])
     expect(check.state.avatar).toBe('dev-he')
-    expect(check.state.avatars).toEqual(expect.arrayContaining(['fox', 'owl']))
+    expect(check.state.avatars).toEqual(expect.arrayContaining(['reader', 'spotter']))
   })
 
   it('rejects XP that no number of runs could earn', () => {
@@ -86,10 +97,10 @@ describe('leaderboard checks', () => {
       expect.arrayContaining([
         { kind: 'level', detail: '3' },
         { kind: 'achievement', detail: 'called-it' },
-        { kind: 'avatar', detail: 'ninja' },
+        { kind: 'avatar', detail: 'oracle' },
       ]),
     )
-    expect(describeEvent('avatar', 'ninja', 'Ravi')).toBe('Ravi unlocked 🥷 Ninja')
+    expect(describeEvent('avatar', 'oracle', 'Ravi')).toBe('Ravi unlocked the Oracle avatar')
     expect(eventsBetween(null, after.state)).toEqual([{ kind: 'joined', detail: '3' }])
   })
 

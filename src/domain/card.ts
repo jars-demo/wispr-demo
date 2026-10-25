@@ -136,16 +136,31 @@ export function taglineFor(index: number): string {
 
 export const SITE_URL = 'https://wispr.jishanahmed.in'
 
-/** Post text for X and LinkedIn. Numbers only, never any code or repository names. */
+const plural = (n: number, one: string, many: string) => `${n} ${n === 1 ? one : many}`
+
+function numbersLine(card: CardData): string {
+  return [
+    `${card.xp.toLocaleString('en-US')} XP`,
+    `${plural(card.breakdowns, 'change', 'changes')} broken down`,
+    `${plural(card.concepts, 'concept', 'concepts')} unlocked`,
+  ].join(', ')
+}
+
+/** X handles credited in every post: the tool it was built with, and who built it. */
+export const WISPR_HANDLE = '@WisprFlow'
+export const MAKER_HANDLE = '@jishanarshaikh'
+
+/**
+ * The X post. Numbers only, never code, repositories or GitHub names. The card link travels
+ * separately (X counts it as 23 characters) and unfurls into the card image.
+ */
 export function shareText(card: CardData, levelTitle: string): string {
   return [
-    `${taglineFor(card.tagline)}`,
+    taglineFor(card.tagline),
     '',
-    `I'm a ${levelTitle} on Breakdown: ${card.xp.toLocaleString('en-US')} XP, ${card.breakdowns} ${card.breakdowns === 1 ? 'change' : 'changes'} broken down, ${card.concepts} concepts unlocked.`,
-    card.topConcepts.length ? `Latest: ${card.topConcepts.join(', ')}.` : '',
+    `I'm a ${levelTitle} on Breakdown: ${numbersLine(card)}.`,
     '',
-    'Think you understand what your agent ships? Beat my score.',
-  ]
-    .filter((line, i, all) => line !== '' || all[i - 1] !== '')
-    .join('\n')
+    `Built by ${MAKER_HANDLE}, completely hands-free with ${WISPR_HANDLE}.`,
+    'Try it: wispr.jishanahmed.in',
+  ].join('\n')
 }

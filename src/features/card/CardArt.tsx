@@ -1,47 +1,46 @@
+import { markDataUri } from '@/components/logo-mark'
 import { PALETTES, taglineFor, type CardData } from '@/domain/card'
-import { ACHIEVEMENTS, avatarById, levelFor } from '@/domain/game'
+import { ACHIEVEMENTS, avatarById, levelFor, type Tier } from '@/domain/game'
 
 // The player card at 1200 by 630. Inline styles and flexbox only, so the exact same component
 // renders on the page and as the share image (next/og). No AI, no image generation: a fixed
-// template filled with the player's numbers.
+// template filled with the player's numbers and their drawn avatar.
 
 export const CARD_SIZE = { width: 1200, height: 630 } as const
 
-function Stat({
-  value,
-  label,
-  ink,
-  muted,
-  surface,
-}: {
-  value: string
-  label: string
-  ink: string
-  muted: string
-  surface: string
-}) {
+/** Where the art and fonts come from: files on the page, data and loaded fonts in next/og. */
+export type CardAssets = { avatarSrc?: string; display?: string; sans?: string }
+
+const METAL: Record<Tier, string> = {
+  bronze: 'linear-gradient(135deg, #f3d2b3 0%, #b8794a 55%, #8f5a33 100%)',
+  silver: 'linear-gradient(135deg, #f7f9fb 0%, #9ea7b3 55%, #7d8794 100%)',
+  gold: 'linear-gradient(135deg, #fff1c2 0%, #d39b22 55%, #a8740e 100%)',
+}
+const TIER_ORDER: Record<Tier, number> = { gold: 0, silver: 1, bronze: 2 }
+
+function Stat({ value, label, color, muted, display }: Record<string, string>) {
   return (
-    <div
-      style={{
-        display: 'flex',
-        flexDirection: 'column',
-        padding: '18px 22px',
-        borderRadius: 24,
-        background: surface,
-        minWidth: 170,
-      }}
-    >
-      <span style={{ fontSize: 44, fontWeight: 700, color: ink, lineHeight: 1 }}>{value}</span>
-      <span style={{ fontSize: 20, color: muted, marginTop: 8 }}>{label}</span>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+      <span style={{ fontFamily: display, fontSize: 84, lineHeight: 0.9, color }}>{value}</span>
+      <span style={{ fontSize: 19, letterSpacing: 2.4, textTransform: 'uppercase', color: muted }}>
+        {label}
+      </span>
     </div>
   )
 }
 
-export function CardArt({ card }: { card: CardData }) {
+export function CardArt({ card, assets = {} }: { card: CardData; assets?: CardAssets }) {
   const p = PALETTES[card.template]
   const avatar = avatarById(card.avatar)
   const level = levelFor(card.xp)
-  const badges = ACHIEVEMENTS.filter((a) => card.achievements.includes(a.id)).slice(0, 8)
+  const display = assets.display ?? 'var(--font-display)'
+  const sans = assets.sans ?? 'var(--font-sans)'
+  const earned = ACHIEVEMENTS.filter((a) => card.achievements.includes(a.id)).sort(
+    (a, b) => TIER_ORDER[a.tier] - TIER_ORDER[b.tier],
+  )
+  const shown = earned.slice(0, 3)
+  const tagline = taglineFor(card.tagline)
+  const split = /^(.*?\?)\s(.*)$/.exec(tagline)
 
   return (
     <div
@@ -51,169 +50,162 @@ export function CardArt({ card }: { card: CardData }) {
         display: 'flex',
         flexDirection: 'column',
         justifyContent: 'space-between',
-        padding: 56,
+        padding: '52px 60px',
         background: p.background,
         color: p.ink,
-        fontFamily: 'sans-serif',
+        fontFamily: sans,
       }}
     >
+      {/* Masthead */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
-          <div
-            style={{
-              display: 'flex',
-              width: 44,
-              height: 44,
-              borderRadius: 12,
-              background: '#141412',
-              position: 'relative',
-            }}
-          >
-            <div
-              style={{
-                position: 'absolute',
-                left: 9,
-                top: 9,
-                width: 12,
-                height: 12,
-                background: '#fbf8f1',
-                borderRadius: 2,
-              }}
-            />
-            <div
-              style={{
-                position: 'absolute',
-                left: 24,
-                top: 9,
-                width: 11,
-                height: 12,
-                background: '#fbf8f1',
-                borderRadius: 2,
-              }}
-            />
-            <div
-              style={{
-                position: 'absolute',
-                left: 9,
-                top: 24,
-                width: 12,
-                height: 11,
-                background: '#fbf8f1',
-                borderRadius: 2,
-              }}
-            />
-            <div
-              style={{
-                position: 'absolute',
-                left: 26,
-                top: 26,
-                width: 11,
-                height: 11,
-                background: '#ff5a1f',
-                borderRadius: 2,
-              }}
-            />
-          </div>
-          <span style={{ fontSize: 30, fontWeight: 700, letterSpacing: -0.5 }}>Breakdown</span>
+          {/* eslint-disable-next-line @next/next/no-img-element -- also rendered by next/og */}
+          <img src={markDataUri()} alt="" width={44} height={44} />
+          <span style={{ fontSize: 30, fontWeight: 600, letterSpacing: -0.8 }}>Breakdown</span>
         </div>
-        <span style={{ fontSize: 22, color: p.muted }}>wispr.jishanahmed.in</span>
+        <div
+          style={{ display: 'flex', alignItems: 'center', gap: 10, fontSize: 20, color: p.muted }}
+        >
+          <span>Built with Wispr Flow</span>
+          <span style={{ width: 5, height: 5, borderRadius: 9, background: p.muted }} />
+          <span>wispr.jishanahmed.in</span>
+        </div>
       </div>
 
-      <div style={{ display: 'flex', alignItems: 'center', gap: 48 }}>
+      {/* Player */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: 52 }}>
         <div
           style={{
             display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            width: 210,
-            height: 210,
-            borderRadius: 999,
-            backgroundImage: `linear-gradient(140deg, ${avatar.colors[0]}, ${avatar.colors[1]})`,
-            fontSize: 120,
+            width: 212,
+            height: 212,
             flexShrink: 0,
+            borderRadius: 999,
+            background: avatar.tone,
+            border: `6px solid ${p.surface}`,
+            boxShadow: '0 18px 40px rgba(0,0,0,0.12)',
           }}
         >
-          {avatar.emoji}
+          {/* eslint-disable-next-line @next/next/no-img-element -- also rendered by next/og */}
+          <img
+            src={assets.avatarSrc ?? `/avatars/${avatar.id}.svg`}
+            alt=""
+            width={200}
+            height={200}
+            style={{ borderRadius: 999 }}
+          />
         </div>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-          <span style={{ fontSize: 52, fontWeight: 700, letterSpacing: -1, lineHeight: 1.05 }}>
-            {card.name}
-          </span>
-          <span style={{ fontSize: 28, color: p.accent, fontWeight: 600 }}>
-            Level {level.level} · {level.title}
-          </span>
-          <div style={{ display: 'flex', gap: 14, marginTop: 14 }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 26 }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+            <span style={{ fontSize: 58, fontWeight: 700, letterSpacing: -1.6, lineHeight: 1 }}>
+              {card.name}
+            </span>
+            <span style={{ fontSize: 26, fontWeight: 600, color: p.accent }}>
+              Level {level.level} · {level.title}
+            </span>
+          </div>
+          <div style={{ display: 'flex', gap: 56 }}>
             <Stat
               value={card.xp.toLocaleString('en-US')}
               label="XP"
-              ink={p.ink}
+              color={p.ink}
               muted={p.muted}
-              surface={p.surface}
+              display={display}
             />
             <Stat
               value={String(card.breakdowns)}
-              label="Changes broken down"
-              ink={p.ink}
+              label={card.breakdowns === 1 ? 'Change' : 'Changes'}
+              color={p.ink}
               muted={p.muted}
-              surface={p.surface}
+              display={display}
             />
             <Stat
               value={String(card.concepts)}
               label="Concepts"
-              ink={p.ink}
+              color={p.ink}
               muted={p.muted}
-              surface={p.surface}
+              display={display}
             />
             {card.streak > 1 ? (
               <Stat
-                value={`${card.streak}🔥`}
+                value={String(card.streak)}
                 label="Day streak"
-                ink={p.ink}
+                color={p.ink}
                 muted={p.muted}
-                surface={p.surface}
+                display={display}
               />
             ) : null}
           </div>
         </div>
       </div>
 
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10 }}>
-          {badges.map((a) => (
+      {/* Footer: tagline and badges */}
+      <div
+        style={{
+          display: 'flex',
+          alignItems: 'flex-end',
+          justifyContent: 'space-between',
+          gap: 32,
+          paddingTop: 26,
+          borderTop: `2px solid ${p.chip}`,
+        }}
+      >
+        <div style={{ display: 'flex', fontSize: 50, lineHeight: 1, letterSpacing: -0.6 }}>
+          {split ? (
+            <>
+              <span style={{ fontWeight: 700, letterSpacing: -1.4 }}>{split[1]}</span>
+              <span
+                style={{
+                  fontFamily: display,
+                  fontStyle: 'italic',
+                  color: p.accent,
+                  marginLeft: 14,
+                }}
+              >
+                {split[2]}
+              </span>
+            </>
+          ) : (
+            <span style={{ fontFamily: display, fontStyle: 'italic' }}>{tagline}</span>
+          )}
+        </div>
+        <div style={{ display: 'flex', gap: 10, flexShrink: 0 }}>
+          {shown.map((a) => (
             <span
               key={a.id}
               style={{
                 display: 'flex',
                 alignItems: 'center',
-                gap: 8,
-                padding: '6px 14px',
+                gap: 9,
+                padding: '7px 15px 7px 8px',
                 borderRadius: 999,
-                background: p.chip,
-                fontSize: 20,
+                background: p.surface,
+                fontSize: 18,
+                fontWeight: 600,
               }}
             >
-              {a.emoji} {a.title}
+              <span
+                style={{ width: 22, height: 22, borderRadius: 99, backgroundImage: METAL[a.tier] }}
+              />
+              {a.title}
             </span>
           ))}
-          {card.topConcepts.map((c) => (
+          {earned.length > shown.length ? (
             <span
-              key={c}
               style={{
                 display: 'flex',
-                padding: '6px 14px',
+                alignItems: 'center',
+                padding: '7px 14px',
                 borderRadius: 999,
-                border: `2px solid ${p.chip}`,
-                fontSize: 20,
+                background: p.surface,
+                fontSize: 18,
                 color: p.muted,
               }}
             >
-              {c}
+              +{earned.length - shown.length}
             </span>
-          ))}
+          ) : null}
         </div>
-        <span style={{ fontSize: 38, fontWeight: 700, letterSpacing: -0.8 }}>
-          {taglineFor(card.tagline)}
-        </span>
       </div>
     </div>
   )

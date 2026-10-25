@@ -23,14 +23,28 @@ let syncTimer: number | undefined
 export function updateProfile(change: (profile: Profile) => Profile) {
   profileStore.write(change(profileStore.read()))
   window.clearTimeout(syncTimer)
-  syncTimer = window.setTimeout(() => void saveProgress(), 700)
+  syncTimer = window.setTimeout(() => {
+    void saveProgress().then((result) => {
+      // Quiet saves only speak up when the name needs attention.
+      if (!result.ok && result.code === 'name_taken') {
+        toast({
+          tone: 'error',
+          title: 'Your name was just taken',
+          body: 'Pick another on your card.',
+        })
+      }
+    })
+  }, 700)
 }
 
-export type SaveResult = { ok: true } | { ok: false; message: string }
+export type SaveResult = { ok: true } | { ok: false; message: string; code?: string }
 
-async function readProblem(response: Response): Promise<string> {
-  const body = (await response.json().catch(() => null)) as { title?: string } | null
-  return body?.title ?? 'Could not save right now.'
+async function readProblem(response: Response): Promise<{ message: string; code?: string }> {
+  const body = (await response.json().catch(() => null)) as {
+    title?: string
+    code?: string
+  } | null
+  return { message: body?.title ?? 'Could not save right now.', code: body?.code }
 }
 
 export async function saveProgress(): Promise<SaveResult> {
@@ -51,7 +65,7 @@ export async function saveProgress(): Promise<SaveResult> {
         profile: { ...profile, board: null },
       }),
     })
-    return response.ok ? { ok: true } : { ok: false, message: await readProblem(response) }
+    return response.ok ? { ok: true } : { ok: false, ...(await readProblem(response)) }
   } catch {
     return { ok: false, message: 'You look offline. Progress is still saved in this browser.' }
   }
@@ -82,6 +96,18 @@ export async function startSaving(name: string, hidden: boolean): Promise<SaveRe
   return result
 }
 
+/** Claims a name on the board: starts saving, or renames a saved player. Reverts if taken. */
+export async function claimName(name: string): Promise<SaveResult> {
+  const before = profileStore.read()
+  if (!before.board) return startSaving(name, false)
+  const clean = cleanName(name)
+  if (!clean) return { ok: false, message: 'Pick a name first.' }
+  profileStore.write({ ...before, name: clean })
+  const result = await saveProgress()
+  if (!result.ok) profileStore.write(before)
+  return result
+}
+
 export async function stopSaving(): Promise<SaveResult> {
   const profile = profileStore.read()
   if (!profile.board) return { ok: true }
@@ -109,7 +135,7 @@ export async function restoreFrom(id: string, secret: string): Promise<SaveResul
     body: JSON.stringify({ id, secret }),
   }).catch(() => null)
   if (!response) return { ok: false, message: 'Could not reach the server. Try again.' }
-  if (!response.ok) return { ok: false, message: await readProblem(response) }
+  if (!response.ok) return { ok: false, ...(await readProblem(response)) }
   const body = (await response.json()) as { profile: unknown; hidden: boolean }
   const restored = checkProfile({ ...(body.profile as object), board: null })
   if (!restored) return { ok: false, message: 'That saved progress could not be read.' }
@@ -123,7 +149,6 @@ export function announce(outcome: RunOutcome) {
     const title = LEVELS[outcome.levelUp.to - 1]?.title ?? ''
     toast({
       tone: 'level',
-      icon: '⬆️',
       title: `Level ${outcome.levelUp.to}: ${title}`,
       body: 'You levelled up.',
     })
@@ -131,13 +156,18 @@ export function announce(outcome: RunOutcome) {
   for (const id of outcome.newAchievements) {
     const a = ACHIEVEMENTS.find((x) => x.id === id)
     if (a)
-      toast({ tone: 'achievement', icon: a.emoji, title: a.title, body: 'Achievement unlocked' })
+      toast({
+        tone: 'achievement',
+        art: { badge: a.id },
+        title: a.title,
+        body: 'Achievement unlocked',
+      })
   }
   for (const id of outcome.newAvatars) {
     const a = avatarById(id)
     toast({
       tone: 'avatar',
-      icon: a.emoji,
+      art: { avatar: a.id },
       title: `${a.name} avatar unlocked`,
       body: 'Pick it on your card.',
     })
