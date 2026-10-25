@@ -3,7 +3,7 @@ import { z } from 'zod'
 import {
   ACHIEVEMENT_IDS,
   ACHIEVEMENTS,
-  avatarById,
+  AVATARS,
   LEVELS,
   levelFor,
   MAX_XP_PER_RUN,
@@ -95,11 +95,11 @@ export function describeEvent(kind: BoardEventKind, detail: string, name: string
     }
     case 'achievement': {
       const a = ACHIEVEMENTS.find((x) => x.id === detail)
-      return a ? `${name} earned ${a.emoji} ${a.title}` : `${name} earned an achievement`
+      return a ? `${name} earned ${a.title}` : `${name} earned an achievement`
     }
     case 'avatar': {
-      const a = avatarById(detail)
-      return `${name} unlocked ${a.emoji} ${a.name}`
+      const a = AVATARS.find((x) => x.id === detail)
+      return a ? `${name} unlocked the ${a.name} avatar` : `${name} unlocked an avatar`
     }
   }
 }

@@ -38,7 +38,6 @@ export async function refreshBoard() {
       const who = aheadName(view.rivalry)
       toast({
         tone: 'rival',
-        icon: '⚡',
         title: who ? `${who} just overtook you` : 'Someone just overtook you',
         body: `You are now #${rank}. Break something down to win it back.`,
       })

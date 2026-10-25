@@ -28,7 +28,7 @@ export function Restore() {
         return
       }
       window.history.replaceState(null, '', '/restore')
-      toast({ tone: 'info', icon: '✨', title: 'Progress restored', body: 'Welcome back.' })
+      toast({ tone: 'info', title: 'Progress restored', body: 'Welcome back.' })
       router.replace('/me')
     })
   }, [router])

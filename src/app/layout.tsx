@@ -6,6 +6,7 @@ import { SITE_URL } from '@/domain/card'
 
 import './globals.css'
 import './fx.css'
+import './ui.css'
 
 // next/font downloads these at build time and serves them from our own origin.
 const geistSans = Geist({ variable: '--font-geist-sans', subsets: ['latin'] })

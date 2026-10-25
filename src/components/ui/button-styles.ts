@@ -1,7 +1,8 @@
 // Shared class names so links and buttons look identical without a polymorphic component.
 
 export type ButtonVariant = 'primary' | 'accent' | 'secondary' | 'ghost'
-export type ButtonSize = 'md' | 'lg'
+/** `field` matches the height of a .field input, for buttons beside one. */
+export type ButtonSize = 'md' | 'field' | 'lg'
 
 const BASE =
   'inline-flex items-center justify-center gap-2 rounded-full font-medium tracking-tight ' +
@@ -17,6 +18,7 @@ const VARIANTS: Record<ButtonVariant, string> = {
 
 const SIZES: Record<ButtonSize, string> = {
   md: 'h-9 px-4 text-sm',
+  field: 'h-11 px-5 text-[15px] shrink-0',
   lg: 'h-12 px-6 text-[15px]',
 }
 

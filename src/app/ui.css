@@ -1,0 +1,159 @@
+/*
+  Breakdown UI pieces that need more than utilities: badge medallions, form fields, the search
+  field focus and bento tiles. Animation keyframes live in fx.css.
+*/
+
+/* Achievement medallions. A metal ring by tier around a quiet disc. */
+.badge {
+  position: relative;
+  display: inline-grid;
+  flex-shrink: 0;
+  place-items: center;
+  padding: 3px;
+  border-radius: 9999px;
+  isolation: isolate;
+  box-shadow:
+    0 1px 1px rgb(0 0 0 / 0.06),
+    0 6px 14px -6px rgb(0 0 0 / 0.25);
+}
+.badge-disc {
+  display: grid;
+  width: 100%;
+  height: 100%;
+  place-items: center;
+  border-radius: 9999px;
+  color: var(--metal-ink);
+  background: radial-gradient(circle at 32% 24%, #fff 0%, var(--disc) 72%);
+  box-shadow:
+    inset 0 1px 2px rgb(0 0 0 / 0.14),
+    0 0 0 1px rgb(255 255 255 / 0.55);
+}
+.badge-bronze {
+  --disc: #fbeee2;
+  --metal-ink: #7a4521;
+  background: conic-gradient(from 210deg, #f3d2b3, #b8794a, #ebbd94, #8f5a33, #f3d2b3);
+}
+.badge-silver {
+  --disc: #f1f3f6;
+  --metal-ink: #3f4855;
+  background: conic-gradient(from 210deg, #f7f9fb, #9ea7b3, #e6eaef, #7d8794, #f7f9fb);
+}
+.badge-gold {
+  --disc: #fff5d6;
+  --metal-ink: #7c5000;
+  background: conic-gradient(from 210deg, #fff1c2, #d39b22, #ffe08a, #a8740e, #fff1c2);
+}
+.badge-locked {
+  --disc: var(--surface-2);
+  --metal-ink: var(--muted);
+  background: transparent;
+  box-shadow: none;
+  outline: 1.5px dashed var(--hairline-strong);
+  outline-offset: -1.5px;
+}
+.badge-locked .badge-disc {
+  background: var(--surface-2);
+  box-shadow: none;
+}
+.badge-lock {
+  position: absolute;
+  right: -2px;
+  bottom: -2px;
+  display: grid;
+  width: 36%;
+  height: 36%;
+  place-items: center;
+  border-radius: 9999px;
+  color: var(--canvas);
+  background: var(--ink);
+  box-shadow: 0 0 0 2px var(--canvas);
+}
+/* A slow light sweep across earned badges on hover. */
+.badge:not(.badge-locked)::after {
+  position: absolute;
+  inset: 0;
+  border-radius: 9999px;
+  pointer-events: none;
+  content: '';
+  background: linear-gradient(115deg, transparent 38%, rgb(255 255 255 / 0.6) 50%, transparent 62%);
+  background-position: 130% 0;
+  background-size: 260% 100%;
+  transition: background-position 0.9s var(--ease-out);
+}
+.badge:not(.badge-locked):hover::after {
+  background-position: -30% 0;
+}
+
+/* Form fields: one height, one radius, one focus ring everywhere. */
+.field {
+  width: 100%;
+  height: 2.75rem;
+  padding: 0 1.1rem;
+  border-radius: 9999px;
+  color: var(--ink);
+  font-size: 15px;
+  background: var(--surface);
+  box-shadow: inset 0 0 0 1px var(--hairline-strong);
+  transition: box-shadow 0.15s ease;
+}
+.field::placeholder {
+  color: var(--muted);
+  opacity: 0.8;
+}
+.field:hover {
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--ink) 22%, transparent);
+}
+.field:focus-visible {
+  outline: none;
+  box-shadow:
+    inset 0 0 0 1px var(--accent),
+    0 0 0 3px color-mix(in srgb, var(--accent) 22%, transparent);
+}
+.field[aria-invalid='true'] {
+  box-shadow: inset 0 0 0 1px var(--bad);
+}
+.field-mono {
+  font-family: var(--font-mono);
+  font-size: 13.5px;
+}
+
+/* A select that looks like a field, with a drawn chevron. */
+.field-select {
+  padding-right: 2.5rem;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%236b675f' stroke-width='2' stroke-linecap='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+  background-position: right 1rem center;
+  background-repeat: no-repeat;
+  background-size: 16px;
+  text-overflow: ellipsis;
+}
+
+/* The search bar draws one ring around itself, so the input inside it shows none. */
+.search-shell:focus-within {
+  box-shadow:
+    0 0 0 1.5px var(--accent),
+    0 0 0 6px color-mix(in srgb, var(--accent) 16%, transparent),
+    var(--shadow-lift);
+}
+.search-shell input:focus-visible {
+  outline: none;
+}
+
+/* Bento tiles: settings and the profile. */
+.tile {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 0.875rem;
+  padding: 1.25rem;
+  border-radius: var(--radius-panel);
+  background: var(--surface);
+  box-shadow:
+    inset 0 0 0 1px var(--hairline),
+    var(--shadow-soft);
+}
+@media (min-width: 640px) {
+  .tile {
+    padding: 1.5rem;
+  }
+}

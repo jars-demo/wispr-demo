@@ -75,9 +75,26 @@ export type Stats = BoardStats & {
   drilled: number
 }
 
+/** Badge metal: how hard an achievement is to earn. */
+export type Tier = 'bronze' | 'silver' | 'gold'
+
+/** Names an icon in the UI's line icon set; the domain never imports UI code. */
+export type BadgeIcon =
+  | 'scan'
+  | 'target'
+  | 'mic'
+  | 'pull-request'
+  | 'wrench'
+  | 'layers'
+  | 'radio'
+  | 'brain'
+  | 'flame'
+  | 'crown'
+
 export type Achievement = {
   id: string
-  emoji: string
+  icon: BadgeIcon
+  tier: Tier
   title: string
   how: string
   test: (s: Stats) => boolean
@@ -86,70 +103,80 @@ export type Achievement = {
 export const ACHIEVEMENTS: readonly Achievement[] = [
   {
     id: 'first',
-    emoji: '🔍',
+    icon: 'scan',
+    tier: 'bronze',
     title: 'First breakdown',
     how: 'Finish a breakdown',
     test: (s) => s.breakdowns >= 1,
   },
   {
+    id: 'senior-study',
+    icon: 'pull-request',
+    tier: 'bronze',
+    title: 'Studied a senior',
+    how: 'Break down a public PR or commit link',
+    test: (s) => s.linkRuns >= 1,
+  },
+  {
+    id: 'rabbit-hole',
+    icon: 'layers',
+    tier: 'bronze',
+    title: 'Rabbit hole',
+    how: 'Drill into one part of a change',
+    test: (s) => s.drilled >= 1,
+  },
+  {
     id: 'called-it',
-    emoji: '🎯',
+    icon: 'target',
+    tier: 'silver',
     title: 'Called it',
     how: 'Answer every question right',
     test: (s) => s.perfectQuizzes >= 1,
   },
   {
     id: 'teacher',
-    emoji: '🎙️',
+    icon: 'mic',
+    tier: 'silver',
     title: 'Could teach it',
     how: 'Score 80+ explaining it back',
     test: (s) => s.bestExplain >= 80,
   },
   {
-    id: 'senior-study',
-    emoji: '🧑‍🏫',
-    title: 'Studied a senior',
-    how: 'Break down a public PR or commit link',
-    test: (s) => s.linkRuns >= 1,
-  },
-  {
     id: 'owned-it',
-    emoji: '🛠️',
+    icon: 'wrench',
+    tier: 'silver',
     title: 'Owned it',
     how: 'Break down a change from your GitHub',
     test: (s) => s.githubRuns >= 1,
   },
   {
-    id: 'rabbit-hole',
-    emoji: '🕳️',
-    title: 'Rabbit hole',
-    how: 'Drill into one part of a change',
-    test: (s) => s.drilled >= 1,
-  },
-  {
     id: 'on-the-wire',
-    emoji: '📡',
+    icon: 'radio',
+    tier: 'silver',
     title: 'On the wire',
     how: 'Finish 5 breakdowns',
     test: (s) => s.breakdowns >= 5,
   },
   {
     id: 'collector',
-    emoji: '🧠',
+    icon: 'brain',
+    tier: 'gold',
     title: 'Concept collector',
     how: 'Unlock 10 concepts',
     test: (s) => s.concepts >= 10,
   },
   {
     id: 'streak-3',
-    emoji: '🔥',
+    icon: 'flame',
+    tier: 'gold',
     title: 'On a streak',
     how: 'Break something down 3 days in a row',
     test: (s) => s.streak >= 3,
   },
   {
     id: 'staff-energy',
-    emoji: '👑',
+    icon: 'crown',
+    tier: 'gold',
     title: 'Staff energy',
     how: 'Reach level 6',
     test: (s) => s.level >= 6,
@@ -158,78 +185,74 @@ export const ACHIEVEMENTS: readonly Achievement[] = [
 
 export const ACHIEVEMENT_IDS = new Set(ACHIEVEMENTS.map((a) => a.id))
 
+export function achievementById(id: string): Achievement | undefined {
+  return ACHIEVEMENTS.find((a) => a.id === id)
+}
+
 export function earnedAchievements(stats: Stats): string[] {
   return ACHIEVEMENTS.filter((a) => a.test(stats)).map((a) => a.id)
 }
 
 export type Avatar = {
   id: string
-  emoji: string
   name: string
-  /** Gradient stops behind the emoji. */
-  colors: readonly [string, string]
+  /** Soft backdrop behind the line art (public/avatars/<id>.svg). */
+  tone: string
   /** null means free from the start. */
   unlock: { how: string; test: (s: BoardStats) => boolean } | null
 }
 
-// Two free avatars, eight earned. Unlock rules use only BoardStats, so the server can re-check them.
+// Two free avatars, eight earned. Characters gain props as they get harder to unlock. Unlock
+// rules use only BoardStats, so the server can re-check them.
 export const AVATARS: readonly Avatar[] = [
-  { id: 'dev-he', emoji: '👨‍💻', name: 'Dev', colors: ['#ffe4d4', '#ffb38a'], unlock: null },
-  { id: 'dev-she', emoji: '👩‍💻', name: 'Dev', colors: ['#fde7ef', '#f9a8c4'], unlock: null },
+  { id: 'dev-he', name: 'Dev', tone: '#efe4d2', unlock: null },
+  { id: 'dev-she', name: 'Dev', tone: '#f6dccb', unlock: null },
   {
-    id: 'fox',
-    emoji: '🦊',
-    name: 'Fox',
-    colors: ['#fff1d6', '#ffc46b'],
+    id: 'reader',
+    name: 'Reader',
+    tone: '#e0e8d4',
     unlock: { how: 'Finish 1 breakdown', test: (s) => s.breakdowns >= 1 },
   },
   {
-    id: 'owl',
-    emoji: '🦉',
-    name: 'Night owl',
-    colors: ['#e9e4ff', '#b7a8ff'],
+    id: 'spotter',
+    name: 'Spotter',
+    tone: '#d9e5ef',
     unlock: { how: 'Earn 300 XP', test: (s) => s.xp >= 300 },
   },
   {
-    id: 'robot',
-    emoji: '🤖',
-    name: 'Robot',
-    colors: ['#e0f2fe', '#8fd0f7'],
+    id: 'reviewer',
+    name: 'Reviewer',
+    tone: '#e7def0',
     unlock: { how: 'Finish 3 breakdowns', test: (s) => s.breakdowns >= 3 },
   },
   {
-    id: 'ninja',
-    emoji: '🥷',
-    name: 'Ninja',
-    colors: ['#e7e5e4', '#a8a29e'],
+    id: 'oracle',
+    name: 'Oracle',
+    tone: '#f3e6c6',
     unlock: { how: 'Get a perfect quiz', test: (s) => s.achievements.includes('called-it') },
   },
   {
-    id: 'octopus',
-    emoji: '🐙',
-    name: 'Octopus',
-    colors: ['#ffe4e6', '#fda4af'],
+    id: 'collector',
+    name: 'Collector',
+    tone: '#f6dccb',
     unlock: { how: 'Unlock 10 concepts', test: (s) => s.concepts >= 10 },
   },
   {
-    id: 'astronaut',
-    emoji: '🧑‍🚀',
-    name: 'Astronaut',
-    colors: ['#dbeafe', '#93b4f5'],
+    id: 'night-owl',
+    name: 'Night owl',
+    tone: '#d9e5ef',
     unlock: { how: 'Keep a 3-day streak', test: (s) => s.achievements.includes('streak-3') },
   },
   {
-    id: 'wizard',
-    emoji: '🧙',
-    name: 'Wizard',
-    colors: ['#ede9fe', '#c4b5fd'],
+    id: 'architect',
+    name: 'Architect',
+    tone: '#e0e8d4',
     unlock: { how: 'Earn 1,500 XP', test: (s) => s.xp >= 1500 },
   },
   {
-    id: 'dragon',
-    emoji: '🐉',
-    name: 'Dragon',
-    colors: ['#dcfce7', '#86efac'],
+    id: 'staff',
+    name: 'Staff engineer',
+    tone: '#f3e6c6',
     unlock: { how: 'Earn 3,000 XP', test: (s) => s.xp >= 3000 },
   },
 ]

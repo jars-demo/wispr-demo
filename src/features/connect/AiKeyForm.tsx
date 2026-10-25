@@ -48,7 +48,7 @@ export function AiKeyForm() {
         if (value.length < 10) return
         aiKeyStore.write({ provider, key: value, model: model.trim() || info.defaultModel })
         setKey('')
-        toast({ tone: 'info', icon: '🔑', title: `${info.label} key saved in this browser` })
+        toast({ tone: 'info', title: `${info.label} key saved in this browser` })
       }}
       className="flex flex-col gap-3"
     >

@@ -46,7 +46,7 @@ describe('applyRun', () => {
     expect(outcome.gained).toBe(550)
     expect(outcome.newConcepts).toEqual(['Cursor pagination', 'Tie-breaker sort key'])
     expect(outcome.newAchievements).toEqual(expect.arrayContaining(['first', 'called-it']))
-    expect(outcome.newAvatars).toEqual(expect.arrayContaining(['fox', 'owl', 'ninja']))
+    expect(outcome.newAvatars).toEqual(expect.arrayContaining(['reader', 'spotter', 'oracle']))
     expect(outcome.levelUp).toEqual({ from: 1, to: 2 })
     expect(outcome.profile.days).toEqual(['2026-10-25'])
   })
@@ -60,7 +60,7 @@ describe('applyRun', () => {
 
   it('only lets a player pick avatars they have unlocked', () => {
     const fresh = emptyProfile()
-    expect(chooseAvatar(fresh, 'dragon').avatar).toBe('dev-he')
+    expect(chooseAvatar(fresh, 'staff').avatar).toBe('dev-he')
     expect(chooseAvatar(fresh, 'dev-she').avatar).toBe('dev-she')
     expect(unlockedAvatars({ xp: 0, breakdowns: 0, concepts: 0, achievements: [] })).toEqual([
       'dev-he',
