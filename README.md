@@ -26,9 +26,22 @@ product.
 3. **Drill down.** Tap any line to see where it is explained, or break down one file on its own.
    Big pull requests are covered most important files first; the rest are listed for file-by-file
    rounds.
-4. **Show it.** Your card (10 avatars, 2 free and 8 to unlock, 3 templates, 5 taglines) posts to
-   X or LinkedIn with a share image. Pick a name to save progress and join the live leaderboard,
-   which tells you when someone overtakes you. No sign-up, no email.
+4. **Show it.** When a breakdown ends, your card pops up with a **Post on X** button. The post
+   links to your card on wispr.jishanahmed.in and credits the maker and Wispr Flow
+   (`Built by @jishanarshaikh, completely hands-free with @WisprFlow`). Cards have 10 avatars
+   (2 free, 8 to unlock), 3 templates and 5 taglines. Claim a name, unique across all players, to
+   save progress and join the live leaderboard, which tells you when someone overtakes you. No
+   sign-up, no email.
+
+## Free and unlimited
+
+- **2 AI breakdowns per hour per visitor** on the shared key. The search bar shows how many are
+  left and when the next one frees up. A breakdown that fails is not counted.
+- **Public links someone already broke down are free.** Results are cached in Postgres: 30 days
+  for a commit (it never changes), 6 hours for a pull request or compare (they can gain commits).
+- **Samples and GitHub are always free.** Connecting GitHub only reads your own feed.
+- **Bring your own key** (Groq, OpenAI, Anthropic or OpenRouter) in Settings for no hourly limit
+  and bigger changes: up to 3,000 changed lines at once.
 
 ## Honesty rules
 
@@ -73,8 +86,17 @@ value.
 | `PGLITE_DIR`          | No            | Where local PGlite keeps data. Default `.data/pglite`           |
 | `LOG_LEVEL`           | No            | `debug`, `info`, `warn` or `error`. Default `info`              |
 
-Players can bring their own Groq, OpenAI, Anthropic or OpenRouter key in Settings. With their own
-key a breakdown covers up to 3,000 changed lines at once and the hourly limit rises.
+The database migrates itself on the first request (`src/server/db/migrations.ts`). Migration
+`b0002_drop_receipts` removes the archived Receipts tables from a shared database and leaves
+`rate_limits` and Breakdown's own tables alone.
+
+### Deploying on Vercel
+
+1. Connect Neon in the Vercel dashboard (Storage). It sets `DATABASE_URL`.
+2. Add `GROQ_API_KEY` under Settings, Environment Variables, for Production. Optional:
+   `BREAKDOWNS_PER_HOUR`, `GROQ_MODEL`, `LOG_LEVEL`.
+3. Add the custom domain `wispr.jishanahmed.in`. Share links and images always use it.
+4. Push to the production branch. The first request runs the migrations.
 
 ## Architecture
 
@@ -90,6 +112,15 @@ postgres.js (Neon) or PGlite locally, Vitest and Playwright. See
 - The share link carries the card's numbers, so anyone can make a card with any numbers. The
   leaderboard re-checks numbers against the game rules but cannot prove them.
 - GitLab and Bitbucket are not connected yet.
+
+## Credits
+
+- Avatars: [DiceBear](https://www.dicebear.com) Notionists style (art CC0, code MIT), drawn once
+  by `node scripts/avatars.mjs` and committed. Nothing is generated at runtime.
+- Fonts in share images: Geist and Instrument Serif, SIL Open Font License (licences in
+  `src/app/card/fonts`).
+- Icons: [Lucide](https://lucide.dev) (ISC).
+- Built hands-free with [Wispr Flow](https://wisprflow.ai).
 
 ## License
 

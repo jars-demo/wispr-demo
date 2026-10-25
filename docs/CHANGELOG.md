@@ -18,9 +18,22 @@ branch.
 - Every breakdown cites real lines; invented references are removed and shown as a count.
 - Big changes: most important files first, automatic smaller retries, and file-by-file rounds.
 - XP, six levels, ten achievements and ten avatars (two free, eight to unlock).
-- Player cards with three templates and five taglines, shared to X or LinkedIn with an image.
+- Player cards with three templates and five taglines, shared to X with an image. The card pops
+  up when a breakdown ends, and the post credits @jishanarshaikh and @WisprFlow.
+- Drawn avatars (DiceBear Notionists, CC0) and metal badge medallions instead of emoji.
+- Unique player names, checked live as you type.
+- 2 free AI breakdowns per hour on the shared key, with the count shown under the search bar.
+  Failed breakdowns are refunded, and public links someone already broke down are cached and free.
+- Clear error screens for each failure, with what to do next and when the limit resets.
+- A new logo, a site share image, a podium and live feed on the leaderboard, a settings bento,
+  and animated round transitions.
 - Save without an account, restore links, and a live leaderboard with "just overtook you" alerts.
 - Bring your own Groq, OpenAI, Anthropic or OpenRouter key.
+
+### Removed
+
+- LinkedIn sharing. Cards post to X only.
+- Receipts' database tables, dropped by migration `b0002_drop_receipts`.
 
 ## Receipts (archived)
 
