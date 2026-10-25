@@ -67,7 +67,7 @@ export function DiffView({
   return (
     <div
       ref={box}
-      className="relative overflow-auto rounded-card bg-surface font-mono text-[12.5px] leading-[1.6] ring-1 ring-hairline"
+      className="relative max-w-full min-w-0 overflow-auto rounded-card bg-surface font-mono text-[12.5px] leading-[1.6] ring-1 ring-hairline"
       style={{ maxHeight }}
     >
       {files.map((file) => (
