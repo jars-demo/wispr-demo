@@ -1,0 +1,224 @@
+/* Breakdown animations, split from globals.css to keep files small. Tokens come from there. */
+/* ---------- Breakdown: things that break apart, type themselves in, and celebrate. ---------- */
+
+/* Title words drift apart while a breakdown loads, then settle. */
+.piece {
+  display: inline-block;
+  animation: piece-drift 2.6s var(--ease-out) infinite alternate;
+  animation-delay: var(--delay, 0ms);
+}
+
+@keyframes piece-drift {
+  0%,
+  20% {
+    transform: none;
+  }
+  100% {
+    transform: translate(var(--dx, 0), var(--dy, 0)) rotate(var(--rot, 0deg));
+    opacity: 0.55;
+  }
+}
+
+/* A feed card cracks into shards when "Break it down" is pressed. */
+.shard {
+  position: absolute;
+  width: 14px;
+  height: 14px;
+  left: var(--x, 50%);
+  top: var(--y, 50%);
+  background: var(--accent);
+  clip-path: polygon(50% 0, 100% 100%, 0 80%);
+  animation: shard-fly 620ms var(--ease-out) forwards;
+  pointer-events: none;
+}
+
+.shard:nth-child(even) {
+  background: var(--ink);
+}
+
+@keyframes shard-fly {
+  from {
+    transform: translate(0, 0) rotate(0deg) scale(1);
+    opacity: 1;
+  }
+  to {
+    transform: translate(var(--dx), var(--dy)) rotate(var(--rot)) scale(0.3);
+    opacity: 0;
+  }
+}
+
+.is-breaking {
+  animation: card-crack 560ms var(--ease-out) forwards;
+}
+
+@keyframes card-crack {
+  0% {
+    transform: none;
+  }
+  25% {
+    transform: rotate(-1.2deg) scale(1.02);
+  }
+  45% {
+    transform: rotate(1deg) scale(0.99);
+  }
+  100% {
+    transform: scale(0.96);
+    opacity: 0.4;
+    filter: blur(2px);
+  }
+}
+
+/* Diff lines type themselves in during the replay. */
+.line-in {
+  animation: line-in 420ms var(--ease-out) both;
+  animation-delay: var(--delay, 0ms);
+}
+
+@keyframes line-in {
+  from {
+    opacity: 0;
+    clip-path: inset(0 100% 0 0);
+  }
+  to {
+    opacity: 1;
+    clip-path: inset(0 0 0 0);
+  }
+}
+
+/* Highlighted lines glow softly when a step points at them. */
+.line-hot {
+  background: var(--accent-wash);
+  box-shadow: inset 3px 0 0 var(--accent);
+}
+
+/* Confetti for level ups and perfect rounds. */
+.confetti {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+  z-index: 60;
+}
+
+.confetti span {
+  position: absolute;
+  top: -12px;
+  left: var(--x);
+  width: 8px;
+  height: 12px;
+  border-radius: 2px;
+  background: var(--c);
+  animation: confetti-fall var(--t, 1.6s) cubic-bezier(0.2, 0.6, 0.4, 1) forwards;
+  animation-delay: var(--delay, 0ms);
+}
+
+@keyframes confetti-fall {
+  to {
+    transform: translate(var(--dx), 105vh) rotate(var(--rot));
+  }
+}
+
+/* XP pops up and floats away when earned. */
+.xp-pop {
+  animation: xp-pop 1.2s var(--ease-out) forwards;
+}
+
+@keyframes xp-pop {
+  0% {
+    transform: translateY(6px) scale(0.8);
+    opacity: 0;
+  }
+  20% {
+    transform: translateY(0) scale(1.1);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(-28px) scale(1);
+    opacity: 0;
+  }
+}
+
+/* Side notifications slide in from the edge. */
+.toast-in {
+  animation: toast-in 420ms var(--ease-out) both;
+}
+
+@keyframes toast-in {
+  from {
+    opacity: 0;
+    transform: translateX(28px) scale(0.98);
+  }
+}
+
+/* Concept cards flip to show the explanation. */
+.flip {
+  perspective: 1200px;
+}
+
+.flip-inner {
+  display: grid;
+  transition: transform 600ms var(--ease-out);
+  transform-style: preserve-3d;
+}
+
+.flip-inner > * {
+  grid-area: 1 / 1;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+
+.flip-back {
+  transform: rotateY(180deg);
+}
+
+.flip.is-flipped .flip-inner {
+  transform: rotateY(180deg);
+}
+
+/* A wrong answer shakes, a right one pops. */
+.shake {
+  animation: shake 380ms ease-in-out;
+}
+
+@keyframes shake {
+  20%,
+  60% {
+    transform: translateX(-5px);
+  }
+  40%,
+  80% {
+    transform: translateX(5px);
+  }
+}
+
+.pop {
+  animation: pop 420ms cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes pop {
+  50% {
+    transform: scale(1.04);
+  }
+}
+
+/* Live dot on the wire. */
+.live-dot {
+  animation: key-pulse 1.8s var(--ease-out) infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .piece,
+  .live-dot,
+  .line-in {
+    animation: none;
+  }
+
+  .confetti,
+  .shard {
+    display: none;
+  }
+
+  .flip-inner {
+    transition: none;
+  }
+}

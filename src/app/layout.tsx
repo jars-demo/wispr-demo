@@ -1,7 +1,11 @@
 import type { Metadata, Viewport } from 'next'
 import { Geist, Geist_Mono, Instrument_Serif } from 'next/font/google'
 
+import { Toaster } from '@/features/fx/Toaster'
+import { SITE_URL } from '@/domain/card'
+
 import './globals.css'
+import './fx.css'
 
 // next/font downloads these at build time and serves them from our own origin.
 const geistSans = Geist({ variable: '--font-geist-sans', subsets: ['latin'] })
@@ -14,9 +18,10 @@ const instrumentSerif = Instrument_Serif({
 })
 
 export const metadata: Metadata = {
-  title: { default: 'Receipts · Say it. Get proof it was done.', template: '%s · Receipts' },
+  metadataBase: new URL(SITE_URL),
+  title: { default: 'Breakdown · SHIPPED IT? Now understand it.', template: '%s · Breakdown' },
   description:
-    'Talk to Receipts, hand the receipt to Claude Code, Codex or Cursor, then check the work against what you said.',
+    'Your coding agent ships the code. Breakdown turns every change into a short game, so you understand exactly what it did and the engineering behind it.',
 }
 
 export const viewport: Viewport = {
@@ -40,6 +45,7 @@ export default function RootLayout({ children }: LayoutProps<'/'>) {
           Skip to content
         </a>
         {children}
+        <Toaster />
       </body>
     </html>
   )

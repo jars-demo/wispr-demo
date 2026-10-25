@@ -1,61 +1,37 @@
 'use client'
 
-import { useMemo, useSyncExternalStore } from 'react'
+import type { OwnAiKey } from '@/domain/ai'
+import { isAiProvider } from '@/domain/ai'
+import { createLocalStore } from '@/lib/local-store'
 
-import { isRepoName, type RepoName } from '@/domain/github-handoff'
+// Credentials for this browser only. The GitHub token is sent only to api.github.com. The AI key
+// is sent with each breakdown request and used for that call only; neither is stored server-side.
 
-// The GitHub connection for this browser only: a token, the account it belongs to, and the repo
-// to send to. Kept in localStorage, shared across tabs, never sent to Receipts' server.
+export type Connection = { token: string; login: string }
 
-export type Connection = { token: string; login: string; repo: RepoName | null }
-
-const KEY = 'receipts:github'
-const listeners = new Set<() => void>()
-
-function emit() {
-  for (const listener of listeners) listener()
-}
-
-function subscribe(listener: () => void) {
-  listeners.add(listener)
-  window.addEventListener('storage', listener)
-  return () => {
-    listeners.delete(listener)
-    window.removeEventListener('storage', listener)
-  }
-}
-
-function readRaw(): string | null {
-  try {
-    return window.localStorage.getItem(KEY)
-  } catch {
-    return null
-  }
-}
-
-function parse(raw: string | null): Connection | null {
+export const githubStore = createLocalStore<Connection | null>('breakdown:github', (raw) => {
   if (!raw) return null
   try {
     const value = JSON.parse(raw) as Partial<Connection>
-    if (typeof value.token !== 'string' || typeof value.login !== 'string') return null
-    const repo = typeof value.repo === 'string' && isRepoName(value.repo) ? value.repo : null
-    return { token: value.token, login: value.login, repo }
+    return typeof value.token === 'string' && typeof value.login === 'string'
+      ? { token: value.token, login: value.login }
+      : null
   } catch {
     return null
   }
-}
+})
 
-export function saveConnection(connection: Connection | null) {
+export const aiKeyStore = createLocalStore<OwnAiKey | null>('breakdown:ai', (raw) => {
+  if (!raw) return null
   try {
-    if (connection) window.localStorage.setItem(KEY, JSON.stringify(connection))
-    else window.localStorage.removeItem(KEY)
+    const value = JSON.parse(raw) as Partial<OwnAiKey>
+    return typeof value.provider === 'string' &&
+      isAiProvider(value.provider) &&
+      typeof value.key === 'string' &&
+      typeof value.model === 'string'
+      ? { provider: value.provider, key: value.key, model: value.model }
+      : null
   } catch {
-    // Storage blocked (private window): the connection cannot be kept.
+    return null
   }
-  emit()
-}
-
-export function useConnection(): Connection | null {
-  const raw = useSyncExternalStore(subscribe, readRaw, () => null)
-  return useMemo(() => parse(raw), [raw])
-}
+})

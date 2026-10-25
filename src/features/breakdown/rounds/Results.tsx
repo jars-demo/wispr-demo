@@ -1,0 +1,245 @@
+'use client'
+
+import Link from 'next/link'
+import { useEffect, useState } from 'react'
+
+import { Avatar } from '@/components/Avatar'
+import { buttonStyles } from '@/components/ui/button-styles'
+import { ACHIEVEMENTS, levelFor, XP } from '@/domain/game'
+import type { RunOutcome } from '@/domain/profile'
+import { Confetti } from '@/features/fx/Confetti'
+import { SaveForm } from '@/features/game/SaveForm'
+
+// Round 5: the score. XP counts up, the level bar fills, and every unlock gets its moment.
+
+function prefersLessMotion(): boolean {
+  return (
+    typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches
+  )
+}
+
+function useCountUp(target: number, ms = 1100): number {
+  const [value, setValue] = useState(() => (prefersLessMotion() ? target : 0))
+  useEffect(() => {
+    if (prefersLessMotion()) return
+    const start = performance.now()
+    let frame = 0
+    const step = (t: number) => {
+      const p = Math.min(1, (t - start) / ms)
+      setValue(Math.round(target * (1 - (1 - p) ** 3)))
+      if (p < 1) frame = requestAnimationFrame(step)
+    }
+    frame = requestAnimationFrame(step)
+    return () => cancelAnimationFrame(frame)
+  }, [target, ms])
+  return value
+}
+
+export function Results({
+  outcome,
+  correct,
+  total,
+  explain,
+  explore,
+  skippedFiles,
+  saved,
+  onDrill,
+}: {
+  outcome: RunOutcome
+  correct: number
+  total: number
+  explain: number | null
+  explore: string[]
+  skippedFiles: string[]
+  saved: boolean
+  onDrill: ((path: string) => void) | null
+}) {
+  const gained = useCountUp(outcome.gained)
+  const xp = outcome.profile.xp
+  const level = levelFor(xp)
+  const span = level.next ? level.next - level.floor : 1
+  const progress = level.next ? Math.min(100, ((xp - level.floor) / span) * 100) : 100
+  const [bar, setBar] = useState(0)
+  useEffect(() => {
+    const id = window.setTimeout(() => setBar(progress), 300)
+    return () => window.clearTimeout(id)
+  }, [progress])
+
+  const perfect = total > 0 && correct === total
+  const celebrate = perfect || outcome.levelUp !== null || outcome.newAchievements.length > 0
+  const replay =
+    outcome.gained > 0 &&
+    outcome.profile.runs.filter((r) => r.key === outcome.profile.runs[0]?.key).length > 1
+
+  const lines = [
+    { label: `${correct} of ${total} predictions right`, xp: correct * XP.correct },
+    {
+      label: explain === null ? 'Explain it back skipped' : `Explained it back: ${explain}%`,
+      xp: Math.round((explain ?? 0) * XP.explainPerPoint),
+    },
+    { label: 'Finished the breakdown', xp: XP.finish },
+    {
+      label: `${outcome.newConcepts.length} new ${outcome.newConcepts.length === 1 ? 'concept' : 'concepts'}`,
+      xp: outcome.newConcepts.length * XP.newConcept,
+    },
+  ]
+
+  return (
+    <div className="flex flex-col gap-5">
+      {celebrate ? <Confetti seed={xp} /> : null}
+      <div className="glass-strong flex flex-col items-center gap-3 rounded-panel px-5 py-8 text-center sm:py-10">
+        <p className="text-[13px] font-medium tracking-[0.16em] text-muted uppercase">
+          {perfect ? 'Perfect round' : 'Breakdown complete'}
+        </p>
+        <p className="font-display text-7xl leading-none tracking-tight text-accent-text tabular-nums sm:text-8xl">
+          +{gained} XP
+        </p>
+        {replay ? (
+          <p className="text-[13px] text-muted">Replays earn a quarter of the XP.</p>
+        ) : null}
+        <div className="mt-2 flex w-full max-w-md flex-col gap-1.5">
+          <div className="flex justify-between text-[13px]">
+            <span className="font-medium">
+              Level {level.level} · {level.title}
+            </span>
+            <span className="text-muted tabular-nums">
+              {xp.toLocaleString('en-US')}
+              {level.next ? ` / ${level.next.toLocaleString('en-US')}` : ''} XP
+            </span>
+          </div>
+          <div
+            className="h-3 overflow-hidden rounded-full bg-surface-2"
+            role="progressbar"
+            aria-valuenow={Math.round(progress)}
+            aria-valuemin={0}
+            aria-valuemax={100}
+            aria-label="Progress to next level"
+          >
+            <div
+              className="h-full rounded-full bg-accent transition-[width] duration-1000 ease-out"
+              style={{ width: `${bar}%` }}
+            />
+          </div>
+        </div>
+      </div>
+
+      <div className="grid gap-4 md:grid-cols-2">
+        <div className="glass flex flex-col gap-2 rounded-panel p-5">
+          <h3 className="text-[15px] font-semibold">Where the XP came from</h3>
+          <ul className="flex flex-col gap-1.5 text-[14px]">
+            {lines.map((line) => (
+              <li key={line.label} className="flex justify-between gap-3">
+                <span className="text-ink-2">{line.label}</span>
+                <span className="font-medium tabular-nums">+{line.xp}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+
+        <div className="glass flex flex-col gap-3 rounded-panel p-5">
+          <h3 className="text-[15px] font-semibold">Unlocked</h3>
+          {outcome.levelUp ? (
+            <p className="pop rounded-card bg-ink px-3 py-2 text-[14px] text-canvas">
+              ⬆️ Level {outcome.levelUp.to}: {level.title}
+            </p>
+          ) : null}
+          {outcome.newAchievements.map((id) => {
+            const a = ACHIEVEMENTS.find((x) => x.id === id)
+            return a ? (
+              <p
+                key={id}
+                className="pop flex items-center gap-2 rounded-card bg-accent-wash px-3 py-2 text-[14px]"
+              >
+                <span aria-hidden="true" className="text-xl">
+                  {a.emoji}
+                </span>
+                <span>
+                  <span className="font-medium">{a.title}</span> · {a.how}
+                </span>
+              </p>
+            ) : null
+          })}
+          {outcome.newAvatars.map((id) => (
+            <p
+              key={id}
+              className="pop flex items-center gap-2 rounded-card bg-accent-wash px-3 py-2 text-[14px]"
+            >
+              <Avatar id={id} size={28} /> New avatar unlocked
+            </p>
+          ))}
+          {outcome.newConcepts.length ? (
+            <div className="flex flex-wrap gap-1.5">
+              {outcome.newConcepts.map((c) => (
+                <span
+                  key={c}
+                  className="rounded-full bg-surface px-2.5 py-1 text-[13px] ring-1 ring-hairline"
+                >
+                  🧠 {c}
+                </span>
+              ))}
+            </div>
+          ) : null}
+          {!outcome.levelUp &&
+          !outcome.newAchievements.length &&
+          !outcome.newAvatars.length &&
+          !outcome.newConcepts.length ? (
+            <p className="text-[14px] text-muted">Nothing new this time. Try a harder change.</p>
+          ) : null}
+        </div>
+      </div>
+
+      {!saved ? (
+        <div id="save" className="glass rounded-panel p-5">
+          <h3 className="text-[15px] font-semibold">Keep this progress and get on the board</h3>
+          <p className="mb-3 text-[14px] text-ink-2">Just a name. No sign-up, no email.</p>
+          <SaveForm />
+        </div>
+      ) : null}
+
+      {skippedFiles.length && onDrill ? (
+        <div className="glass flex flex-col gap-2 rounded-panel p-5">
+          <h3 className="text-[15px] font-semibold">
+            Big change: {skippedFiles.length} more files to explore
+          </h3>
+          <p className="text-[14px] text-ink-2">
+            This round covered the most important files. Break down the rest one at a time.
+          </p>
+          <ul className="flex flex-col gap-1">
+            {skippedFiles.slice(0, 12).map((path) => (
+              <li key={path} className="flex items-center justify-between gap-3 text-[13px]">
+                <span className="truncate font-mono">{path}</span>
+                <button
+                  type="button"
+                  onClick={() => onDrill(path)}
+                  className="shrink-0 font-medium text-accent-text hover:underline"
+                >
+                  Break down
+                </button>
+              </li>
+            ))}
+          </ul>
+        </div>
+      ) : null}
+
+      {explore.length ? (
+        <div className="flex flex-wrap items-center gap-2 text-[14px]">
+          <span className="text-muted">Explore next:</span>
+          {explore.map((topic) => (
+            <span key={topic} className="rounded-full bg-surface px-3 py-1 ring-1 ring-hairline">
+              {topic}
+            </span>
+          ))}
+        </div>
+      ) : null}
+
+      <div className="flex flex-wrap gap-2">
+        <Link href="/me" className={buttonStyles('accent', 'lg')}>
+          Share my card
+        </Link>
+        <Link href="/" className={buttonStyles('secondary', 'lg')}>
+          Next change
+        </Link>
+      </div>
+    </div>
+  )
+}

@@ -2,31 +2,39 @@
 
 import { useState } from 'react'
 
-import { AgentLogo } from '@/components/AgentLogo'
 import { buttonStyles } from '@/components/ui/button-styles'
-import { isRepoName } from '@/domain/github-handoff'
 
-import { saveConnection, type Connection } from './connection'
-import { getViewer, GitHubError, listRepos, type Repo } from './github'
+import { githubStore } from './connection'
+import { getViewer, GitHubError } from './github'
 
-// Connect GitHub with a token that stays in this browser, then pick the repo agents work in.
+// Connect GitHub with a read-only token that stays in this browser.
 
-const TOKEN_URL = 'https://github.com/settings/personal-access-tokens/new'
+const TOKEN_URL =
+  'https://github.com/settings/personal-access-tokens/new?description=Breakdown&contents=read&pull_requests=read&metadata=read'
 
-export function ConnectGitHub({ connection }: { connection: Connection | null }) {
-  const [open, setOpen] = useState(false)
+export function GitHubMark({ size = 18 }: { size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" aria-hidden="true" fill="currentColor">
+      <path d="M12 .5a11.5 11.5 0 0 0-3.64 22.41c.58.1.79-.25.79-.56v-2c-3.2.7-3.88-1.37-3.88-1.37-.52-1.33-1.28-1.69-1.28-1.69-1.05-.71.08-.7.08-.7 1.16.08 1.77 1.19 1.77 1.19 1.03 1.77 2.71 1.26 3.37.96.1-.75.4-1.26.73-1.55-2.55-.29-5.24-1.28-5.24-5.68 0-1.26.45-2.28 1.19-3.09-.12-.29-.52-1.46.11-3.04 0 0 .97-.31 3.17 1.18a11 11 0 0 1 5.77 0c2.2-1.49 3.17-1.18 3.17-1.18.63 1.58.23 2.75.11 3.04.74.81 1.19 1.83 1.19 3.09 0 4.41-2.69 5.39-5.25 5.67.41.36.78 1.06.78 2.14v3.17c0 .31.21.67.8.56A11.5 11.5 0 0 0 12 .5Z" />
+    </svg>
+  )
+}
+
+export function ConnectGitHub({ compact = false }: { compact?: boolean }) {
+  const connection = githubStore.use()
+  const [open, setOpen] = useState(!compact)
   const [token, setToken] = useState('')
-  const [repos, setRepos] = useState<Repo[] | null>(null)
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  async function connect(withToken: string) {
+  async function connect() {
+    const value = token.trim()
+    if (!value) return
     setBusy(true)
     setError(null)
     try {
-      const [{ login }, list] = await Promise.all([getViewer(withToken), listRepos(withToken)])
-      saveConnection({ token: withToken, login, repo: connection?.repo ?? null })
-      setRepos(list)
+      const { login } = await getViewer(value)
+      githubStore.write({ token: value, login })
       setToken('')
     } catch (caught) {
       setError(caught instanceof GitHubError ? caught.message : 'Could not reach GitHub.')
@@ -35,25 +43,17 @@ export function ConnectGitHub({ connection }: { connection: Connection | null })
     }
   }
 
-  // Connected and a repo chosen: one quiet line with a way to change it.
-  if (connection?.repo && repos === null) {
+  if (connection) {
     return (
-      <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[13px] text-muted">
-        <AgentLogo id="github" size={16} />
+      <div className="flex flex-wrap items-center gap-x-3 gap-y-2 text-[14px]">
+        <GitHubMark />
         <span>
-          <span className="text-ink">{connection.repo}</span> as {connection.login}
+          Connected as <span className="font-medium">{connection.login}</span>
         </span>
         <button
           type="button"
-          onClick={() => connect(connection.token)}
-          className="underline-offset-4 hover:text-ink hover:underline"
-        >
-          Change repo
-        </button>
-        <button
-          type="button"
-          onClick={() => saveConnection(null)}
-          className="underline-offset-4 hover:text-ink hover:underline"
+          onClick={() => githubStore.write(null)}
+          className="text-muted underline-offset-4 hover:text-ink hover:underline"
         >
           Disconnect
         </button>
@@ -61,64 +61,11 @@ export function ConnectGitHub({ connection }: { connection: Connection | null })
     )
   }
 
-  // Connected: choose the repo.
-  if (connection) {
-    return (
-      <div className="flex flex-col gap-2">
-        <label htmlFor="repo" className="text-[13px] text-muted">
-          Which repo should the agent work in?
-        </label>
-        {repos ? (
-          <select
-            id="repo"
-            defaultValue={connection.repo ?? ''}
-            onChange={(event) => {
-              const repo = event.target.value
-              if (isRepoName(repo)) {
-                saveConnection({ ...connection, repo })
-                setRepos(null)
-              }
-            }}
-            className="h-12 rounded-full border border-hairline bg-surface px-4 text-[15px]"
-          >
-            <option value="" disabled>
-              Choose a repository
-            </option>
-            {repos.map((repo) => (
-              <option key={repo.full_name} value={repo.full_name}>
-                {repo.full_name}
-                {repo.private ? ' (private)' : ''}
-              </option>
-            ))}
-          </select>
-        ) : (
-          <button
-            type="button"
-            onClick={() => connect(connection.token)}
-            disabled={busy}
-            className={buttonStyles('secondary')}
-          >
-            {busy ? 'Loading repositories…' : 'Choose a repository'}
-          </button>
-        )}
-        {error ? (
-          <p role="alert" className="text-sm text-bad">
-            {error}
-          </p>
-        ) : null}
-      </div>
-    )
-  }
-
   if (!open) {
     return (
-      <button
-        type="button"
-        onClick={() => setOpen(true)}
-        className={`${buttonStyles('secondary', 'lg')} gap-2.5`}
-      >
-        <AgentLogo id="github" size={18} />
-        Connect GitHub
+      <button type="button" onClick={() => setOpen(true)} className={buttonStyles('primary', 'lg')}>
+        <GitHubMark />
+        Plug in your GitHub
       </button>
     )
   }
@@ -127,9 +74,9 @@ export function ConnectGitHub({ connection }: { connection: Connection | null })
     <form
       onSubmit={(event) => {
         event.preventDefault()
-        void connect(token.trim())
+        void connect()
       }}
-      className="flex flex-col gap-3 rounded-card bg-surface/70 p-4"
+      className="flex flex-col gap-3"
     >
       <ol className="flex list-decimal flex-col gap-1 pl-5 text-[13px] leading-relaxed text-ink-2">
         <li>
@@ -141,48 +88,41 @@ export function ConnectGitHub({ connection }: { connection: Connection | null })
           >
             Create a fine-grained token
           </a>{' '}
-          for the repos you want agents to work in.
+          with read-only Contents and Pull requests.
         </li>
-        <li>
-          Give it read and write access to Contents, Issues, Pull requests and Actions (Metadata is
-          read-only).
-        </li>
-        <li>Paste it here.</li>
+        <li>Paste it here. That is it.</li>
       </ol>
-      <label htmlFor="gh-token" className="sr-only">
-        GitHub token
-      </label>
-      <input
-        id="gh-token"
-        type="password"
-        autoComplete="off"
-        spellCheck={false}
-        value={token}
-        onChange={(event) => setToken(event.target.value)}
-        placeholder="github_pat_…"
-        className="h-12 rounded-full border border-hairline bg-surface px-4 font-mono text-[14px]"
-      />
+      <div className="flex flex-col gap-2 sm:flex-row">
+        <label htmlFor="gh-token" className="sr-only">
+          GitHub token
+        </label>
+        <input
+          id="gh-token"
+          type="password"
+          autoComplete="off"
+          spellCheck={false}
+          value={token}
+          onChange={(event) => setToken(event.target.value)}
+          placeholder="github_pat_…"
+          className="h-11 min-w-0 flex-1 rounded-full border border-hairline-strong bg-surface px-4 font-mono text-[14px]"
+        />
+        <button
+          type="submit"
+          disabled={busy || !token.trim()}
+          className={buttonStyles('primary', 'lg')}
+        >
+          {busy ? 'Checking…' : 'Connect'}
+        </button>
+      </div>
       <p className="text-[12px] text-muted">
-        Kept only in this browser and sent only to api.github.com. Receipts&apos; server never sees
-        it. Disconnect any time.
+        Stays in this browser and is only ever sent to api.github.com. Breakdown&apos;s server never
+        sees it.
       </p>
       {error ? (
-        <p role="alert" className="text-sm text-bad">
+        <p role="alert" className="text-[13px] text-bad">
           {error}
         </p>
       ) : null}
-      <div className="flex gap-2">
-        <button
-          type="submit"
-          disabled={busy || token.trim() === ''}
-          className={buttonStyles('primary')}
-        >
-          {busy ? 'Connecting…' : 'Connect'}
-        </button>
-        <button type="button" onClick={() => setOpen(false)} className={buttonStyles('ghost')}>
-          Cancel
-        </button>
-      </div>
     </form>
   )
 }
