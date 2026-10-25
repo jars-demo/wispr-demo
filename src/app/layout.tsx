@@ -23,6 +23,7 @@ export const metadata: Metadata = {
   title: { default: 'Breakdown · SHIPPED IT? Now understand it.', template: '%s · Breakdown' },
   description:
     'Your coding agent ships the code. Breakdown turns every change into a short game, so you understand exactly what it did and the engineering behind it.',
+  twitter: { card: 'summary_large_image', creator: '@jishanarshaikh' },
 }
 
 export const viewport: Viewport = {

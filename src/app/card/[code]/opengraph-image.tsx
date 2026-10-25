@@ -1,15 +1,13 @@
-import { readFile } from 'node:fs/promises'
-import { join } from 'node:path'
-
 import { ImageResponse } from 'next/og'
 
 import { decodeCard, type CardData } from '@/domain/card'
 import { AVATAR_ART } from '@/features/card/avatar-art'
 import { CARD_SIZE, CardArt } from '@/features/card/CardArt'
+import { loadOgFonts } from '@/features/card/og-fonts'
 
 // The share image for a player card: the same template as on the page, filled from the link.
-// The avatar comes in as a data URI and Geist and Instrument Serif (both OFL, licences beside
-// them) are loaded from the repo, so the image renders without fetching anything.
+// The avatar comes in as a data URI and the fonts are read from the repo, so the image renders
+// without fetching anything.
 
 export const size = CARD_SIZE
 export const contentType = 'image/png'
@@ -28,18 +26,9 @@ const FALLBACK: CardData = {
   tagline: 0,
 }
 
-const fontFile = (name: string) => readFile(join(process.cwd(), 'src/app/card/fonts', name))
-
 export default async function Image({ params }: { params: Promise<{ code: string }> }) {
   const { code } = await params
   const card = decodeCard(code) ?? FALLBACK
-  const [sans, sansSemi, sansBold, serif, serifItalic] = await Promise.all([
-    fontFile('Geist-Regular.ttf'),
-    fontFile('Geist-SemiBold.ttf'),
-    fontFile('Geist-Bold.ttf'),
-    fontFile('InstrumentSerif-Regular.ttf'),
-    fontFile('InstrumentSerif-Italic.ttf'),
-  ])
   return new ImageResponse(
     <CardArt
       card={card}
@@ -51,13 +40,7 @@ export default async function Image({ params }: { params: Promise<{ code: string
     />,
     {
       ...size,
-      fonts: [
-        { name: 'Geist', data: sans, style: 'normal', weight: 400 },
-        { name: 'Geist', data: sansSemi, style: 'normal', weight: 600 },
-        { name: 'Geist', data: sansBold, style: 'normal', weight: 700 },
-        { name: 'Instrument Serif', data: serif, style: 'normal', weight: 400 },
-        { name: 'Instrument Serif', data: serifItalic, style: 'italic', weight: 400 },
-      ],
+      fonts: [...(await loadOgFonts())],
     },
   )
 }
