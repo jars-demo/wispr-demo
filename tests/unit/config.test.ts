@@ -9,7 +9,7 @@ describe('parseConfig', () => {
     expect(config.logLevel).toBe('info')
     expect(config.environment).toBe('development')
     expect(config.groq).toBeNull()
-    expect(config.breakdownsPerHour).toBe(30)
+    expect(config.breakdownsPerHour).toBe(2)
     expect(config.database).toEqual({ kind: 'pglite', dir: '.data/pglite' })
   })
 

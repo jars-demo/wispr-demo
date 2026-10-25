@@ -68,7 +68,7 @@ value.
 | --------------------- | ------------- | --------------------------------------------------------------- |
 | `GROQ_API_KEY`        | No            | Shared AI for breakdowns. Without it, samples and own keys only |
 | `GROQ_MODEL`          | No            | Default `openai/gpt-oss-120b`                                   |
-| `BREAKDOWNS_PER_HOUR` | No            | Shared-key breakdowns per visitor per hour. Default 30          |
+| `BREAKDOWNS_PER_HOUR` | No            | Free shared-key breakdowns per visitor per hour. Default 2      |
 | `DATABASE_URL`        | In production | Hosted Postgres (Neon) for the leaderboard and saved progress   |
 | `PGLITE_DIR`          | No            | Where local PGlite keeps data. Default `.data/pglite`           |
 | `LOG_LEVEL`           | No            | `debug`, `info`, `warn` or `error`. Default `info`              |

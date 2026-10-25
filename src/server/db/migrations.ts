@@ -1,7 +1,7 @@
 // Numbered, forward-only migrations. Never edit an applied migration: add a new one.
 // Kept as TypeScript strings so they ship inside the serverless bundle without file lookups.
 // Versions start with "b" so they never collide with the Receipts migrations that may already be
-// recorded in the same database. Receipts' old tables are left alone.
+// recorded in the same database.
 
 export type Migration = { version: string; sql: string }
 
@@ -42,6 +42,45 @@ export const MIGRATIONS: readonly Migration[] = [
         count integer not null,
         primary key (key, window_start)
       );
+    `,
+  },
+  {
+    // Receipts shared this database. Its tables and its migration rows go; Breakdown's tables and
+    // rate_limits (created by Receipts, now used by Breakdown) stay.
+    version: 'b0002_drop_receipts',
+    sql: `
+      drop table if exists checks;
+      drop table if exists spec_items;
+      drop table if exists spec_versions;
+      drop table if exists specs;
+      delete from schema_migrations where version in ('0001_specs', '0002_checks', '0003_sent');
+    `,
+  },
+  {
+    // One name per player across the board, ignoring case. Older duplicates keep their name with
+    // a short suffix so the index can be built.
+    version: 'b0003_unique_names',
+    sql: `
+      update players p set name = left(p.name, 19) || '-' || left(p.id::text, 4)
+      where exists (
+        select 1 from players q
+        where lower(q.name) = lower(p.name)
+          and (q.created_at, q.id) < (p.created_at, p.id)
+      );
+      create unique index players_name_key on players (lower(name));
+    `,
+  },
+  {
+    // Public links broken down once are kept so the next person gets them instantly and free.
+    version: 'b0004_breakdown_cache',
+    sql: `
+      create table breakdown_cache (
+        key text primary key check (char_length(key) <= 600),
+        result jsonb not null,
+        expires_at timestamptz not null,
+        created_at timestamptz not null default now()
+      );
+      create index breakdown_cache_expires_idx on breakdown_cache (expires_at);
     `,
   },
 ]

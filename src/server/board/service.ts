@@ -18,6 +18,8 @@ import {
   findOwnProfile,
   insertEvents,
   insertPlayer,
+  isUniqueViolation,
+  nameTaken,
   playerExists,
   recentEvents,
   standing,
@@ -31,7 +33,15 @@ export async function hashSecret(secret: string): Promise<string> {
 }
 
 export type SyncOutcome =
-  { ok: true; events: number } | { ok: false; status: 404 | 422; reason: string }
+  | { ok: true; events: number }
+  | { ok: false; status: 404 | 409 | 422; reason: string; code?: 'name_taken' }
+
+const NAME_TAKEN = {
+  ok: false,
+  status: 409,
+  reason: 'Someone already has that name. Try another.',
+  code: 'name_taken',
+} as const
 
 /** Saves a player's numbers after re-checking them, and records what changed as public events. */
 export async function syncPlayer(db: Db, input: SyncInput): Promise<SyncOutcome> {
@@ -39,22 +49,31 @@ export async function syncPlayer(db: Db, input: SyncInput): Promise<SyncOutcome>
   if (!check.ok) return { ok: false, status: 422, reason: check.reason }
   const secretHash = await hashSecret(input.secret)
 
-  return db.transaction(async (tx) => {
-    const before = await findOwnPlayer(tx, input.id, secretHash)
-    if (!before) {
+  try {
+    return await db.transaction(async (tx): Promise<SyncOutcome> => {
+      const before = await findOwnPlayer(tx, input.id, secretHash)
       // Someone else's id behaves exactly like a missing one.
-      if (await playerExists(tx, input.id)) {
-        return { ok: false as const, status: 404 as const, reason: 'Player not found.' }
+      if (!before && (await playerExists(tx, input.id))) {
+        return { ok: false, status: 404, reason: 'Player not found.' }
       }
-      await insertPlayer(tx, input.id, secretHash, check.state, input.profile)
-    } else {
-      await updateOwnPlayer(tx, input.id, secretHash, check.state, input.profile)
-    }
-    // Hidden players save progress quietly: no public events.
-    const events = check.state.hidden ? [] : eventsBetween(before, check.state)
-    await insertEvents(tx, input.id, events)
-    return { ok: true as const, events: events.length }
-  })
+      if (await nameTaken(tx, check.state.name, input.id)) return NAME_TAKEN
+      if (before) await updateOwnPlayer(tx, input.id, secretHash, check.state, input.profile)
+      else await insertPlayer(tx, input.id, secretHash, check.state, input.profile)
+      // Hidden players save progress quietly: no public events.
+      const events = check.state.hidden ? [] : eventsBetween(before, check.state)
+      await insertEvents(tx, input.id, events)
+      return { ok: true, events: events.length }
+    })
+  } catch (error) {
+    // Two players claimed the same name at the same moment; the index let only one through.
+    if (isUniqueViolation(error)) return NAME_TAKEN
+    throw error
+  }
+}
+
+/** Whether a name is free to claim. A player's own current name is checked in the browser. */
+export async function nameAvailable(db: Db, name: string): Promise<boolean> {
+  return !(await nameTaken(db, name, null))
 }
 
 export async function leaveBoard(db: Db, id: string, secret: string): Promise<boolean> {

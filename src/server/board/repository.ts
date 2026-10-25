@@ -44,6 +44,22 @@ export async function findOwnPlayer(
   return row ? toState(row) : null
 }
 
+/** Whether another player already holds this name. Names are unique ignoring case. */
+export async function nameTaken(db: Db, name: string, exceptId: string | null): Promise<boolean> {
+  const rows = await db.query(
+    'select 1 from players where lower(name) = lower($1) and id is distinct from $2::uuid',
+    [name, exceptId],
+  )
+  return rows.length > 0
+}
+
+/** Postgres reports a broken unique index as 23505, from both postgres.js and PGlite. */
+export function isUniqueViolation(error: unknown): boolean {
+  return (
+    typeof error === 'object' && error !== null && (error as { code?: unknown }).code === '23505'
+  )
+}
+
 export async function playerExists(db: Db, id: string): Promise<boolean> {
   const rows = await db.query('select 1 from players where id = $1', [id])
   return rows.length > 0
