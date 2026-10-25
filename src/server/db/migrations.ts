@@ -113,4 +113,11 @@ export const MIGRATIONS: readonly Migration[] = [
     version: 'b0006_name_changes',
     sql: `alter table players add column name_changed_at timestamptz;`,
   },
+  {
+    // A clean start before the launch, asked for by the maintainer: every player, event, share
+    // and cached breakdown goes. Players keep their progress in their browsers and reappear on
+    // their next save. Rate limit windows expire on their own within the hour.
+    version: 'b0007_launch_reset',
+    sql: `truncate table shared_breakdowns, player_events, players, breakdown_cache;`,
+  },
 ]
