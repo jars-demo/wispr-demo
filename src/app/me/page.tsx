@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 
 import { PageHeader, PageShell } from '@/components/PageShell'
 import { MyCard } from '@/features/card/MyCard'
+import { MyShares } from '@/features/shared/MyShares'
 
 export const metadata: Metadata = { title: 'Your card', robots: { index: false } }
 
@@ -15,6 +16,7 @@ export default function MePage() {
         </p>
       </PageHeader>
       <MyCard />
+      <MyShares />
     </PageShell>
   )
 }

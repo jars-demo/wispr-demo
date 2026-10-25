@@ -66,6 +66,8 @@ test('a full sample breakdown earns XP and unlocks the first achievement', async
 
   await expect(page.getByText('Perfect round')).toBeVisible()
   await expect(page.getByText('First breakdown').first()).toBeVisible()
+  // Samples are never shareable: only public GitHub changes the server broke down are.
+  await expect(page.getByRole('switch', { name: 'Make this breakdown public' })).toHaveCount(0)
 
   // The card pops up on its own, ready to post on X with both handles and the real site link.
   const modal = page.getByRole('dialog', { name: 'Your card is ready' })
@@ -94,6 +96,18 @@ test('the card page offers sharing and shows locked avatars', async ({ page }) =
   )
   await expect(page.getByRole('region', { name: 'Avatars' })).toContainText('2 of 10')
   await noSidewaysScroll(page)
+})
+
+test('learn from others lists shared breakdowns or explains how to share', async ({ page }) => {
+  await page.goto('/learn')
+  await expect(page.getByRole('heading', { level: 1 })).toContainText('broken down by')
+  await expect(
+    page.getByRole('link', { name: /Play/ }).first().or(page.getByText('Nothing shared yet')),
+  ).toBeVisible()
+  await noSidewaysScroll(page)
+
+  await page.goto('/b?shared=00000000-0000-4000-8000-000000000000')
+  await expect(page.getByText(/That shared breakdown is gone/)).toBeVisible()
 })
 
 test('a malformed share link shows not found, a junk link is explained', async ({

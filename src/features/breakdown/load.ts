@@ -2,6 +2,7 @@
 
 import { AI_HEADERS, type OwnAiKey } from '@/domain/ai'
 import type { Breakdown } from '@/domain/breakdown'
+import { changeLabel } from '@/domain/shared'
 import { parseDiff, type ParsedDiff } from '@/domain/diff'
 import { sampleById } from '@/domain/samples'
 import type { Connection } from '@/features/connect/connection'
@@ -23,6 +24,10 @@ export type Loaded = {
   url: string | null
   label: string
   demo: boolean
+  /** The public GitHub link the server broke this down from, so it can be shared. */
+  shareUrl?: string | null
+  /** Who made this breakdown public, when playing someone's shared one. */
+  sharedBy?: { name: string; avatar: string } | null
 }
 
 export class LoadError extends Error {
@@ -107,7 +112,54 @@ async function post(body: unknown, ai: OwnAiKey | null) {
   }
   // A fresh AI run used one free breakdown; a cached public link did not.
   if (response.headers.get('X-Breakdown-Cache') !== 'hit') void refreshQuota()
-  return (await response.json()) as Omit<Loaded, 'repo' | 'url' | 'label' | 'demo'>
+  return (await response.json()) as Result
+}
+
+type Result = Omit<Loaded, 'repo' | 'url' | 'label' | 'demo'>
+
+/**
+ * Public changes go through the server first: the result is cached for everyone and can be
+ * shared. Returns null when GitHub will not serve the change publicly (a private repository),
+ * so the caller can fetch it in the browser with the player's own token instead.
+ */
+async function postPublic(url: string, extra: object, ai: OwnAiKey | null): Promise<Result | null> {
+  try {
+    return await post({ source: { kind: 'link', url }, ...extra }, ai)
+  } catch (error) {
+    if (error instanceof LoadError && error.code === 'github_fetch') return null
+    throw error
+  }
+}
+
+async function loadShared(id: string): Promise<Loaded> {
+  let response: Response
+  try {
+    response = await fetch(`/api/shared/${encodeURIComponent(id)}`, { cache: 'no-store' })
+  } catch {
+    throw new LoadError(
+      'Could not reach Breakdown. Check your connection and try again.',
+      'offline',
+    )
+  }
+  if (!response.ok) {
+    const problem = (await response.json().catch(() => null)) as { title?: string } | null
+    throw new LoadError(problem?.title ?? 'That shared breakdown is gone.', 'not_found')
+  }
+  const share = (await response.json()) as {
+    result: Result
+    url: string
+    repo: string
+    by: { name: string; avatar: string }
+  }
+  return {
+    ...share.result,
+    repo: share.repo,
+    url: share.url,
+    label: changeLabel(share.url),
+    demo: false,
+    shareUrl: null,
+    sharedBy: share.by,
+  }
 }
 
 export async function loadBreakdown(
@@ -133,14 +185,18 @@ export async function loadBreakdown(
     }
   }
 
+  // Shared breakdowns are always read fresh: their owner can make them private at any time.
+  if (source.kind === 'shared') return loadShared(source.id)
+
   if (!options.fresh) {
     const cached = readCache()[key]
     if (cached) return cached.value
   }
 
-  let result: Omit<Loaded, 'repo' | 'url' | 'label' | 'demo'>
+  let result: Result
   let repo: string | null = null
   let url: string | null = null
+  let shareUrl: string | null = null
   let label = 'A change'
 
   if (source.kind === 'sample') {
@@ -161,56 +217,62 @@ export async function loadBreakdown(
       throw new LoadError('The pasted diff is gone. Paste it again on the home page.', 'not_found')
     result = await post({ source: { kind: 'diff', diff, title: null }, ...extra }, options.ai)
     label = 'Pasted diff'
-  } else if (source.kind === 'github') {
-    const gh = options.github
-    if (!gh)
-      throw new LoadError('Connect GitHub in Settings to break down this change.', 'no_github')
-    let diff: string
-    try {
-      diff =
-        'pr' in source
-          ? await getPullDiff(gh.token, source.repo, source.pr)
-          : await getCommitDiff(gh.token, source.repo, source.sha)
-    } catch (error) {
-      throw new LoadError(
-        error instanceof GitHubError ? error.message : 'Could not load the change.',
-        'github',
+  } else {
+    // A GitHub change, from the player's feed or a pasted link.
+    if (source.kind === 'github') {
+      repo = source.repo
+      url = `https://github.com/${source.repo}/${'pr' in source ? `pull/${source.pr}` : `commit/${source.sha}`}`
+    } else {
+      url = source.url
+    }
+    const parts = /github\.com\/([^/]+\/[^/]+)\/(pull|commit|compare)\/([^/]+)/.exec(url)
+    repo = parts?.[1] ?? repo
+    label = changeLabel(url)
+    const pr = parts?.[2] === 'pull' ? Number(parts[3]) : null
+    const sha = parts?.[2] === 'commit' ? (parts[3] ?? null) : null
+
+    const open = await postPublic(url, extra, options.ai)
+    if (open) {
+      result = open
+      shareUrl = url
+    } else {
+      // Not public: fetch it here with the player's token, so private code stays private.
+      const gh = options.github
+      if (!gh || !repo || !(pr || sha)) {
+        throw new LoadError(
+          gh
+            ? 'GitHub would not share this change. Check the link.'
+            : 'This change is not public. Connect GitHub in Settings to break down private repositories.',
+          gh ? 'github' : 'no_github',
+        )
+      }
+      let diff: string
+      try {
+        diff = pr
+          ? await getPullDiff(gh.token, repo, pr)
+          : await getCommitDiff(gh.token, repo, sha ?? '')
+      } catch (error) {
+        throw new LoadError(
+          error instanceof GitHubError ? error.message : 'Could not load the change.',
+          'github',
+        )
+      }
+      result = await post(
+        {
+          source: {
+            kind: 'diff',
+            diff,
+            title: label,
+            origin: source.kind === 'github' ? 'mine' : 'theirs',
+          },
+          ...extra,
+        },
+        options.ai,
       )
     }
-    label =
-      'pr' in source ? `${source.repo} #${source.pr}` : `${source.repo} @ ${source.sha.slice(0, 7)}`
-    result = await post(
-      { source: { kind: 'diff', diff, title: label, origin: 'mine' }, ...extra },
-      options.ai,
-    )
-    repo = source.repo
-    url = `https://github.com/${source.repo}/${'pr' in source ? `pull/${source.pr}` : `commit/${source.sha}`}`
-  } else {
-    url = source.url
-    const parts = /github\.com\/([^/]+\/[^/]+)\/(pull|commit|compare)\/([^/]+)/.exec(source.url)
-    repo = parts?.[1] ?? null
-    label = parts
-      ? `${parts[1]} ${parts[2] === 'pull' ? `#${parts[3]}` : `@ ${parts[3]?.slice(0, 7)}`}`
-      : source.url
-    // With GitHub connected, fetch in the browser so private repositories work too.
-    const gh = options.github
-    const pr = parts?.[2] === 'pull' ? Number(parts[3]) : null
-    const sha = parts?.[2] === 'commit' ? parts[3] : null
-    let diff: string | null = null
-    if (gh && repo && (pr || sha)) {
-      diff = await (
-        pr ? getPullDiff(gh.token, repo, pr) : getCommitDiff(gh.token, repo, sha ?? '')
-      ).catch(() => null)
-    }
-    result = diff
-      ? await post(
-          { source: { kind: 'diff', diff, title: label, origin: 'theirs' }, ...extra },
-          options.ai,
-        )
-      : await post({ source: { kind: 'link', url: source.url }, ...extra }, options.ai)
   }
 
-  const loaded: Loaded = { ...result, repo, url, label, demo: false }
+  const loaded: Loaded = { ...result, repo, url, label, demo: false, shareUrl }
   writeCache(key, loaded)
   return loaded
 }

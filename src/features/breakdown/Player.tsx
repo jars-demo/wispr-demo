@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 
+import { Avatar } from '@/components/Avatar'
 import { SampleLabel } from '@/components/SampleLabel'
 import { buttonStyles } from '@/components/ui/button-styles'
 import { sectionsForRef } from '@/domain/breakdown'
@@ -160,9 +161,14 @@ function Run({
   const drill = useCallback(
     (path: string) => {
       updateProfile((p) => recordDrill(p, new Date()))
-      router.push(hrefFor(request, path))
+      // A shared breakdown is one frozen copy; drilling in breaks down its public link instead.
+      const shared = request.source.kind === 'shared'
+      const url = state.status === 'ready' ? state.loaded.url : null
+      router.push(
+        hrefFor(shared && url ? { source: { kind: 'link', url }, only: null } : request, path),
+      )
     },
-    [request, router],
+    [request, router, state],
   )
 
   if (state.status === 'loading') return <Loading label={label} />
@@ -210,6 +216,12 @@ function Run({
       <div className="glass-strong z-30 sm:sticky flex flex-col gap-3 rounded-panel px-4 py-3 sm:top-22 sm:px-5">
         <div className="flex flex-wrap items-center gap-2 text-[12px] text-muted">
           {loaded.demo ? <SampleLabel>Sample change · ready-made breakdown</SampleLabel> : null}
+          {loaded.sharedBy ? (
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-surface px-2 py-0.5 text-ink ring-1 ring-hairline">
+              <Avatar id={loaded.sharedBy.avatar} size={18} />
+              Shared by {loaded.sharedBy.name}
+            </span>
+          ) : null}
           {loaded.repo ? <span className="font-mono">{loaded.repo}</span> : null}
           {request.only ? (
             <span className="rounded-full bg-accent-wash px-2 py-0.5 text-accent-text">
@@ -333,6 +345,7 @@ function Run({
               explore={breakdown.explore}
               skippedFiles={diff.skipped.files}
               saved={profile.board !== null}
+              share={loaded.shareUrl ? { url: loaded.shareUrl, only: request.only } : null}
               onDrill={drill}
             />
           ) : null}

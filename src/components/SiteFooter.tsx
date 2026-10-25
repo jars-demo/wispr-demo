@@ -34,6 +34,9 @@ export function SiteFooter() {
           <Link href="/board" className="hover:text-ink">
             Leaderboard
           </Link>
+          <Link href="/learn" className="hover:text-ink">
+            Learn from others
+          </Link>
           <Link href="/me" className="hover:text-ink">
             Your card
           </Link>

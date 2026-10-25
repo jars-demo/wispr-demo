@@ -1,7 +1,8 @@
 'use client'
 
-import { ChevronsUp } from 'lucide-react'
+import { BookOpen, ChevronsUp } from 'lucide-react'
 import { AnimatePresence, motion, useReducedMotion } from 'motion/react'
+import Link from 'next/link'
 
 import { Avatar } from '@/components/Avatar'
 import { Badge } from '@/components/Badge'
@@ -79,6 +80,13 @@ type Event = BoardView['events'][number]
 function EventArt({ event }: { event: Event }) {
   if (event.kind === 'achievement') return <Badge id={event.detail} size={30} />
   if (event.kind === 'avatar') return <Avatar id={event.detail} size={30} />
+  if (event.kind === 'shared') {
+    return (
+      <span className="grid size-[30px] shrink-0 place-items-center rounded-full bg-accent-wash text-accent-text">
+        <BookOpen aria-hidden="true" className="size-4" />
+      </span>
+    )
+  }
   if (event.kind === 'level') {
     return (
       <span className="grid size-[30px] shrink-0 place-items-center rounded-full bg-ink text-canvas">
@@ -106,7 +114,16 @@ export function LiveFeed({ events, limit }: { events: Event[]; limit: number }) 
             className="flex items-center gap-2.5 text-[13px]"
           >
             <EventArt event={event} />
-            <span className="min-w-0 flex-1 leading-snug">{event.text}</span>
+            {event.href ? (
+              <Link
+                href={event.href}
+                className="min-w-0 flex-1 leading-snug underline-offset-4 hover:text-accent-text hover:underline"
+              >
+                {event.text}
+              </Link>
+            ) : (
+              <span className="min-w-0 flex-1 leading-snug">{event.text}</span>
+            )}
             <span className="shrink-0 text-[12px] text-muted">{timeAgo(event.at, now)}</span>
           </motion.li>
         ))}

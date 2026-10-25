@@ -9,6 +9,7 @@ export type Source =
   | { kind: 'github'; repo: string; pr: number }
   | { kind: 'github'; repo: string; sha: string }
   | { kind: 'paste' }
+  | { kind: 'shared'; id: string }
 
 export type Request = { source: Source; only: string | null }
 
@@ -16,6 +17,9 @@ export function readRequest(params: { get(name: string): string | null }): Reque
   const only = params.get('only')
   const sample = params.get('sample')
   if (sample) return { source: { kind: 'sample', id: sample }, only }
+  const shared = params.get('shared')
+  if (shared && /^[0-9a-f-]{36}$/i.test(shared))
+    return { source: { kind: 'shared', id: shared }, only }
   const url = params.get('url')
   if (url) {
     const link = parseChangeLink(url)
@@ -48,14 +52,17 @@ export function runKey(request: Request, pasted: string | null): string {
         ? `link:${s.url}`
         : s.kind === 'paste'
           ? `paste:${hash(pasted ?? '')}`
-          : 'pr' in s
-            ? `gh:${s.repo}#${s.pr}`
-            : `gh:${s.repo}@${s.sha}`
+          : s.kind === 'shared'
+            ? `shared:${s.id}`
+            : 'pr' in s
+              ? `gh:${s.repo}#${s.pr}`
+              : `gh:${s.repo}@${s.sha}`
   return request.only ? `${base}::${request.only}` : base
 }
 
 export function runSource(source: Source): RunSource {
-  return source.kind
+  // A shared breakdown is a public GitHub change, so it counts like a link.
+  return source.kind === 'shared' ? 'link' : source.kind
 }
 
 /** The same request with a different focus, for drilling into one file. */
@@ -65,6 +72,7 @@ export function hrefFor(request: Request, only: string | null): string {
   if (s.kind === 'sample') params.set('sample', s.id)
   else if (s.kind === 'link') params.set('url', s.url)
   else if (s.kind === 'paste') params.set('paste', '1')
+  else if (s.kind === 'shared') params.set('shared', s.id)
   else {
     params.set('repo', s.repo)
     if ('pr' in s) params.set('pr', String(s.pr))

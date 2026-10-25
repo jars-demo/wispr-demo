@@ -18,7 +18,8 @@ export function Logo() {
   return (
     <span className="logo inline-flex items-center gap-2.5 text-[17px] font-semibold tracking-[-0.03em]">
       <LogoMark />
-      Breakdown
+      {/* On the narrowest phones the mark alone carries the brand; the link is labelled. */}
+      <span className="max-[379px]:hidden">Breakdown</span>
     </span>
   )
 }

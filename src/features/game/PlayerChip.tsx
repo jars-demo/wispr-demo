@@ -28,7 +28,7 @@ export function PlayerChip() {
       className="flex h-10 items-center gap-2 rounded-full bg-surface/80 py-1 pr-3 pl-1 ring-1 ring-hairline transition-colors hover:bg-surface"
     >
       <Avatar id={profile.avatar} size={32} />
-      <span className="flex flex-col leading-none">
+      <span className="flex flex-col leading-none whitespace-nowrap">
         <span className="text-[12px] font-semibold tabular-nums">
           {profile.xp.toLocaleString('en-US')} XP
         </span>

@@ -15,6 +15,7 @@ import { CardModal } from '@/features/card/CardModal'
 import { cardFromProfile } from '@/features/card/share'
 import { Confetti } from '@/features/fx/Confetti'
 import { NameClaim } from '@/features/game/NameClaim'
+import { ShareToggle } from '@/features/shared/ShareToggle'
 
 // Round 5: the score. XP counts up, the level bar fills, and every unlock gets its moment.
 
@@ -81,6 +82,7 @@ export function Results({
   explore,
   skippedFiles,
   saved,
+  share,
   onDrill,
 }: {
   outcome: RunOutcome
@@ -90,6 +92,8 @@ export function Results({
   explore: string[]
   skippedFiles: string[]
   saved: boolean
+  /** The public link this breakdown came from, when it can be shared. */
+  share: { url: string; only: string | null } | null
   onDrill: ((path: string) => void) | null
 }) {
   const gained = useCountUp(outcome.gained)
@@ -240,6 +244,8 @@ export function Results({
           <NameClaim id="results-name" />
         </div>
       ) : null}
+
+      {share ? <ShareToggle url={share.url} only={share.only} /> : null}
 
       {skippedFiles.length && onDrill ? (
         <div className="glass flex flex-col gap-2 rounded-panel p-5">

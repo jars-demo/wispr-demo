@@ -1,3 +1,4 @@
+import { BookOpen } from 'lucide-react'
 import Link from 'next/link'
 
 import { Logo } from '@/components/Logo'
@@ -22,14 +23,24 @@ export function SiteNav() {
             <Link href="/board" className={buttonStyles('ghost')}>
               Board
             </Link>
+            <Link href="/learn" className={buttonStyles('ghost')}>
+              Learn
+            </Link>
             <Link href="/settings" className={buttonStyles('ghost')}>
               Settings
             </Link>
           </div>
           <Link
+            href="/learn"
+            aria-label="Learn from others"
+            className="inline-flex size-9 items-center justify-center rounded-full text-ink-2 hover:bg-surface-2 sm:hidden"
+          >
+            <BookOpen aria-hidden="true" className="size-[18px]" strokeWidth={1.8} />
+          </Link>
+          <Link
             href="/board"
             aria-label="Leaderboard"
-            className="inline-flex size-10 items-center justify-center rounded-full text-ink-2 hover:bg-surface-2 sm:hidden"
+            className="inline-flex size-9 items-center justify-center rounded-full text-ink-2 hover:bg-surface-2 sm:hidden"
           >
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
               <path
@@ -44,7 +55,7 @@ export function SiteNav() {
           <Link
             href="/settings"
             aria-label="Settings"
-            className="inline-flex size-10 items-center justify-center rounded-full text-ink-2 hover:bg-surface-2 sm:hidden"
+            className="inline-flex size-9 items-center justify-center rounded-full text-ink-2 hover:bg-surface-2 sm:hidden"
           >
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
               <path
