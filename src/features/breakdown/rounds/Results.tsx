@@ -15,6 +15,7 @@ import { CardModal } from '@/features/card/CardModal'
 import { cardFromProfile } from '@/features/card/share'
 import { Confetti } from '@/features/fx/Confetti'
 import { NameClaim } from '@/features/game/NameClaim'
+import { profileStore } from '@/features/game/store'
 import { ShareDialog } from '@/features/shared/ShareDialog'
 import { ShareToggle } from '@/features/shared/ShareToggle'
 import { useShare } from '@/features/shared/useShare'
@@ -118,7 +119,9 @@ export function Results({
     const id = window.setTimeout(() => setPopup(asksToShare ? 'share' : 'card'), 1400)
     return () => window.clearTimeout(id)
   }, [asksToShare])
-  const card = cardFromProfile(outcome.profile, new Date().toISOString().slice(0, 10))
+  // The live profile, not the run's snapshot: a name claimed in the share popup must reach the card.
+  const live = profileStore.use()
+  const card = cardFromProfile(live, new Date().toISOString().slice(0, 10))
 
   const perfect = total > 0 && correct === total
   const celebrate = perfect || outcome.levelUp !== null || outcome.newAchievements.length > 0
