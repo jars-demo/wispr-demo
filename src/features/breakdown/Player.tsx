@@ -9,7 +9,7 @@ import { Avatar } from '@/components/Avatar'
 import { SampleLabel } from '@/components/SampleLabel'
 import { buttonStyles } from '@/components/ui/button-styles'
 import { sectionsForRef } from '@/domain/breakdown'
-import type { DiffFile } from '@/domain/diff'
+import { isNoisePath, type DiffFile } from '@/domain/diff'
 import { XP } from '@/domain/game'
 import { applyRun, conceptKey, recordDrill, type RunOutcome } from '@/domain/profile'
 import { sampleById } from '@/domain/samples'
@@ -187,6 +187,8 @@ function Run({
   const { loaded } = state
   const { breakdown, diff } = loaded
   const known = new Set(profile.concepts.map(conceptKey))
+  // What is left of a big change to break down next. Lock files and build output never are.
+  const moreParts = diff.skipped.files.filter((path) => !isNoisePath(path))
 
   function finish(score: number | null) {
     setExplain(score)
@@ -293,10 +295,11 @@ function Run({
           this change. We removed them.
         </p>
       ) : null}
-      {diff.skipped.files.length ? (
+      {moreParts.length ? (
         <p className="text-[13px] text-muted">
-          Big change: this round covers the most important files. {diff.skipped.files.length} more
-          can be broken down one by one at the end.
+          Big change: this round covers the most important part. {moreParts.length} more{' '}
+          {moreParts.length === 1 ? 'part follows' : 'parts follow'}, one at a time, when you
+          finish.
         </p>
       ) : null}
 
@@ -343,7 +346,7 @@ function Run({
               total={breakdown.quiz.length}
               explain={explain}
               explore={breakdown.explore}
-              skippedFiles={diff.skipped.files}
+              skippedFiles={moreParts}
               saved={profile.board !== null}
               share={loaded.shareUrl ? { url: loaded.shareUrl, only: request.only } : null}
               onDrill={drill}

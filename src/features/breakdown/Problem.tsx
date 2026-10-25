@@ -38,7 +38,7 @@ const KINDS: Record<string, Kind> = {
   },
   rate_limited: { icon: Hourglass, title: 'Time for a short breather', actions: ['retry', SAMPLE] },
   busy: { icon: Zap, title: 'The free AI is busy right now', actions: ['retry', OWN_KEY] },
-  too_large: { icon: FileWarning, title: 'Too big for the free AI', actions: [OWN_KEY, SAMPLE] },
+  too_large: { icon: FileWarning, title: 'The free AI is stretched', actions: ['retry', OWN_KEY] },
   bad_key: {
     icon: KeyRound,
     title: 'Your AI key was turned down',

@@ -41,7 +41,13 @@ export type ParsedDiff = {
 export const DIFF_LIMITS = { files: 12, lines: 700 } as const
 export const BIG_DIFF_LIMITS = { files: 40, lines: 3000 } as const
 
-export type DiffOptions = { files?: number; lines?: number; only?: readonly string[] }
+export type DiffOptions = {
+  files?: number
+  lines?: number
+  /** A character budget on top of lines, since a few very long lines can cost as much as many. */
+  chars?: number
+  only?: readonly string[]
+}
 
 // Lock files, build output and minified code teach nothing and burn the budget.
 const NOISE = [
@@ -156,6 +162,22 @@ function lineCountOf(hunks: readonly DiffHunk[]): number {
   return hunks.reduce((sum, h) => sum + h.lines.length, 0)
 }
 
+function charsOf(lines: readonly DiffLine[]): number {
+  return lines.reduce((sum, line) => sum + line.text.length + 1, 0)
+}
+
+/** The first lines of a hunk that fit both budgets. */
+function prefixThatFits(lines: readonly DiffLine[], room: number, charRoom: number): DiffLine[] {
+  const part: DiffLine[] = []
+  let chars = 0
+  for (const line of lines) {
+    if (part.length >= room || chars + line.text.length + 1 > charRoom) break
+    part.push(line)
+    chars += line.text.length + 1
+  }
+  return part
+}
+
 /**
  * Chooses what fits the budget: the most important files first (source before tests and docs,
  * bigger changes first), then shown in their original order. A file that does not fit whole
@@ -164,6 +186,7 @@ function lineCountOf(hunks: readonly DiffHunk[]): number {
 function budget(drafts: Draft[], options: DiffOptions): ParsedDiff {
   const maxFiles = options.files ?? DIFF_LIMITS.files
   const maxLines = options.lines ?? DIFF_LIMITS.lines
+  const maxChars = options.chars ?? Number.POSITIVE_INFINITY
   const only = options.only ? new Set(options.only) : null
   const skipped: ParsedDiff['skipped'] = { files: [], lines: 0 }
 
@@ -182,19 +205,37 @@ function budget(drafts: Draft[], options: DiffOptions): ParsedDiff {
 
   const chosen: { draft: Draft; order: number; hunks: DiffHunk[]; partial: boolean }[] = []
   let used = 0
+  let usedChars = 0
   for (const candidate of candidates) {
     const room = maxLines - used
-    if (chosen.length >= maxFiles || room < Math.min(candidate.lines, 20)) {
+    const charRoom = maxChars - usedChars
+    if (chosen.length >= maxFiles || room < Math.min(candidate.lines, 20) || charRoom < 200) {
       skipped.files.push(candidate.draft.path)
       skipped.lines += candidate.lines
       continue
     }
     const hunks: DiffHunk[] = []
     let taken = 0
+    let takenChars = 0
     for (const hunk of candidate.draft.hunks) {
-      if (taken + hunk.lines.length > room) break
-      hunks.push(hunk)
-      taken += hunk.lines.length
+      const size = charsOf(hunk.lines)
+      if (taken + hunk.lines.length <= room && takenChars + size <= charRoom) {
+        hunks.push(hunk)
+        taken += hunk.lines.length
+        takenChars += size
+        continue
+      }
+      // A first hunk bigger than the whole budget (a large new file) is cut to fit, so the file is
+      // still covered; whatever does not fit stays listed for its own round.
+      if (!hunks.length) {
+        const part = prefixThatFits(hunk.lines, room, charRoom)
+        if (part.length) {
+          hunks.push({ header: hunk.header, lines: part })
+          taken += part.length
+          takenChars += charsOf(part)
+        }
+      }
+      break
     }
     if (!hunks.length) {
       skipped.files.push(candidate.draft.path)
@@ -202,6 +243,7 @@ function budget(drafts: Draft[], options: DiffOptions): ParsedDiff {
       continue
     }
     used += taken
+    usedChars += takenChars
     skipped.lines += candidate.lines - taken
     chosen.push({ ...candidate, hunks, partial: taken < candidate.lines })
   }

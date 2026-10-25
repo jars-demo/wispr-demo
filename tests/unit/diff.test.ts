@@ -70,6 +70,24 @@ describe('parseDiff', () => {
     expect(diff.skipped.lines).toBe(20)
   })
 
+  it('cuts a file whose first hunk is bigger than the whole budget, so it is still covered', () => {
+    const lines = Array.from({ length: 500 }, (_, i) => `+const line${i} = ${i}`).join('\n')
+    const text = `diff --git a/new.ts b/new.ts\n--- /dev/null\n+++ b/new.ts\n@@ -0,0 +1,500 @@\n${lines}\n`
+    const diff = parseDiff(text, { lines: 80 })
+    expect(diff.files[0]?.path).toBe('new.ts')
+    expect(diff.files[0]?.partial).toBe(true)
+    expect(diff.files[0]?.hunks[0]?.lines).toHaveLength(80)
+    expect(diff.skipped.lines).toBe(420)
+  })
+
+  it('also budgets characters, so a few very long lines cannot blow the limit', () => {
+    const long = Array.from({ length: 10 }, () => `+${'x'.repeat(999)}`).join('\n')
+    const text = `diff --git a/wide.ts b/wide.ts\n--- a/wide.ts\n+++ b/wide.ts\n@@ -1,0 +1,10 @@\n${long}\n`
+    const diff = parseDiff(text, { lines: 700, chars: 3_000 })
+    expect(diff.files[0]?.hunks[0]?.lines).toHaveLength(3)
+    expect(diff.files[0]?.partial).toBe(true)
+  })
+
   it('can focus on a single file for a drill-down', () => {
     const diff = parseDiff(GIT, { only: ['src/a.ts'] })
     expect(diff.files.map((f) => f.path)).toEqual(['src/a.ts'])

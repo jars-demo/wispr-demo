@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
 
-import { Brain } from 'lucide-react'
+import { ArrowRight, Brain } from 'lucide-react'
 import { motion, useReducedMotion } from 'motion/react'
 
 import { Avatar } from '@/components/Avatar'
@@ -250,11 +250,21 @@ export function Results({
       {skippedFiles.length && onDrill ? (
         <div className="glass flex flex-col gap-2 rounded-panel p-5">
           <h3 className="text-[15px] font-semibold">
-            Big change: {skippedFiles.length} more files to explore
+            Big change: {skippedFiles.length} more {skippedFiles.length === 1 ? 'part' : 'parts'} to
+            go
           </h3>
           <p className="text-[14px] text-ink-2">
-            This round covered the most important files. Break down the rest one at a time.
+            This round covered the most important part. Carry on with the next one, or pick any
+            file.
           </p>
+          <button
+            type="button"
+            onClick={() => onDrill(skippedFiles[0] ?? '')}
+            className={`${buttonStyles('accent', 'field')} self-start`}
+          >
+            Continue with the next part
+            <ArrowRight aria-hidden="true" className="size-4" />
+          </button>
           <ul className="flex flex-col gap-1">
             {skippedFiles.slice(0, 12).map((path) => (
               <li key={path} className="flex items-center justify-between gap-3 text-[13px]">

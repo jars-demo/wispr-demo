@@ -37,15 +37,28 @@ const FAILURE_COPY: Record<string, [BreakdownErrorCode, string]> = {
   rate_limited: ['busy', 'The AI is busy right now. Try again in a minute, or add your own key.'],
   too_large: [
     'too_large',
-    'This change is too big for the free AI in one go. Break it down file by file, or add your own AI key in Settings.',
+    'The free AI is stretched right now and could not take even a small part of this change. Try again in a minute, or add your own AI key in Settings.',
   ],
   auth: ['bad_key', 'Your AI provider did not accept that key. Check it in Settings.'],
 }
 
-// Budgets to try, biggest first. When a provider says the request is too large, the next one
-// covers fewer files (the most important first) and the rest stay listed for file-by-file rounds.
-const SHARED_LADDER = [DIFF_LIMITS.lines, 320, 160]
-const OWN_LADDER = [BIG_DIFF_LIMITS.lines, 1200, 500]
+// Budgets to try, biggest first, in lines and characters (long lines cost tokens too). When a
+// provider says the request is too large, the next step covers less, most important parts first,
+// and the rest stays listed to break down part by part. The last shared step is small enough for
+// the tightest free tier, so a big change still gets a breakdown instead of an error.
+type Step = { lines: number; chars: number }
+const SHARED_LADDER: readonly Step[] = [
+  { lines: DIFF_LIMITS.lines, chars: 24_000 },
+  { lines: 320, chars: 12_000 },
+  { lines: 160, chars: 6_000 },
+  { lines: 80, chars: 3_000 },
+]
+const OWN_LADDER: readonly Step[] = [
+  { lines: BIG_DIFF_LIMITS.lines, chars: 150_000 },
+  { lines: 1200, chars: 60_000 },
+  { lines: 500, chars: 24_000 },
+  { lines: 160, chars: 6_000 },
+]
 
 export async function createBreakdown(
   model: JsonModel,
@@ -61,8 +74,8 @@ export async function createBreakdown(
   const ladder = input.ownKey ? OWN_LADDER : SHARED_LADDER
   const only = input.only ?? undefined
 
-  for (const [step, lines] of ladder.entries()) {
-    const diff = parseDiff(input.diffText, { files, lines, only })
+  for (const [step, { lines, chars }] of ladder.entries()) {
+    const diff = parseDiff(input.diffText, { files, lines, chars, only })
     if (!diff.files.length) {
       throw new BreakdownError(
         'empty_diff',
