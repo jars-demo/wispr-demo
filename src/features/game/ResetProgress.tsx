@@ -14,9 +14,9 @@ export function ResetProgress() {
       <button
         type="button"
         onClick={() => setSure(true)}
-        className={`${buttonStyles('secondary')} self-start`}
+        className={`${buttonStyles('secondary', 'field')} self-start`}
       >
-        Reset progress in this browser
+        Reset this browser
       </button>
     )
   }
@@ -29,11 +29,15 @@ export function ResetProgress() {
           profileStore.write(emptyProfile())
           setSure(false)
         }}
-        className={buttonStyles('primary')}
+        className={buttonStyles('primary', 'field')}
       >
         Yes, reset
       </button>
-      <button type="button" onClick={() => setSure(false)} className={buttonStyles('ghost')}>
+      <button
+        type="button"
+        onClick={() => setSure(false)}
+        className={buttonStyles('ghost', 'field')}
+      >
         Cancel
       </button>
     </div>

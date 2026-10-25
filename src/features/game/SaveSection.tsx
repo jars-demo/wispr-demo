@@ -1,5 +1,6 @@
 'use client'
 
+import { Eye, EyeOff, Link2, Trash2 } from 'lucide-react'
 import { useState } from 'react'
 
 import { buttonStyles } from '@/components/ui/button-styles'
@@ -10,7 +11,8 @@ import { useHydrated } from '@/lib/local-store'
 import { NameClaim } from './NameClaim'
 import { profileStore, restoreLink, startSaving, stopSaving } from './store'
 
-// Saving without an account: a name, a restore link for other devices, and a way out.
+// Saving without an account: claim a name, then a restore link for other devices, a switch to
+// stay off the public board, and a way out.
 
 export function SaveSection() {
   const hydrated = useHydrated()
@@ -18,10 +20,9 @@ export function SaveSection() {
   const [busy, setBusy] = useState(false)
 
   if (!hydrated) return <div className="h-24 animate-pulse rounded-card bg-surface-2/60" />
-  if (!profile.board) return <NameClaim />
 
   const board = profile.board
-  const link = restoreLink(profile)
+  if (!board) return <NameClaim id="settings-name" />
 
   async function setHidden(hidden: boolean) {
     setBusy(true)
@@ -47,49 +48,56 @@ export function SaveSection() {
     void refreshBoard()
   }
 
+  async function copyRestore() {
+    const link = restoreLink(profile)
+    if (!link) return
+    try {
+      await navigator.clipboard.writeText(link)
+      toast({
+        tone: 'info',
+        title: 'Restore link copied',
+        body: 'Anyone with it can change your progress. Keep it to yourself.',
+      })
+    } catch {
+      toast({ tone: 'error', title: 'Copy failed', body: 'Your browser blocked the clipboard.' })
+    }
+  }
+
   return (
     <div className="flex flex-col gap-4">
-      <p className="text-[15px]">
-        Saved as <span className="font-semibold">{profile.name || 'A developer'}</span>
-        {board.hidden ? ' · kept off the public board' : ' · on the public board'}
+      <NameClaim id="settings-name" />
+      <p className="text-[13px] text-muted">
+        {board.hidden ? 'Saved privately, off the public board.' : 'Saved and on the public board.'}
       </p>
-      <div className="flex flex-col gap-2 rounded-card bg-surface-2/70 p-4">
-        <p className="text-[14px] font-medium">Your restore link</p>
-        <p className="text-[13px] text-ink-2">
-          Open it on another device to bring your progress along. Anyone with it can change your
-          progress, so keep it to yourself.
-        </p>
-        <div className="flex flex-wrap gap-2">
-          <button
-            type="button"
-            onClick={() => {
-              if (!link) return
-              navigator.clipboard
-                .writeText(link)
-                .then(() => toast({ tone: 'info', title: 'Restore link copied' }))
-                .catch(() => toast({ tone: 'error', title: 'Copy failed' }))
-            }}
-            className={buttonStyles('primary')}
-          >
-            Copy restore link
-          </button>
-        </div>
-      </div>
       <div className="flex flex-wrap gap-2">
+        <button
+          type="button"
+          onClick={() => void copyRestore()}
+          className={buttonStyles('secondary', 'field')}
+        >
+          <Link2 aria-hidden="true" className="size-4" />
+          Copy restore link
+        </button>
         <button
           type="button"
           disabled={busy}
           onClick={() => void setHidden(!board.hidden)}
-          className={buttonStyles('secondary')}
+          className={buttonStyles('secondary', 'field')}
         >
+          {board.hidden ? (
+            <Eye aria-hidden="true" className="size-4" />
+          ) : (
+            <EyeOff aria-hidden="true" className="size-4" />
+          )}
           {board.hidden ? 'Show me on the board' : 'Hide me from the board'}
         </button>
         <button
           type="button"
           disabled={busy}
           onClick={() => void remove()}
-          className={buttonStyles('ghost')}
+          className={buttonStyles('ghost', 'field')}
         >
+          <Trash2 aria-hidden="true" className="size-4" />
           Delete saved progress
         </button>
       </div>

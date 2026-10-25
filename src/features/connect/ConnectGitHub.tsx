@@ -92,7 +92,7 @@ export function ConnectGitHub({ compact = false }: { compact?: boolean }) {
         </li>
         <li>Paste it here. That is it.</li>
       </ol>
-      <div className="flex flex-col gap-2 sm:flex-row">
+      <div className="flex gap-2">
         <label htmlFor="gh-token" className="sr-only">
           GitHub token
         </label>
@@ -104,12 +104,12 @@ export function ConnectGitHub({ compact = false }: { compact?: boolean }) {
           value={token}
           onChange={(event) => setToken(event.target.value)}
           placeholder="github_pat_…"
-          className="h-11 min-w-0 flex-1 rounded-full border border-hairline-strong bg-surface px-4 font-mono text-[14px]"
+          className="field field-mono min-w-0 flex-1"
         />
         <button
           type="submit"
           disabled={busy || !token.trim()}
-          className={buttonStyles('primary', 'lg')}
+          className={buttonStyles('primary', 'field')}
         >
           {busy ? 'Checking…' : 'Connect'}
         </button>

@@ -1,5 +1,6 @@
 'use client'
 
+import { Check } from 'lucide-react'
 import { useState } from 'react'
 
 import { buttonStyles } from '@/components/ui/button-styles'
@@ -9,7 +10,8 @@ import { useHydrated } from '@/lib/local-store'
 
 import { aiKeyStore } from './connection'
 
-// Bring your own AI key for bigger changes and no shared limits.
+// Bring your own AI key for unlimited breakdowns and bigger changes. The key stays in this
+// browser and rides along with each breakdown request; the server never stores or logs it.
 
 export function AiKeyForm() {
   const hydrated = useHydrated()
@@ -18,22 +20,28 @@ export function AiKeyForm() {
   const [key, setKey] = useState('')
   const [model, setModel] = useState('')
 
-  if (!hydrated) return <div className="h-24 animate-pulse rounded-card bg-surface-2/60" />
+  if (!hydrated) return <div className="h-32 animate-pulse rounded-card bg-surface-2/60" />
 
   if (current) {
     return (
-      <div className="flex flex-wrap items-center gap-x-3 gap-y-2 text-[14px]">
-        <span className="rounded-full bg-ok-wash px-2.5 py-1 font-medium text-ok">
-          ✓ Using your {AI_PROVIDER_INFO[current.provider].label} key
-        </span>
-        <span className="font-mono text-[13px] text-muted">{current.model}</span>
-        <button
-          type="button"
-          onClick={() => aiKeyStore.write(null)}
-          className="text-muted underline-offset-4 hover:text-ink hover:underline"
-        >
-          Remove key
-        </button>
+      <div className="flex flex-col gap-3">
+        <p className="flex items-center gap-2 text-[15px]">
+          <span className="grid size-6 place-items-center rounded-full bg-ok-wash text-ok">
+            <Check aria-hidden="true" className="size-3.5" strokeWidth={3} />
+          </span>
+          Using your{' '}
+          <span className="font-semibold">{AI_PROVIDER_INFO[current.provider].label}</span> key
+        </p>
+        <p className="font-mono text-[13px] text-muted">{current.model}</p>
+        <div>
+          <button
+            type="button"
+            onClick={() => aiKeyStore.write(null)}
+            className={buttonStyles('secondary', 'field')}
+          >
+            Remove key
+          </button>
+        </div>
       </div>
     )
   }
@@ -52,7 +60,11 @@ export function AiKeyForm() {
       }}
       className="flex flex-col gap-3"
     >
-      <div className="flex flex-wrap gap-2" role="radiogroup" aria-label="Provider">
+      <div
+        role="radiogroup"
+        aria-label="Provider"
+        className="grid grid-cols-2 gap-1 rounded-[1.25rem] bg-surface-2 p-1 sm:grid-cols-4 sm:rounded-full"
+      >
         {AI_PROVIDERS.map((p) => (
           <button
             key={p}
@@ -63,23 +75,25 @@ export function AiKeyForm() {
               setProvider(p)
               setModel('')
             }}
-            className={`rounded-full px-3 py-1.5 text-[13px] ring-1 ${provider === p ? 'bg-ink text-canvas ring-ink' : 'ring-hairline hover:bg-surface-2'}`}
+            className={`h-9 rounded-full text-[13.5px] font-medium transition ${provider === p ? 'bg-surface text-ink shadow-[var(--shadow-soft)] ring-1 ring-hairline' : 'text-muted hover:text-ink'}`}
           >
             {AI_PROVIDER_INFO[p].label}
           </button>
         ))}
       </div>
-      <div className="grid grid-cols-1 gap-2 sm:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
-        <label className="flex flex-col gap-1 text-[13px]">
-          API key ·{' '}
-          <a
-            href={info.keyUrl}
-            target="_blank"
-            rel="noreferrer"
-            className="text-accent-text underline"
-          >
-            get one
-          </a>
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-[minmax(0,3fr)_minmax(0,2fr)]">
+        <label className="flex flex-col gap-1.5">
+          <span className="flex items-baseline justify-between text-[13px] font-medium">
+            API key
+            <a
+              href={info.keyUrl}
+              target="_blank"
+              rel="noreferrer"
+              className="font-normal text-accent-text underline-offset-4 hover:underline"
+            >
+              Get a {info.label} key
+            </a>
+          </span>
           <input
             type="password"
             autoComplete="off"
@@ -87,33 +101,32 @@ export function AiKeyForm() {
             value={key}
             onChange={(event) => setKey(event.target.value)}
             placeholder={info.keyHint}
-            className="h-11 rounded-full border border-hairline-strong bg-surface px-4 font-mono text-[14px]"
+            className="field field-mono"
           />
         </label>
-        <label className="flex flex-col gap-1 text-[13px]">
-          Model
+        <label className="flex flex-col gap-1.5">
+          <span className="text-[13px] font-medium">Model</span>
           <input
             value={model}
             onChange={(event) => setModel(event.target.value)}
             placeholder={info.defaultModel}
             spellCheck={false}
-            className="h-11 rounded-full border border-hairline-strong bg-surface px-4 font-mono text-[13px]"
+            className="field field-mono"
           />
         </label>
       </div>
-      <p className="text-[12px] text-muted">
-        Kept in this browser. Each breakdown sends it to our server for that one call to{' '}
-        {info.label}; it is never stored or logged. With your own key, breakdowns cover up to 3,000
-        changed lines at once.
-      </p>
-      <div>
+      <div className="flex flex-wrap items-center gap-3">
         <button
           type="submit"
           disabled={key.trim().length < 10}
-          className={buttonStyles('primary', 'lg')}
+          className={buttonStyles('primary', 'field')}
         >
           Use my key
         </button>
+        <p className="min-w-0 flex-1 text-[12px] text-muted">
+          Stays in this browser. Sent with each breakdown for that one call to {info.label}, never
+          stored or logged.
+        </p>
       </div>
     </form>
   )
