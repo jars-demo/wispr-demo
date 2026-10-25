@@ -31,7 +31,12 @@ product.
    (`Built by @jishanarshaikh, completely hands-free with @WisprFlow`). Cards have 10 avatars
    (2 free, 8 to unlock), 3 templates and 5 taglines. Claim a name, unique across all players, to
    save progress and join the live leaderboard, which tells you when someone overtakes you. No
-   sign-up, no email.
+   sign-up, no email. A name can change once every 180 days.
+5. **Learn from others.** At the end of a breakdown of a public GitHub change, you can turn on
+   **Make this breakdown public**. It is off by default. Shared breakdowns appear on
+   [/learn](https://wispr.jishanahmed.in/learn) and in the live feed with your name, and anyone
+   can play them free. Make any of them private again from your card page. Private repositories,
+   pasted diffs and samples can never be shared.
 
 ## Free and unlimited
 
@@ -50,6 +55,9 @@ product.
 - Sample changes and the sample wire are labelled as samples everywhere.
 - Leaderboard numbers are self-reported by each browser and re-checked against the game rules.
   It is a game, not a certificate.
+- Sharing is consent per breakdown. The server shares its own cached breakdown of a public
+  GitHub link, never text the browser sends, so private code cannot be shared and shared text
+  is real, grounded model output.
 - The GitHub token is only sent to api.github.com. A player's own AI key is sent with each
   breakdown request and used for that one call; neither is stored or logged.
 

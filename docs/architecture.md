@@ -33,12 +33,30 @@ images.
   `src/domain/profile.ts`, applied in the browser.
 - Names are unique across players, ignoring case (a unique index on `lower(name)`). The name
   field checks `GET /api/players/name` as you type; a race still ends in a 409 `name_taken`.
+- A saved player can rename once every 180 days (`players.name_changed_at`). Claiming and case
+  changes are free. A refused rename returns 409 `name_locked` with the kept name and the unlock
+  date; a second device holding an old name adopts the kept one and keeps syncing.
 - Saving creates a random player id and secret in the browser. `POST /api/players` stores the
   numbers (re-checked by `checkSync`), the profile JSON for restore links, and public events
   derived from what changed. Writes match on id and secret hash; another player's id behaves like
   a missing one.
 - `GET /api/board` returns the top 25, the caller's rank and rival, and recent events. The browser
   polls it every 20 seconds while visible and raises "X just overtook you" when the rank drops.
+
+**Shared breakdowns**
+
+1. Public GitHub changes (links and feed items) load through `POST /api/breakdown` with the link
+   first, so the server fetches the diff without a token and caches the result. Only if GitHub
+   will not serve it publicly does the browser fetch it with the player's token, as before.
+2. At the end, the score screen shows **Make this breakdown public** for results that came from
+   a public link. `POST /api/shared` takes the player's id and secret plus the link, and copies
+   the server's own `breakdown_cache` entry into `shared_breakdowns`. Nothing the browser sends
+   becomes shared text, and a private repo or pasted diff never has a cache entry to share.
+3. A share adds a `shared` event to the live feed (not for hidden players). The feed query joins
+   each event to its share, so making it private (`DELETE /api/shared/<id>`, owner only) removes
+   it from the feed too. Deleting the player deletes their shares.
+4. `/learn` lists one card per change with how many players shared it. Playing one
+   (`/b?shared=<id>`) reads the frozen copy: no AI call and no hourly limit.
 
 **Share cards**
 
@@ -63,7 +81,8 @@ breakdown ends, `CardModal` shows the card with a Post on X button; the post tex
 ## Data
 
 Tables (`src/server/db/migrations.ts`, applied in order on the first request): `players` (with a
-unique index on `lower(name)`), `player_events`, `rate_limits` and `breakdown_cache`. Migration
+unique index on `lower(name)` and `name_changed_at`), `player_events`, `rate_limits`,
+`breakdown_cache` and `shared_breakdowns`. Migration
 `b0002_drop_receipts` drops Receipts' archived tables (`specs`, `spec_versions`, `spec_items`,
 `checks`) from the shared Neon database and keeps everything Breakdown uses.
 

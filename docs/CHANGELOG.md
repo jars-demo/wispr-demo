@@ -30,6 +30,11 @@ branch.
 - Save without an account, restore links, and a live leaderboard with "just overtook you" alerts.
 - Bring your own Groq, OpenAI, Anthropic or OpenRouter key.
 
+- Make this breakdown public: an opt-in switch at the end of a public GitHub breakdown. Shared
+  breakdowns appear on Learn from others and in the live feed, play free, and can be made
+  private again from your card page.
+- Names can change once every 180 days.
+
 ### Removed
 
 - LinkedIn sharing. Cards post to X only.

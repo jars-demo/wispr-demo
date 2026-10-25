@@ -31,21 +31,26 @@ src/app/card/[code]/          public share card page and its opengraph-image
 src/app/card/fonts/           Geist and Instrument Serif TTFs (OFL) for share images
 src/app/opengraph-image.tsx   the site's own share image
 src/app/api/players/name/     GET: is this name free (names are unique, case-insensitive)
+src/app/api/shared/           list, share, play, unshare and "mine" for public breakdowns
+src/app/learn/                Learn from others: shared breakdowns to play free
 src/domain/diff.ts            unified diff parser, line refs (F2.L14), importance budgeting
 src/domain/breakdown.ts       breakdown schema and groundBreakdown (drop invented refs)
 src/domain/game.ts            levels, XP, achievements, avatars and their unlock rules
 src/domain/profile.ts         the browser profile and applyRun
 src/domain/board.ts           leaderboard re-checks, public events, rivalry line
 src/domain/card.ts            card templates, taglines, share-link encoding, X post text
+src/domain/shared.ts          shared breakdown schemas, labels and links
 src/domain/samples/           four labelled sample changes with ready-made breakdowns
 src/features/                 client UI: wire, breakdown rounds, card, board, connect, fx
 src/features/card/            CardArt (page and share image), CardModal, ShareActions (X only)
+src/features/shared/          share switch, Learn list, your public breakdowns
 src/components/               Avatar, Badge medallions, Logo and logo-mark, page chrome
 src/server/config.ts          the ONLY reader of process.env
 src/server/breakdown/         prompt, service (budget ladder for big diffs), link result cache
 src/server/rate-limit.ts      fixed-window limits with peek (quota) and refund
 src/server/providers/ai/      Groq, OpenAI, OpenRouter (compatible) and Anthropic (SDK)
-src/server/board/             owner-scoped leaderboard SQL and service
+src/server/board/             owner-scoped leaderboard SQL and service (180-day rename rule)
+src/server/shared/            owner-scoped shared breakdown SQL; shares only server cache entries
 src/server/db/                Db interface, PGlite and postgres.js adapters, migrations
 scripts/avatars.mjs           draws the ten DiceBear avatars once; output is committed
 tests/unit, integration, e2e  Vitest (PGlite for real SQL) and Playwright
