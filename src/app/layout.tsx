@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from 'next'
 import { Geist, Geist_Mono, Instrument_Serif } from 'next/font/google'
+import { Analytics } from '@vercel/analytics/next'
 
 import { Toaster } from '@/features/fx/Toaster'
 import { SITE_URL } from '@/domain/card'
@@ -48,6 +49,7 @@ export default function RootLayout({ children }: LayoutProps<'/'>) {
         </a>
         {children}
         <Toaster />
+        <Analytics />
       </body>
     </html>
   )
