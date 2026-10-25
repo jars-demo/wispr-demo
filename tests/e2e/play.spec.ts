@@ -66,7 +66,23 @@ test('a full sample breakdown earns XP and unlocks the first achievement', async
 
   await expect(page.getByText('Perfect round')).toBeVisible()
   await expect(page.getByText('First breakdown').first()).toBeVisible()
+
+  // The card pops up on its own, ready to post on X with both handles and the real site link.
+  const modal = page.getByRole('dialog', { name: 'Your card is ready' })
+  await expect(modal).toBeVisible()
+  const post = modal.getByRole('link', { name: 'Post on X' })
+  await expect(post).toHaveAttribute('href', /x\.com\/intent\/post/)
+  const href = decodeURIComponent((await post.getAttribute('href')) ?? '')
+  expect(href).toContain('@WisprFlow')
+  expect(href).toContain('@jishanarshaikh')
+  expect(href).toContain('wispr.jishanahmed.in/card/')
+  expect(href).not.toContain('localhost')
+  await modal.getByRole('button', { name: 'Close' }).click()
+  await expect(modal).toBeHidden()
+
   await expect(page.getByRole('link', { name: /Your card: level/ })).toContainText('XP')
+  await page.getByRole('button', { name: 'Share my card' }).click()
+  await expect(modal).toBeVisible()
   await noSidewaysScroll(page)
 })
 
@@ -76,7 +92,7 @@ test('the card page offers sharing and shows locked avatars', async ({ page }) =
     'href',
     /x\.com\/intent\/post/,
   )
-  await expect(page.getByText(/Avatar · 2 of 10 unlocked/)).toBeVisible()
+  await expect(page.getByRole('region', { name: 'Avatars' })).toContainText('2 of 10')
   await noSidewaysScroll(page)
 })
 
