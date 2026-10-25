@@ -60,6 +60,7 @@ describe('migrations on a database that still holds Receipts', () => {
       'b0003_unique_names',
       'b0004_breakdown_cache',
       'b0005_shared_breakdowns',
+      'b0006_name_changes',
     ])
   })
 

@@ -60,6 +60,19 @@ export function isUniqueViolation(error: unknown): boolean {
   )
 }
 
+/** When this player last renamed, or null if they never have. */
+export async function lastNameChange(db: Db, id: string): Promise<Date | null> {
+  const [row] = await db.query<{ name_changed_at: Date | string | null }>(
+    'select name_changed_at from players where id = $1',
+    [id],
+  )
+  return row?.name_changed_at ? new Date(row.name_changed_at) : null
+}
+
+export async function markNameChanged(db: Db, id: string): Promise<void> {
+  await db.query('update players set name_changed_at = now() where id = $1', [id])
+}
+
 export async function playerExists(db: Db, id: string): Promise<boolean> {
   const rows = await db.query('select 1 from players where id = $1', [id])
   return rows.length > 0

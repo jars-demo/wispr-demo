@@ -4,6 +4,9 @@ import {
   checkSync,
   describeEvent,
   eventsBetween,
+  isRename,
+  nameLockedMessage,
+  nameLockedUntil,
   rivalryLine,
   type BoardView,
   type SyncInput,
@@ -20,6 +23,8 @@ import {
   insertEvents,
   insertPlayer,
   isUniqueViolation,
+  lastNameChange,
+  markNameChanged,
   nameTaken,
   playerExists,
   recentEvents,
@@ -36,6 +41,15 @@ export async function hashSecret(secret: string): Promise<string> {
 export type SyncOutcome =
   | { ok: true; events: number }
   | { ok: false; status: 404 | 409 | 422; reason: string; code?: 'name_taken' }
+  | {
+      ok: false
+      status: 409
+      reason: string
+      code: 'name_locked'
+      /** The name the server keeps, so another device can adopt it. */
+      name: string
+      until: string
+    }
 
 const NAME_TAKEN = {
   ok: false,
@@ -45,7 +59,7 @@ const NAME_TAKEN = {
 } as const
 
 /** Saves a player's numbers after re-checking them, and records what changed as public events. */
-export async function syncPlayer(db: Db, input: SyncInput): Promise<SyncOutcome> {
+export async function syncPlayer(db: Db, input: SyncInput, now = new Date()): Promise<SyncOutcome> {
   const check = checkSync(input)
   if (!check.ok) return { ok: false, status: 422, reason: check.reason }
   const secretHash = await hashSecret(input.secret)
@@ -57,9 +71,25 @@ export async function syncPlayer(db: Db, input: SyncInput): Promise<SyncOutcome>
       if (!before && (await playerExists(tx, input.id))) {
         return { ok: false, status: 404, reason: 'Player not found.' }
       }
+      const renamed = before !== null && isRename(before.name, check.state.name)
+      if (renamed) {
+        // One rename per NAME_CHANGE_DAYS. Claiming a name and changing its case are free.
+        const until = nameLockedUntil(await lastNameChange(tx, input.id), now)
+        if (until) {
+          return {
+            ok: false,
+            status: 409,
+            reason: nameLockedMessage(until),
+            code: 'name_locked',
+            name: before.name,
+            until: until.toISOString(),
+          }
+        }
+      }
       if (await nameTaken(tx, check.state.name, input.id)) return NAME_TAKEN
       if (before) await updateOwnPlayer(tx, input.id, secretHash, check.state, input.profile)
       else await insertPlayer(tx, input.id, secretHash, check.state, input.profile)
+      if (renamed) await markNameChanged(tx, input.id)
       // Hidden players save progress quietly: no public events.
       const events = check.state.hidden ? [] : eventsBetween(before, check.state)
       await insertEvents(tx, input.id, events)

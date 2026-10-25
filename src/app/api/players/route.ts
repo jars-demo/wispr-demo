@@ -26,7 +26,13 @@ export const POST = withErrors('players.sync', async (request, { clientKey }) =>
   }
   const outcome = await syncPlayer(db, input)
   if (!outcome.ok) {
-    return problem(outcome.status, outcome.reason, outcome.code ? { code: outcome.code } : {})
+    const extra =
+      outcome.code === 'name_locked'
+        ? { code: outcome.code, name: outcome.name, until: outcome.until }
+        : outcome.code
+          ? { code: outcome.code }
+          : {}
+    return problem(outcome.status, outcome.reason, extra)
   }
   return Response.json({ saved: true, events: outcome.events })
 })

@@ -40,6 +40,31 @@ export type PlayerState = BoardStats & {
   hidden: boolean
 }
 
+/** A saved player can change their name once in this many days. */
+export const NAME_CHANGE_DAYS = 180
+
+/** A rename changes more than letter case: names are unique ignoring case. */
+export function isRename(before: string, after: string): boolean {
+  return before.toLowerCase() !== after.toLowerCase()
+}
+
+/** When the name can change again, or null if it can change now. */
+export function nameLockedUntil(lastChange: Date | null, now: Date): Date | null {
+  if (!lastChange) return null
+  const until = new Date(lastChange.getTime() + NAME_CHANGE_DAYS * 24 * 3600 * 1000)
+  return until > now ? until : null
+}
+
+export function nameLockedMessage(until: Date): string {
+  const day = until.toLocaleDateString('en-US', {
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric',
+    timeZone: 'UTC',
+  })
+  return `You can change your name once every ${NAME_CHANGE_DAYS} days. Next change: ${day}.`
+}
+
 export type SyncCheck = { ok: true; state: PlayerState } | { ok: false; reason: string }
 
 /** Re-checks reported numbers against the game rules. Unknown ids are dropped, not trusted. */

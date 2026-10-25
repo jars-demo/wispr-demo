@@ -108,4 +108,9 @@ export const MIGRATIONS: readonly Migration[] = [
         check (kind in ('joined', 'level', 'achievement', 'avatar', 'shared'));
     `,
   },
+  {
+    // When the player last renamed. Null until the first rename; claiming a name is not one.
+    version: 'b0006_name_changes',
+    sql: `alter table players add column name_changed_at timestamptz;`,
+  },
 ]

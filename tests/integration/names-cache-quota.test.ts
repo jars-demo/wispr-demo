@@ -37,6 +37,35 @@ const join = (id: string, name: string): SyncInput => ({
 const A = 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa'
 const B = 'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb'
 
+describe('one rename every 180 days', () => {
+  const R = 'eeeeeeee-eeee-4eee-8eee-eeeeeeeeeeee'
+  const lastChange = (days: number) =>
+    db.query(
+      `update players set name_changed_at = now() - make_interval(days => $2) where id = $1`,
+      [R, days],
+    )
+
+  it('claims freely, allows one rename, then locks the name with the unlock date', async () => {
+    expect(await syncPlayer(db, join(R, 'Ravi'))).toMatchObject({ ok: true })
+    expect(await syncPlayer(db, join(R, 'RAVI'))).toMatchObject({ ok: true }) // case is free
+    expect(await syncPlayer(db, join(R, 'Ravi K'))).toMatchObject({ ok: true })
+
+    const locked = await syncPlayer(db, join(R, 'Ravi Kumar'))
+    expect(locked).toMatchObject({ ok: false, status: 409, code: 'name_locked', name: 'Ravi K' })
+    expect(locked.ok ? '' : locked.reason).toContain('once every 180 days')
+    // Other progress still saves under the kept name.
+    expect(await syncPlayer(db, { ...join(R, 'Ravi K'), xp: 150 })).toMatchObject({ ok: true })
+  })
+
+  it('unlocks once 180 days have passed', async () => {
+    await lastChange(179)
+    expect(await syncPlayer(db, join(R, 'Ravi Kumar'))).toMatchObject({ code: 'name_locked' })
+    await lastChange(181)
+    expect(await syncPlayer(db, join(R, 'Ravi Kumar'))).toMatchObject({ ok: true })
+    expect(await syncPlayer(db, join(R, 'Ravi K2'))).toMatchObject({ code: 'name_locked' })
+  })
+})
+
 describe('unique names', () => {
   it('gives a name to the first player and refuses it to the next, ignoring case', async () => {
     expect(await nameAvailable(db, 'Mr Jha')).toBe(true)

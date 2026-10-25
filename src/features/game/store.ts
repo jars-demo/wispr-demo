@@ -26,6 +26,12 @@ export function updateProfile(change: (profile: Profile) => Profile) {
   syncTimer = window.setTimeout(() => {
     void saveProgress().then((result) => {
       // Quiet saves only speak up when the name needs attention.
+      if (!result.ok && result.code === 'name_locked' && result.name) {
+        // Another device renamed this player; this browser takes the saved name and carries on.
+        profileStore.write({ ...profileStore.read(), name: result.name })
+        void saveProgress()
+        return
+      }
       if (!result.ok && result.code === 'name_taken') {
         toast({
           tone: 'error',
@@ -37,14 +43,17 @@ export function updateProfile(change: (profile: Profile) => Profile) {
   }, 700)
 }
 
-export type SaveResult = { ok: true } | { ok: false; message: string; code?: string }
+export type SaveResult = { ok: true } | { ok: false; message: string; code?: string; name?: string }
 
-async function readProblem(response: Response): Promise<{ message: string; code?: string }> {
+async function readProblem(
+  response: Response,
+): Promise<{ message: string; code?: string; name?: string }> {
   const body = (await response.json().catch(() => null)) as {
     title?: string
     code?: string
+    name?: string
   } | null
-  return { message: body?.title ?? 'Could not save right now.', code: body?.code }
+  return { message: body?.title ?? 'Could not save right now.', code: body?.code, name: body?.name }
 }
 
 export async function saveProgress(): Promise<SaveResult> {

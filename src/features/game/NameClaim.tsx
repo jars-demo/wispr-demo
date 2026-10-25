@@ -4,6 +4,7 @@ import { Check, LoaderCircle, X } from 'lucide-react'
 import { useState } from 'react'
 
 import { buttonStyles } from '@/components/ui/button-styles'
+import { NAME_CHANGE_DAYS } from '@/domain/board'
 import { refreshBoard } from '@/features/board/board-store'
 import { toast } from '@/features/fx/toasts'
 
@@ -97,6 +98,7 @@ export function NameClaim({ id = 'claim-name' }: { id?: string }) {
       </div>
       <p id={`${id}-hint`} aria-live="polite" className={`px-1 text-[12.5px] ${hintTone}`}>
         {HINT[status]}
+        {claimed ? ` · You can change it once every ${NAME_CHANGE_DAYS} days.` : null}
       </p>
     </form>
   )
