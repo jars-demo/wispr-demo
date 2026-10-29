@@ -151,4 +151,4 @@ postgres.js (Neon) or PGlite locally, Vitest and Playwright. See
 
 ## License
 
-MIT
+[MIT](LICENSE) © 2026 Jishanahmed AR Shaikh
